@@ -3,6 +3,11 @@
  * Loaded after Framer SSR styles — uses !important only where Framer sets inline/fixed values.
  */
 
+/* Brand font — single source of truth for the site typeface. */
+:root {
+  --font-brand: 'PP Mori', 'PP Mori Placeholder', sans-serif;
+}
+
 /* ── Base ─────────────────────────────────────────────────────────────── */
 html {
   -webkit-text-size-adjust: 100%;
@@ -106,12 +111,17 @@ body,
    footer CTA's font + weight. Font-SIZE is deliberately left untouched. */
 .framer-c57h6 .framer-od3clj .framer-text,
 .framer-c57h6 .framer-od3clj .framer-text * {
-  --framer-font-family: 'PP Mori', 'PP Mori Placeholder', sans-serif !important;
-  --framer-font-weight: 700 !important;
+  --framer-font-family: var(--font-brand) !important;
+  --framer-font-weight: 400 !important;
   --framer-letter-spacing: normal !important;
-  font-family: 'PP Mori', 'PP Mori Placeholder', sans-serif !important;
-  font-weight: 700 !important;
+  font-family: var(--font-brand) !important;
+  font-weight: 400 !important;
   letter-spacing: normal !important;
+}
+.framer-c57h6 .framer-od3clj .framer-v-jolk4e .framer-text,
+.framer-c57h6 .framer-od3clj .framer-v-jolk4e .framer-text * {
+  --framer-font-weight: 700 !important;
+  font-weight: 700 !important;
 }
 
 /* ── "Senior Product Designer" role line below H1 ────────────────────── */
@@ -123,7 +133,7 @@ body,
 .framer-c57h6 .framer-w7uw4j::after {
   content: 'Senior Product Designer';
   display: block;
-  font-family: 'PP Mori', 'PP Mori Placeholder', sans-serif;
+  font-family: var(--font-brand);
   /* fluid — a pseudo-element can't inherit Framer's font-size media queries,
      and at a fixed 48px/nowrap it forced the whole layout to 500px+ on phones */
   font-size: clamp(27px, 6.7vw, 48px);
@@ -219,14 +229,7 @@ body,
   padding-top: 110px !important;
   padding-bottom: 0 !important;
   position: relative !important;
-  /* pastel mesh at the top — lavender core, indigo/sky/pink hints,
-     melting into the white page */
-  background:
-    radial-gradient(ellipse 48% 95% at 50% 0%, rgba(168, 85, 247, 0.16) 0%, transparent 72%),
-    radial-gradient(ellipse 36% 80% at 34% 0%, rgba(99, 102, 241, 0.13) 0%, transparent 68%),
-    radial-gradient(ellipse 36% 80% at 66% 0%, rgba(56, 189, 248, 0.11) 0%, transparent 68%),
-    radial-gradient(ellipse 30% 65% at 55% 2%, rgba(244, 114, 182, 0.07) 0%, transparent 60%),
-    #ffffff !important;
+  background: #ffffff !important;
 }
 
 /* Full-height side lines on the hero — fade in from top, hold through mid, fade out */
@@ -565,6 +568,7 @@ svg#svg297365751_11010 {
 }
 
 
+
 /* ── Section-header icons — distinct squircle tile per section ─────────── */
 /* All three headers shipped with the same green sprite; replace via CSS
    background (hydration-proof), one glyph per section, same tile style. */
@@ -639,48 +643,26 @@ svg#svg297365751_11010 {
 }
 
 /* ── Bento tiles → glassmorphism ──────────────────────────────────────── */
-/* Frosted glass over the wireframe room; each card carries a faint aurora
-   tint sampled from the section background (green/indigo/violet/cyan). */
 .framer-c57h6 .framer-fs20qu .framer-itx7f,
 .framer-c57h6 .framer-fs20qu .framer-19ebriy,
 .framer-c57h6 .framer-fs20qu .framer-7byk6d,
 .framer-c57h6 .framer-fs20qu .framer-1kfbg45,
 .framer-c57h6 .framer-fs20qu .framer-jwdy93 {
-  /* brightness lift separates the glass from the room behind it */
-  backdrop-filter: blur(28px) saturate(180%) brightness(1.6);
-  -webkit-backdrop-filter: blur(28px) saturate(180%) brightness(1.6);
-  --border-color: rgba(255, 255, 255, 0.20) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  --border-color: rgba(0, 0, 0, 0.08) !important;
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.22),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.30),
-    0 24px 60px rgba(0, 0, 0, 0.55),
-    0 4px 14px rgba(0, 0, 0, 0.35);
+    0 1px 3px rgba(0, 0, 0, 0.08),
+    0 8px 24px rgba(0, 0, 0, 0.06);
 }
-/* Base sheen: light top → dark bottom, like lit glass */
-.framer-c57h6 .framer-fs20qu .framer-itx7f {
-  background:
-    radial-gradient(120% 90% at 12% 0%, rgba(74, 222, 128, 0.14) 0%, transparent 60%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.05) 40%, rgba(255, 255, 255, 0.03) 100%) !important;
-}
-.framer-c57h6 .framer-fs20qu .framer-19ebriy {
-  background:
-    radial-gradient(120% 90% at 88% 0%, rgba(99, 102, 241, 0.16) 0%, transparent 60%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.05) 40%, rgba(255, 255, 255, 0.03) 100%) !important;
-}
-.framer-c57h6 .framer-fs20qu .framer-7byk6d {
-  background:
-    radial-gradient(120% 90% at 12% 0%, rgba(168, 85, 247, 0.15) 0%, transparent 60%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.05) 40%, rgba(255, 255, 255, 0.03) 100%) !important;
-}
+.framer-c57h6 .framer-fs20qu .framer-itx7f,
+.framer-c57h6 .framer-fs20qu .framer-19ebriy,
+.framer-c57h6 .framer-fs20qu .framer-7byk6d,
 .framer-c57h6 .framer-fs20qu .framer-1kfbg45 {
-  background:
-    radial-gradient(120% 90% at 88% 0%, rgba(56, 189, 248, 0.15) 0%, transparent 60%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.05) 40%, rgba(255, 255, 255, 0.03) 100%) !important;
+  background: #ffffff !important;
 }
 .framer-c57h6 .framer-fs20qu .framer-jwdy93 {
-  background:
-    radial-gradient(140% 100% at 50% 100%, rgba(74, 222, 128, 0.11) 0%, rgba(168, 85, 247, 0.10) 50%, transparent 75%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.05) 40%, rgba(255, 255, 255, 0.03) 100%) !important;
+  background: #ffffff !important;
 }
 
 /* Tile text on glass — white titles, muted white subtext */
