@@ -1,0 +1,1268 @@
+/**
+ * Responsive overrides for Framer export (1440px desktop canvas).
+ * Loaded after Framer SSR styles — uses !important only where Framer sets inline/fixed values.
+ */
+
+/* ── Base ─────────────────────────────────────────────────────────────── */
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+html,
+body,
+#main {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: clip;
+}
+
+[data-framer-root],
+.framer-c57h6.framer-72rtr7 {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+}
+
+[data-framer-root] img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* ── Shared section gutters (180px desktop → fluid) ───────────────────── */
+.framer-c57h6 .framer-1jhguc6,
+.framer-c57h6 .framer-xiaegt,
+.framer-c57h6 .framer-1szzpcb,
+.framer-c57h6 .framer-eh96xg,
+.framer-c57h6 .framer-hyxuu,
+.framer-c57h6 .framer-1vuewct,
+.framer-c57h6 .framer-xsn7i4,
+.framer-c57h6 .framer-e64r2n {
+  padding-left: clamp(16px, 5vw, 180px) !important;
+  padding-right: clamp(16px, 5vw, 180px) !important;
+  box-sizing: border-box !important;
+}
+
+/* ── Section wrappers ─────────────────────────────────────────────────── */
+.framer-c57h6 .framer-eh96xg,
+.framer-c57h6 .framer-hyxuu,
+.framer-c57h6 .framer-n5o53k,
+.framer-c57h6 .framer-1m7zsgh,
+.framer-c57h6 .framer-1ddmsxs {
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+/* ── Fluid content widths ─────────────────────────────────────────────── */
+.framer-c57h6 .framer-1gmsbj2,
+.framer-c57h6 .framer-krhpmx,
+.framer-c57h6 .framer-1dv9wgl,
+.framer-c57h6 .framer-1pzmip5,
+.framer-c57h6 .framer-1ehjggb,
+.framer-c57h6 .framer-qpufh1 {
+  width: 100% !important;
+  max-width: 1020px !important;
+  box-sizing: border-box !important;
+}
+
+/* ── Nav pill — liquid glass ─────────────────────────────────────────────── */
+.framer-c57h6 .framer-1ooizrb {
+  /* z:2 — above the icon-flight overlay (z:1), which itself must beat the
+     hero content column (framer-5vaexd, z:1) */
+  z-index: 2 !important;
+  width: min(680px, calc(100vw - 24px)) !important;
+  left: 50% !important;
+  right: auto !important;
+  transform: translateX(-50%) !important;
+
+  /* Liquid glass material */
+  background: rgba(12, 12, 12, 0.92) !important;
+  backdrop-filter: blur(40px) saturate(180%) brightness(1.05) !important;
+  -webkit-backdrop-filter: blur(40px) saturate(180%) brightness(1.05) !important;
+
+  /* Prismatic rim: white highlight on top, dark on bottom */
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  box-shadow:
+    inset 0 1.5px 0 rgba(255, 255, 255, 0.14),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.12),
+    inset 1px 0 0 rgba(255, 255, 255, 0.04),
+    inset -1px 0 0 rgba(255, 255, 255, 0.04),
+    0 16px 40px rgba(0, 0, 0, 0.14),
+    0 4px 12px rgba(0, 0, 0, 0.08) !important;
+}
+
+.framer-c57h6 .framer-od3clj {
+  padding-left: clamp(12px, 3vw, 40px) !important;
+  padding-right: clamp(12px, 3vw, 40px) !important;
+  gap: clamp(8px, 2vw, 32px) !important;
+  max-width: 100% !important;
+  /* soften the nav wrapper border to complement glass pill */
+  --border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* ── Nav link typography → match the "Contact Me" CTA (PP Mori 700) ─────
+   Framer ships nav labels in Geist-600 / Neue Regrade; retype them to the
+   footer CTA's font + weight. Font-SIZE is deliberately left untouched. */
+.framer-c57h6 .framer-od3clj .framer-text,
+.framer-c57h6 .framer-od3clj .framer-text * {
+  --framer-font-family: 'PP Mori', 'PP Mori Placeholder', sans-serif !important;
+  --framer-font-weight: 700 !important;
+  --framer-letter-spacing: normal !important;
+  font-family: 'PP Mori', 'PP Mori Placeholder', sans-serif !important;
+  font-weight: 700 !important;
+  letter-spacing: normal !important;
+}
+
+/* ── "Senior Product Designer" role line below H1 ────────────────────── */
+/* framer-w7uw4j = "Heading 1:margin" wrapper — ::after adds the role line */
+.framer-c57h6 .framer-w7uw4j {
+  align-items: center !important;
+  gap: 6px !important;
+}
+.framer-c57h6 .framer-w7uw4j::after {
+  content: 'Senior Product Designer';
+  display: block;
+  font-family: 'PP Mori', 'PP Mori Placeholder', sans-serif;
+  /* fluid — a pseudo-element can't inherit Framer's font-size media queries,
+     and at a fixed 48px/nowrap it forced the whole layout to 500px+ on phones */
+  font-size: clamp(27px, 6.7vw, 48px);
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  line-height: 1.15;
+  text-align: center;
+  color: rgb(23, 23, 23);
+  white-space: nowrap;
+}
+
+/* ── Hero load animation ──────────────────────────────────────────────── */
+@keyframes hero-reveal {
+  from { opacity: 0; transform: translateY(28px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Badge pill (framer-lgi26s — NOT framer-17et2vx, which is the "5+ Years"
+   segment INSIDE the pill; animating that made the text slide out of the pill) */
+.framer-c57h6 .framer-lgi26s {
+  animation: hero-reveal 1s cubic-bezier(0.2, 0, 0, 1) 0.15s both;
+}
+/* Heading block ("Hey, I'm Ajeet" + "Senior Product Designer") */
+.framer-c57h6 .framer-w7uw4j {
+  animation: hero-reveal 1s cubic-bezier(0.2, 0, 0, 1) 0.32s both;
+}
+/* Subtitle loop */
+.framer-c57h6 .framer-fz7b92 {
+  animation: hero-reveal 1s cubic-bezier(0.2, 0, 0, 1) 0.52s both;
+}
+/* Company chips */
+.framer-c57h6 .framer-1wgz76y {
+  animation: hero-reveal 1s cubic-bezier(0.2, 0, 0, 1) 0.7s both;
+}
+
+/* ── Company chips ("Currently designing at") — big rounded pills ─────── */
+/* framer-ipsl1e = Porter, framer-1x127ba = Juspay, framer-lna641 = Convin.ai */
+.framer-c57h6 .framer-ipsl1e,
+.framer-c57h6 .framer-1x127ba,
+.framer-c57h6 .framer-lna641 {
+  background-color: #fff !important;
+  border-radius: 9999px !important;
+  padding: 7px 15px 7px 9px !important;
+  gap: 9px !important;
+  --border-color: #e8e8e8 !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05) !important;
+}
+
+/* Logo tiles — rounded squares */
+.framer-c57h6 .framer-zood6u {
+  width: 22px !important;
+  height: 22px !important;
+}
+.framer-c57h6 .framer-zood6u svg {
+  width: 100% !important;
+  height: 100% !important;
+}
+.framer-c57h6 .framer-41rq1c,
+.framer-c57h6 .framer-16lwcta {
+  width: 22px !important;
+  height: auto !important;
+  aspect-ratio: 1 !important;
+  border-radius: 50% !important;
+  overflow: hidden !important;
+}
+/* Porter logo (SVG sprite) — clip circular like the image logos */
+.framer-c57h6 .framer-zood6u {
+  border-radius: 50% !important;
+  overflow: hidden !important;
+}
+
+/* Company name — semibold, dark ink */
+.framer-c57h6 .framer-ipsl1e .framer-text,
+.framer-c57h6 .framer-1x127ba .framer-text,
+.framer-c57h6 .framer-lna641 .framer-text {
+  --framer-font-size: 14px !important;
+  --framer-font-weight: 600 !important;
+  --framer-text-color: #171717 !important;
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  color: #171717 !important;
+}
+
+/* A bit more air between the Juspay / Convin chips */
+.framer-c57h6 .framer-d63esj {
+  gap: 10px !important;
+}
+
+/* ── Hero ─────────────────────────────────────────────────────────────── */
+.framer-c57h6 .framer-1jhguc6 {
+  height: auto !important;
+  min-height: 700px;
+  padding-top: 110px !important;
+  padding-bottom: 0 !important;
+  position: relative !important;
+  /* pastel mesh at the top — lavender core, indigo/sky/pink hints,
+     melting into the white page */
+  background:
+    radial-gradient(ellipse 48% 95% at 50% 0%, rgba(168, 85, 247, 0.16) 0%, transparent 72%),
+    radial-gradient(ellipse 36% 80% at 34% 0%, rgba(99, 102, 241, 0.13) 0%, transparent 68%),
+    radial-gradient(ellipse 36% 80% at 66% 0%, rgba(56, 189, 248, 0.11) 0%, transparent 68%),
+    radial-gradient(ellipse 30% 65% at 55% 2%, rgba(244, 114, 182, 0.07) 0%, transparent 60%),
+    #ffffff !important;
+}
+
+/* Full-height side lines on the hero — fade in from top, hold through mid, fade out */
+.framer-c57h6 .framer-1jhguc6::before,
+.framer-c57h6 .framer-1jhguc6::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    rgba(0, 0, 0, 0.05) 12%,
+    rgba(0, 0, 0, 0.05) 88%,
+    transparent 100%
+  );
+  pointer-events: none;
+  z-index: 0;
+}
+
+.framer-c57h6 .framer-1jhguc6::before {
+  left: clamp(16px, 5vw, 180px);
+}
+
+.framer-c57h6 .framer-1jhguc6::after {
+  right: clamp(16px, 5vw, 180px);
+}
+
+.framer-c57h6 .framer-1sllspy {
+  width: 100% !important;
+  max-width: 672px !important;
+}
+
+.framer-c57h6 .framer-18ss2ql {
+  width: 100% !important;
+  max-width: 1070px !important;
+  left: 50% !important;
+  transform: translateX(-50%);
+  opacity: 0.45;
+  /* the grid SVG has white baked into its box — multiply melts the white
+     into the pastel mesh so its rectangular edges can't show */
+  mix-blend-mode: multiply;
+}
+
+/* Hero badge icon (framer-1nmolxk, 14px — sits before "Bangalore"):
+   replaced with a brand-green map pin. NOTE: this element is the badge
+   icon, NOT a hero haze — the old note here was wrong; the pastel-mesh
+   seam was actually fixed by the grid's mix-blend-mode: multiply. */
+.framer-c57h6 .framer-1nmolxk svg {
+  display: none !important;
+}
+.framer-c57h6 .framer-1nmolxk {
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 14 14'%3E%3Cpath d='M7 1 C4.24 1 2 3.24 2 6 c0 3.5 5 7.5 5 7.5 S12 9.5 12 6 C12 3.24 9.76 1 7 1 Z M7 8 a2 2 0 1 1 0 -4 a2 2 0 0 1 0 4 Z' fill='%234b4b4b'/%3E%3C/svg%3E") center / contain no-repeat !important;
+}
+
+/* ── Hero badge pill ("Bangalore | 5+ Years") — refined chip ──────────── */
+.framer-c57h6 .framer-lgi26s {
+  --border-color: #e8e8e8 !important;
+  background-color: #fff !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05) !important;
+}
+/* segment padding — a little more air */
+.framer-c57h6 .framer-lzod0m {
+  padding: 9px 14px 9px 17px !important;
+}
+.framer-c57h6 .framer-10pjkrx {
+  --border-color: #ececec !important;
+  padding: 9px 17px 9px 14px !important;
+}
+/* labels — 13px medium, calm grey */
+.framer-c57h6 .framer-1xis7ec .framer-text,
+.framer-c57h6 .framer-yalj5p .framer-text {
+  --framer-font-size: 13px !important;
+  --framer-font-weight: 500 !important;
+  --framer-text-color: #4b4b4b !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  color: #4b4b4b !important;
+}
+
+.framer-c57h6 .framer-c3k5qs {
+  padding: 0 !important;
+  align-items: center !important;
+  --border-left-width: 0px !important;
+  --border-right-width: 0px !important;
+}
+
+/* framer-5vaexd is position:absolute top:50% left:50% translate(-50%,-50%) —
+   setting width:100% makes it span exactly from line to line */
+.framer-c57h6 .framer-5vaexd {
+  width: 100% !important;
+  align-items: center !important;
+}
+
+.framer-c57h6 .framer-1sllspy {
+  width: 100% !important;
+  max-width: 100% !important;
+  align-items: center !important;
+}
+
+/* ── Hero app icons — don't clip the float/rotate animation ────────────── */
+/* The three icons animate (bob ±7px + sway) inside an SVG whose viewport
+   clips by default; the container is only 98x33. Let everything overflow,
+   including the whole subtitle/icons ancestor chain. */
+.framer-c57h6 .framer-1jed50t,
+.framer-c57h6 .framer-1jed50t .svgContainer,
+.framer-c57h6 .framer-1jed50t svg,
+.framer-c57h6 .framer-mtk1mc,
+.framer-c57h6 .framer-fz7b92,
+.framer-c57h6 .framer-1yfgaui {
+  overflow: visible !important;
+}
+/* The sprite DEF is a nested <svg> — it establishes its own clipping
+   viewport (UA default), and GSAP animates the groups INSIDE it. This is
+   what actually cut the icons' tops while bobbing up. */
+svg#svg297365751_11010 {
+  overflow: visible !important;
+}
+
+/* ── Hero spacing cleanup ──────────────────────────────────────────────── */
+/* badges row → heading: more breathing room than the original 19px */
+.framer-c57h6 .framer-w7uw4j {
+  padding-top: 28px !important;
+}
+/* heading block → subtitle: was 8px, too tight */
+.framer-c57h6 .framer-fz7b92 {
+  padding-top: 20px !important;
+}
+/* subtitle → company chips: add consistent spacing */
+.framer-c57h6 .framer-1wgz76y {
+  padding-top: 28px !important;
+}
+
+/* ── About section (2nd) — background + lines always visible; content scrolls in ── */
+/* framer-xiaegt is the section wrapper with opacity:0 set by Framer JS.
+   CSS !important overrides the inline style so the background and borders
+   are visible from the start. The children (framer-1i5ns50, framer-1gmsbj2)
+   keep their own Framer scroll animations and still fade in on scroll. */
+.framer-c57h6 .framer-xiaegt {
+  opacity: 1 !important;
+  transform: none !important;
+  align-items: center !important;
+}
+
+/* Photo composite (framer-1xj9pya) hugs the left border line;
+   bio column (framer-652bj3) fills the rest, its text centres inside */
+.framer-c57h6 .framer-leiwsy {
+  justify-content: flex-start !important;
+  position: relative !important;
+}
+
+/* Right-side container mockup — mirrors the left photo composite.
+   CSS ::after (not injected DOM) so React hydration can't destroy it. */
+.framer-c57h6 .framer-leiwsy::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 274px;
+  height: 100%;
+  background: url("images/container.png") right center / contain no-repeat;
+  pointer-events: none;
+}
+
+.framer-c57h6 .framer-652bj3 {
+  align-items: center !important;
+  max-width: none !important;
+  /* symmetric padding — content centres in the gap between the two side images */
+  padding-left: 20px !important;
+  padding-right: 20px !important;
+}
+
+.framer-c57h6 .framer-hbarid {
+  align-items: center !important;
+}
+
+.framer-c57h6 .framer-1cjhaxu,
+.framer-c57h6 .framer-cs4lcq,
+.framer-c57h6 .framer-1tzt04z {
+  align-items: center !important;
+  width: 100% !important;
+}
+
+.framer-c57h6 .framer-c42ugo,
+.framer-c57h6 .framer-7orfwh,
+.framer-c57h6 .framer-h1ifz1 {
+  width: 100% !important;
+  max-width: 470px !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+
+.framer-c57h6 .framer-hbarid .framer-text,
+.framer-c57h6 .framer-1cjhaxu .framer-text,
+.framer-c57h6 .framer-cs4lcq .framer-text,
+.framer-c57h6 .framer-1tzt04z .framer-text {
+  --framer-text-alignment: center !important;
+  text-align: center !important;
+}
+
+/* Data / Craft / System row — words on top, icon strip directly below.
+   The group was a fixed 422x83 Framer Group (icons absolutely at 50/30);
+   flow it as a centred column instead so the strip always sits under the words. */
+.framer-c57h6 .framer-ml6zjt {
+  width: min-content !important;
+  max-width: 100% !important;
+  height: auto !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  gap: 10px !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+
+.framer-c57h6 .framer-1ckmuqc {
+  position: relative !important;
+  top: auto !important;
+  left: auto !important;
+  transform: none !important;
+  justify-content: center !important;
+  width: max-content !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+
+/* Icon strip: out of absolute land, centred under the words.
+   visibility:hidden (not display:none) — the hero icons fly in and land on
+   this exact spot (scroll flight in index.html); the box must keep its size. */
+.framer-c57h6 .framer-25ip3p {
+  position: relative !important;
+  top: auto !important;
+  left: auto !important;
+}
+@media (min-width: 768px) {
+  .framer-c57h6 .framer-25ip3p {
+    visibility: hidden !important;
+  }
+}
+/* below 768: no flight — hide the overlay, un-hide the hero's own icons
+   (beats the inline visibility:hidden the flight script sets) */
+@media (max-width: 767.98px) {
+  #icon-flight {
+    display: none !important;
+  }
+  .framer-c57h6 .framer-1jed50t {
+    visibility: visible !important;
+  }
+}
+
+/* Section headers (Selected Work, Building with AI, etc.) */
+.framer-c57h6 .framer-qmkuj {
+  justify-content: center !important;
+  align-items: center !important;
+}
+
+.framer-c57h6 .framer-zm2y38,
+.framer-c57h6 .framer-mqf6ty {
+  width: 100% !important;
+  max-width: 100% !important;
+  text-align: center !important;
+}
+
+.framer-c57h6 .framer-qmkuj .framer-text {
+  --framer-text-alignment: center !important;
+  text-align: center !important;
+}
+
+/* ── Selected Work cards — hover lift shadow (tilt/zoom via GSAP in index.html) ── */
+.framer-c57h6 .framer-1gmsbj2,
+.framer-c57h6 .framer-krhpmx,
+.framer-c57h6 .framer-1dv9wgl,
+.framer-c57h6 .framer-1pzmip5 {
+  transition: box-shadow 0.5s ease;
+}
+.framer-c57h6 .framer-1gmsbj2:hover,
+.framer-c57h6 .framer-krhpmx:hover,
+.framer-c57h6 .framer-1dv9wgl:hover,
+.framer-c57h6 .framer-1pzmip5:hover {
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.025);
+}
+
+/* "Read Case Study" CTA — inverts + arrow slides in when the card is hovered.
+   framer-1v76fm8 / phqwv3 / z62pqu / 1bwktwp — one Button per card. */
+.framer-c57h6 .framer-1v76fm8,
+.framer-c57h6 .framer-phqwv3,
+.framer-c57h6 .framer-z62pqu,
+.framer-c57h6 .framer-1bwktwp {
+  transition: background-color 0.35s ease;
+}
+.framer-c57h6 .framer-1v76fm8 .framer-text,
+.framer-c57h6 .framer-phqwv3 .framer-text,
+.framer-c57h6 .framer-z62pqu .framer-text,
+.framer-c57h6 .framer-1bwktwp .framer-text {
+  transition: color 0.35s ease;
+}
+
+/* Arrow — present but collapsed at rest so it can slide in smoothly */
+.framer-c57h6 .framer-1v76fm8 .framer-text::after,
+.framer-c57h6 .framer-phqwv3 .framer-text::after,
+.framer-c57h6 .framer-z62pqu .framer-text::after,
+.framer-c57h6 .framer-1bwktwp .framer-text::after {
+  content: '→';
+  display: inline-block;
+  max-width: 0;
+  margin-left: 0;
+  opacity: 0;
+  transform: translateX(-6px);
+  transition: opacity 0.35s ease, transform 0.35s ease, max-width 0.35s ease, margin-left 0.35s ease;
+}
+
+/* Card hover → dark CTA, white label, arrow in */
+.framer-c57h6 .framer-1gmsbj2:hover [data-framer-name="Button"],
+.framer-c57h6 .framer-krhpmx:hover [data-framer-name="Button"],
+.framer-c57h6 .framer-1dv9wgl:hover [data-framer-name="Button"],
+.framer-c57h6 .framer-1pzmip5:hover [data-framer-name="Button"] {
+  background-color: #171717 !important;
+  --border-color: #171717 !important;
+}
+.framer-c57h6 .framer-1gmsbj2:hover [data-framer-name="Button"] .framer-text,
+.framer-c57h6 .framer-krhpmx:hover [data-framer-name="Button"] .framer-text,
+.framer-c57h6 .framer-1dv9wgl:hover [data-framer-name="Button"] .framer-text,
+.framer-c57h6 .framer-1pzmip5:hover [data-framer-name="Button"] .framer-text {
+  --framer-text-color: #ffffff !important;
+  color: #ffffff !important;
+}
+.framer-c57h6 .framer-1gmsbj2:hover [data-framer-name="Button"] .framer-text::after,
+.framer-c57h6 .framer-krhpmx:hover [data-framer-name="Button"] .framer-text::after,
+.framer-c57h6 .framer-1dv9wgl:hover [data-framer-name="Button"] .framer-text::after,
+.framer-c57h6 .framer-1pzmip5:hover [data-framer-name="Button"] .framer-text::after {
+  max-width: 20px;
+  margin-left: 8px;
+  opacity: 1;
+  transform: translateX(0);
+}
+
+
+/* ── Section-header icons — distinct squircle tile per section ─────────── */
+/* All three headers shipped with the same green sprite; replace via CSS
+   background (hydration-proof), one glyph per section, same tile style. */
+.framer-c57h6 .framer-129ann2 svg,
+.framer-c57h6 .framer-1dhg0jl svg,
+.framer-c57h6 .framer-1d6ij2w svg {
+  display: none !important;
+}
+/* Selected Work — green, rounded triangle */
+.framer-c57h6 .framer-129ann2 {
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48'%3E%3Cg transform='rotate(-3 24 24)'%3E%3Crect x='5' y='5' width='38' height='38' rx='13' fill='%234ADE80'/%3E%3Cpath d='M20.2 15.4 L32.6 22.2 c1.4 0.78 1.4 2.8 0 3.6 L20.2 32.6 c-1.36 0.75 -3 -0.23 -3 -1.8 V17.2 c0 -1.55 1.66 -2.54 3 -1.8 Z' fill='%2314532D'/%3E%3C/g%3E%3C/svg%3E") center / contain no-repeat !important;
+}
+/* Building with AI — green, sparkle */
+.framer-c57h6 .framer-1dhg0jl {
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48'%3E%3Cg transform='rotate(4 24 24)'%3E%3Crect x='5' y='5' width='38' height='38' rx='13' fill='%234ADE80'/%3E%3Cpath d='M23 13.5 C24.4 20 27.5 23.1 34 24.5 C27.5 25.9 24.4 29 23 35.5 C21.6 29 18.5 25.9 12 24.5 C18.5 23.1 21.6 20 23 13.5 Z' fill='%2314532D'/%3E%3Ccircle cx='33.5' cy='15.5' r='2.4' fill='%2314532D'/%3E%3C/g%3E%3C/svg%3E") center / contain no-repeat !important;
+}
+/* Give it a read — purple, bookmark */
+.framer-c57h6 .framer-1d6ij2w {
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48'%3E%3Cg transform='rotate(-4 24 24)'%3E%3Crect x='5' y='5' width='38' height='38' rx='13' fill='%23C084FC'/%3E%3Cpath d='M18.5 13.5 h11 a2.5 2.5 0 0 1 2.5 2.5 v18.5 l-8 -5.4 -8 5.4 V16 a2.5 2.5 0 0 1 2.5 -2.5 Z' fill='%23581C87'/%3E%3C/g%3E%3C/svg%3E") center / contain no-repeat !important;
+}
+
+/* Contact mark ("Lets Build Something Together") — green, arrow */
+.framer-c57h6 .framer-pdodke svg {
+  display: none !important;
+}
+.framer-c57h6 .framer-pdodke {
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48'%3E%3Cg transform='rotate(-3 24 24)'%3E%3Crect x='5' y='5' width='38' height='38' rx='13' fill='%234ADE80'/%3E%3Cpath d='M17.5 30.5 L30 18 M19.5 16.5 h11.5 v11.5' fill='none' stroke='%2314532D' stroke-width='5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/g%3E%3C/svg%3E") center / contain no-repeat !important;
+}
+
+/* ── "Building with AI" — dark wireframe room ─────────────────────────── */
+/* framer-fs20qu wraps both the heading and bento cards.
+   Perspective grid room (images/ai-grid.svg) + edge vignette over near-black. */
+.framer-c57h6 .framer-fs20qu {
+  /* Extra breathing room above the header and below the bento grid */
+  padding-top: 72px !important;
+  padding-bottom: 72px !important;
+  /* top → bottom: edge vignette, cursor spotlight, wireframe room, AI aurora glows, base.
+     The --ai-* vars are driven by the cursor-parallax script in index.html. */
+  background:
+    radial-gradient(ellipse 85% 75% at 50% 45%, rgba(5, 5, 5, 0) 45%, rgba(5, 5, 5, 0.55) 100%),
+    radial-gradient(560px circle at var(--ai-cx, 50%) var(--ai-cy, 40%), rgba(129, 140, 248, 0.13) 0%, transparent 65%),
+    url("images/ai-grid.svg") calc(50% + var(--ai-gx, 0px)) calc(50% + var(--ai-gy, 0px)) / cover no-repeat,
+    radial-gradient(ellipse 55% 40% at calc(50% + var(--ai-glx, 0px)) calc(42% + var(--ai-gly, 0px)), rgba(99, 102, 241, 0.18) 0%, transparent 65%),
+    radial-gradient(ellipse 70% 50% at calc(10% + var(--ai-glx, 0px)) calc(6% + var(--ai-gly, 0px)), rgba(74, 222, 128, 0.15) 0%, transparent 55%),
+    radial-gradient(ellipse 65% 55% at calc(92% + var(--ai-glx, 0px)) calc(88% + var(--ai-gly, 0px)), rgba(168, 85, 247, 0.15) 0%, transparent 55%),
+    radial-gradient(ellipse 50% 45% at calc(88% + var(--ai-glx, 0px)) calc(8% + var(--ai-gly, 0px)), rgba(56, 189, 248, 0.10) 0%, transparent 60%),
+    #050505 !important;
+}
+
+/* Header text → white on dark */
+.framer-c57h6 .framer-fs20qu .framer-1kewby2 .framer-text {
+  --framer-text-color: #ffffff !important;
+  color: #ffffff !important;
+}
+.framer-c57h6 .framer-fs20qu .framer-1098nfj .framer-text {
+  --framer-text-color: rgba(255, 255, 255, 0.65) !important;
+  color: rgba(255, 255, 255, 0.65) !important;
+}
+
+/* Lime accent asterisk after the title (from the wireframe-room reference) */
+.framer-c57h6 .framer-fs20qu .framer-1kewby2 .framer-text::after {
+  content: '*';
+  color: #4ADE80;
+  margin-left: 2px;
+}
+
+/* Framer border system inside the dark band → faint white */
+.framer-c57h6 .framer-fs20qu .framer-xinqve,
+.framer-c57h6 .framer-fs20qu .framer-hyxuu,
+.framer-c57h6 .framer-fs20qu .framer-jnm7s7 {
+  --border-color: rgba(255, 255, 255, 0.14) !important;
+}
+
+/* ── Bento tiles → glassmorphism ──────────────────────────────────────── */
+/* Frosted glass over the wireframe room; each card carries a faint aurora
+   tint sampled from the section background (green/indigo/violet/cyan). */
+.framer-c57h6 .framer-fs20qu .framer-itx7f,
+.framer-c57h6 .framer-fs20qu .framer-19ebriy,
+.framer-c57h6 .framer-fs20qu .framer-7byk6d,
+.framer-c57h6 .framer-fs20qu .framer-1kfbg45,
+.framer-c57h6 .framer-fs20qu .framer-jwdy93 {
+  /* brightness lift separates the glass from the room behind it */
+  backdrop-filter: blur(28px) saturate(180%) brightness(1.6);
+  -webkit-backdrop-filter: blur(28px) saturate(180%) brightness(1.6);
+  --border-color: rgba(255, 255, 255, 0.20) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.22),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.30),
+    0 24px 60px rgba(0, 0, 0, 0.55),
+    0 4px 14px rgba(0, 0, 0, 0.35);
+}
+/* Base sheen: light top → dark bottom, like lit glass */
+.framer-c57h6 .framer-fs20qu .framer-itx7f {
+  background:
+    radial-gradient(120% 90% at 12% 0%, rgba(74, 222, 128, 0.14) 0%, transparent 60%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.05) 40%, rgba(255, 255, 255, 0.03) 100%) !important;
+}
+.framer-c57h6 .framer-fs20qu .framer-19ebriy {
+  background:
+    radial-gradient(120% 90% at 88% 0%, rgba(99, 102, 241, 0.16) 0%, transparent 60%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.05) 40%, rgba(255, 255, 255, 0.03) 100%) !important;
+}
+.framer-c57h6 .framer-fs20qu .framer-7byk6d {
+  background:
+    radial-gradient(120% 90% at 12% 0%, rgba(168, 85, 247, 0.15) 0%, transparent 60%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.05) 40%, rgba(255, 255, 255, 0.03) 100%) !important;
+}
+.framer-c57h6 .framer-fs20qu .framer-1kfbg45 {
+  background:
+    radial-gradient(120% 90% at 88% 0%, rgba(56, 189, 248, 0.15) 0%, transparent 60%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.05) 40%, rgba(255, 255, 255, 0.03) 100%) !important;
+}
+.framer-c57h6 .framer-fs20qu .framer-jwdy93 {
+  background:
+    radial-gradient(140% 100% at 50% 100%, rgba(74, 222, 128, 0.11) 0%, rgba(168, 85, 247, 0.10) 50%, transparent 75%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.05) 40%, rgba(255, 255, 255, 0.03) 100%) !important;
+}
+
+/* Tile text on glass — white titles, muted white subtext */
+.framer-c57h6 .framer-fs20qu .framer-pyirc .framer-text,
+.framer-c57h6 .framer-fs20qu .framer-1ijirur .framer-text,
+.framer-c57h6 .framer-fs20qu .framer-1ijrbrw .framer-text,
+.framer-c57h6 .framer-fs20qu .framer-idu6b3 .framer-text,
+.framer-c57h6 .framer-fs20qu .framer-a4e0zk .framer-text {
+  --framer-text-color: #ffffff !important;
+  color: #ffffff !important;
+}
+.framer-c57h6 .framer-fs20qu .framer-1x1arje .framer-text,
+.framer-c57h6 .framer-fs20qu .framer-z5yd7p .framer-text,
+.framer-c57h6 .framer-fs20qu .framer-kdwpoz .framer-text,
+.framer-c57h6 .framer-fs20qu .framer-qe8wrw .framer-text,
+.framer-c57h6 .framer-fs20qu .framer-1u0roqr .framer-text {
+  --framer-text-color: rgba(255, 255, 255, 0.62) !important;
+  color: rgba(255, 255, 255, 0.62) !important;
+}
+
+/* ── Structure lines — light solid (lighter than the original #e5e5e5) ── */
+.framer-c57h6 .framer-xiaegt,
+.framer-c57h6 .framer-eh96xg,
+.framer-c57h6 .framer-e64r2n,
+.framer-c57h6 .framer-1szzpcb,
+.framer-c57h6 .framer-xsn7i4,
+.framer-c57h6 .framer-cqrbvk,
+.framer-c57h6 .framer-1xl1f7w,
+.framer-c57h6 .framer-1m7zsgh,
+.framer-c57h6 .framer-n5o53k {
+  --border-style: solid !important;
+  --border-color: rgba(0, 0, 0, 0.05) !important;
+}
+
+/* Continuous side rails on the main sections */
+.framer-c57h6 .framer-xiaegt,
+.framer-c57h6 .framer-eh96xg,
+.framer-c57h6 .framer-e64r2n {
+  --border-left-width: 1px !important;
+  --border-right-width: 1px !important;
+}
+
+/* AI dark band — lighter white lines */
+.framer-c57h6 .framer-fs20qu .framer-xinqve,
+.framer-c57h6 .framer-fs20qu .framer-hyxuu,
+.framer-c57h6 .framer-fs20qu .framer-jnm7s7 {
+  --border-style: solid !important;
+  --border-color: rgba(255, 255, 255, 0.10) !important;
+}
+
+/* ── Section headers — Framer gives these fixed widths (up to 1010px);
+   below ~1100px they centre-overflow the viewport and clip. ─────────── */
+@media (max-width: 1100px) {
+  .framer-c57h6 .framer-1i5ns50,
+  .framer-c57h6 .framer-ag9lum,
+  .framer-c57h6 .framer-1dpt38s,
+  .framer-c57h6 .framer-1r7gvwv,
+  .framer-c57h6 .framer-lt1n51,
+  .framer-c57h6 .framer-t5shua,
+  .framer-c57h6 .framer-q36pis,
+  .framer-c57h6 .framer-14mfhfe,
+  .framer-c57h6 .framer-12ucqcf,
+  .framer-c57h6 .framer-1kewby2,
+  .framer-c57h6 .framer-1nk21tw,
+  .framer-c57h6 .framer-1098nfj,
+  .framer-c57h6 .framer-zm2y38,
+  .framer-c57h6 .framer-mqf6ty {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    left: auto !important;
+    right: auto !important;
+    transform: none !important;
+  }
+  .framer-c57h6 .framer-t5shua,
+  .framer-c57h6 .framer-q36pis,
+  .framer-c57h6 .framer-14mfhfe {
+    justify-content: center !important;
+  }
+  /* titles sit in a row WITH the icon tile — auto width so the pair centres */
+  .framer-c57h6 .framer-12ucqcf,
+  .framer-c57h6 .framer-1kewby2,
+  .framer-c57h6 .framer-1nk21tw {
+    width: auto !important;
+    max-width: calc(100% - 60px) !important;
+  }
+  .framer-c57h6 .framer-1i5ns50 .framer-text,
+  .framer-c57h6 .framer-ag9lum .framer-text,
+  .framer-c57h6 .framer-1dpt38s .framer-text {
+    --framer-text-alignment: center !important;
+    text-align: center !important;
+  }
+}
+
+/* ── "Give it a read" — hidden for now (may return later) ─────────────── */
+/* framer-nc5g3x wraps the whole section (header band + article list).
+   Remove this rule to bring the section back. */
+.framer-c57h6 .framer-nc5g3x {
+  display: none !important;
+}
+
+/* ── Contact — fluid layout (Framer had it absolute-positioned for 1440) ── */
+.framer-c57h6 .framer-18911x {
+  width: 100% !important;
+  left: 0 !important;
+  right: 0 !important;
+  top: 0 !important;
+  height: 100% !important;
+  transform: none !important;
+}
+
+.framer-c57h6 .framer-yanuq0 {
+  height: auto !important;
+  min-height: min(950px, 100svh);
+  display: flex !important;
+}
+.framer-c57h6 .framer-1xoc51q {
+  position: relative !important;
+  top: auto !important;
+  bottom: auto !important;
+  left: auto !important;
+  width: 100% !important;
+  max-width: 1078px;
+  margin: 0 auto;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  padding: clamp(96px, 22vh, 227px) 20px 140px !important;
+}
+.framer-c57h6 .framer-c4c8e6 {
+  position: relative !important;
+  top: auto !important;
+  left: auto !important;
+  width: 100% !important;
+  max-width: 732px !important;
+}
+.framer-c57h6 .framer-1caux12 {
+  width: 100% !important;
+}
+.framer-c57h6 .framer-15shnal {
+  position: relative !important;
+  top: auto !important;
+  left: auto !important;
+  margin-top: 44px !important;
+}
+.framer-c57h6 .framer-19mx04p {
+  top: auto !important;
+  bottom: 44px !important;
+}
+
+/* ── Heavier bold text ────────────────────────────────────────────────
+   Scoped to the PP Mori 700/800 font-selector tokens so ONLY portfolio
+   headings + inline highlighted words get heavier — never the product
+   mockups (those use Geist/IBM Plex/Fira, different tokens).
+   R0Y7UFAgTW9yaS03MDA = "GF;PP Mori-700"  → push to 800
+   R0Y7UFAgTW9yaS04MDA = "GF;PP Mori-800"  → push to 900 + hairline stroke  */
+.framer-c57h6 [style*="R0Y7UFAgTW9yaS03MDA"] {
+  --framer-font-weight: 800 !important;
+  font-weight: 800 !important;
+  --framer-letter-spacing: -0.035em !important;
+  letter-spacing: -0.035em !important;
+}
+.framer-c57h6 [style*="R0Y7UFAgTW9yaS04MDA"] {
+  --framer-font-weight: 900 !important;
+  font-weight: 900 !important;
+  -webkit-text-stroke: 0.4px currentColor;
+  --framer-letter-spacing: -0.05em !important;
+  letter-spacing: -0.05em !important;
+}
+/* the "Senior Product Designer" role line is a CSS ::after (no token) */
+.framer-c57h6 .framer-w7uw4j::after {
+  font-weight: 800 !important;
+  letter-spacing: -0.05em !important;
+}
+
+/* ── Typography scale (Framer CSS variables) ──────────────────────────── */
+@media (max-width: 1024px) {
+  [data-framer-root] [style*="--framer-font-size:48px"] {
+    --framer-font-size: 40px !important;
+    --framer-line-height: 48px !important;
+  }
+
+  [data-framer-root] [style*="--framer-font-size:40px"] {
+    --framer-font-size: 34px !important;
+    --framer-line-height: 40px !important;
+  }
+}
+
+@media (max-width: 768px) {
+  [data-framer-root] [style*="--framer-font-size:48px"] {
+    --framer-font-size: 32px !important;
+    --framer-line-height: 38px !important;
+  }
+
+  [data-framer-root] [style*="--framer-font-size:40px"] {
+    --framer-font-size: 28px !important;
+    --framer-line-height: 34px !important;
+  }
+
+  [data-framer-root] [style*="--framer-font-size:24px"] {
+    --framer-font-size: 20px !important;
+    --framer-line-height: 26px !important;
+  }
+
+  [data-framer-root] [style*="--framer-font-size:18px"] {
+    --framer-font-size: 16px !important;
+    --framer-line-height: 22px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  [data-framer-root] [style*="--framer-font-size:48px"] {
+    --framer-font-size: 28px !important;
+    --framer-line-height: 34px !important;
+  }
+
+  [data-framer-root] [style*="--framer-font-size:40px"] {
+    --framer-font-size: 24px !important;
+    --framer-line-height: 30px !important;
+  }
+}
+
+/* ── Tablet (≤ 1024px) ─────────────────────────────────────────────────── */
+@media (max-width: 1024px) {
+  .framer-c57h6 .framer-1gmsbj2,
+  .framer-c57h6 .framer-krhpmx,
+  .framer-c57h6 .framer-1dv9wgl,
+  .framer-c57h6 .framer-1pzmip5 {
+    height: auto !important;
+    min-height: 360px;
+  }
+
+  .framer-c57h6 .framer-acwpcf,
+  .framer-c57h6 .framer-gp6wwv,
+  .framer-c57h6 .framer-vlkxkp,
+  .framer-c57h6 .framer-1qywjkz {
+    width: 100% !important;
+    max-width: 100% !important;
+    height: auto !important;
+    min-height: 280px;
+    aspect-ratio: 4 / 3;
+  }
+}
+
+/* ── Tablet portrait (≤ 900px) — stack case-study cards ───────────────── */
+@media (max-width: 900px) {
+  .framer-c57h6 .framer-n5o53k,
+  .framer-c57h6 .framer-1m7zsgh {
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+  }
+
+  .framer-c57h6 .framer-1gmsbj2,
+  .framer-c57h6 .framer-krhpmx,
+  .framer-c57h6 .framer-1dv9wgl,
+  .framer-c57h6 .framer-1pzmip5 {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    height: auto !important;
+    gap: 16px !important;
+    padding: 20px !important;
+    border-radius: 32px !important;
+  }
+
+  .framer-c57h6 .framer-652bj3 {
+    width: 100% !important;
+    max-width: 100% !important;
+    flex: none !important;
+    padding: 0 !important;
+    align-items: center !important;
+  }
+
+  .framer-c57h6 .framer-hbarid {
+    height: auto !important;
+    min-height: 0 !important;
+    padding: 0 !important;
+    align-items: flex-start !important;
+  }
+
+  .framer-c57h6 .framer-itx7f,
+  .framer-c57h6 .framer-19ebriy,
+  .framer-c57h6 .framer-7byk6d,
+  .framer-c57h6 .framer-1kfbg45,
+  .framer-c57h6 .framer-jwdy93 {
+    width: 100% !important;
+    min-width: 0 !important;
+    flex: none !important;
+    height: auto !important;
+    min-height: 220px !important;
+    aspect-ratio: 16 / 10;
+    padding: 20px !important;
+    border-radius: 24px !important;
+  }
+
+  .framer-c57h6 .framer-lq2141,
+  .framer-c57h6 .framer-hg5fwy,
+  .framer-c57h6 .framer-15emvvk,
+  .framer-c57h6 .framer-1bov6tm,
+  .framer-c57h6 .framer-am6rb0,
+  .framer-c57h6 .framer-153uemn,
+  .framer-c57h6 .framer-ml6zjt {
+    width: 100% !important;
+    height: auto !important;
+  }
+
+  /* Bento rows → stack */
+  .framer-c57h6 .framer-dw0zyn,
+  .framer-c57h6 .framer-6h1865,
+  .framer-c57h6 .framer-qmkuj,
+  .framer-c57h6 .framer-ag9lum,
+  .framer-c57h6 .framer-1dpt38s {
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+
+  .framer-c57h6 .framer-1lbc6l6,
+  .framer-c57h6 .framer-b2tt68,
+  .framer-c57h6 .framer-kqg2mu,
+  .framer-c57h6 .framer-1ptmy5e {
+    width: 100% !important;
+    gap: 24px !important;
+    height: auto !important;
+    padding: 16px !important;
+  }
+
+  /* About section — auto heights down the whole chain; Framer's fixed
+     heights clipped the Data/Craft/System strip under overflow:hidden */
+  .framer-c57h6 .framer-xiaegt {
+    height: auto !important;
+    min-height: 0 !important;
+    padding-top: 48px !important;
+    padding-bottom: 48px !important;
+    overflow: visible !important;
+  }
+  .framer-c57h6 .framer-leiwsy,
+  .framer-c57h6 .framer-652bj3,
+  .framer-c57h6 .framer-1ytk2nj {
+    height: auto !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+  }
+
+  /* Right container mockup off (stacked layout) */
+  .framer-c57h6 .framer-leiwsy::after {
+    display: none;
+  }
+
+  .framer-c57h6 .framer-leiwsy {
+    flex-direction: column !important;
+    align-items: center !important;
+    gap: 32px !important;
+  }
+
+  .framer-c57h6 .framer-1xj9pya {
+    width: min(274px, 80vw) !important;
+    height: auto !important;
+    aspect-ratio: 274 / 798;
+    max-height: 520px;
+  }
+  /* 62b2oa is an EMPTY desktop spacer frame — on mobile it rendered as a
+     huge blank block after Data/Craft/System */
+  .framer-c57h6 .framer-62b2oa {
+    display: none !important;
+  }
+  /* tighter section bottom now that the spacer is gone */
+  .framer-c57h6 .framer-xiaegt {
+    padding-bottom: 24px !important;
+  }
+
+  .framer-c57h6 .framer-w625s0 {
+    width: 100% !important;
+    height: 100% !important;
+    position: relative !important;
+    top: auto !important;
+    left: auto !important;
+  }
+
+  .framer-c57h6 .framer-1cjhaxu,
+  .framer-c57h6 .framer-c42ugo,
+  .framer-c57h6 .framer-7orfwh,
+  .framer-c57h6 .framer-h1ifz1 {
+    width: 100% !important;
+  }
+
+  .framer-c57h6 .framer-1ckmuqc {
+    flex-wrap: wrap !important;
+    gap: 20px !important;
+    padding: 24px 0 !important;
+  }
+
+  /* Article list text */
+  .framer-c57h6 .framer-1owllo1,
+  .framer-c57h6 .framer-mqf6ty {
+    width: 100% !important;
+  }
+
+  .framer-c57h6 .framer-1226555 {
+    padding: 16px !important;
+    border-radius: 20px !important;
+  }
+
+  /* Disable sticky/absolute offsets that break on narrow screens */
+  .framer-c57h6 .framer-1gmsbj2,
+  .framer-c57h6 .framer-krhpmx,
+  .framer-c57h6 .framer-1dv9wgl,
+  .framer-c57h6 .framer-1pzmip5 {
+    position: relative !important;
+    top: auto !important;
+    transform: none !important;
+  }
+}
+
+/* ── Mobile (≤ 640px) ─────────────────────────────────────────────────── */
+@media (max-width: 640px) {
+  .framer-c57h6 .framer-1jhguc6 {
+    min-height: 0 !important;
+    height: auto !important;
+    padding-top: 96px !important;
+    padding-bottom: 48px !important;
+  }
+  /* inner fill must grow with the (now in-flow) hero content.
+     flex:none is the key — its original flex:1 0 0 resolves to height 0
+     inside the auto-height hero */
+  .framer-c57h6 .framer-c3k5qs {
+    flex: none !important;
+    width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
+  }
+  /* About icon strip is visible on phones (flight off) — keep it inside
+     the viewport */
+  .framer-c57h6 .framer-25ip3p {
+    width: min(371px, 92vw) !important;
+    height: auto !important;
+    aspect-ratio: 371 / 33 !important;
+  }
+  /* hero text column: kill fixed/min widths + the 50px side padding that
+     forced a 561px layout on phones */
+  .framer-c57h6 .framer-fz7b92,
+  .framer-c57h6 .framer-mtk1mc,
+  .framer-c57h6 .framer-1yfgaui {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+  .hero-subtitle-wrap {
+    min-width: 0 !important;
+    width: 100% !important;
+  }
+
+  .framer-c57h6 .framer-1ooizrb {
+    width: calc(100vw - 16px) !important;
+    height: 56px !important;
+    border-radius: 48px !important;
+    top: 12px !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .framer-c57h6 .framer-1ooizrb::-webkit-scrollbar {
+    display: none;
+  }
+
+  .framer-c57h6 .framer-od3clj {
+    min-width: max-content;
+    gap: 12px !important;
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+  }
+
+  /* Hide secondary nav links on very small screens */
+  .framer-c57h6 .framer-1unbjb7 {
+    display: none !important;
+  }
+
+  /* Company chips: drop the divider, flatten the desktop grouping
+     (label+Porter | Juspay+Convin) so the label takes its own line and the
+     three chips wrap together as one centred row */
+  .framer-c57h6 .framer-1142z0w {
+    display: none !important;
+  }
+  .framer-c57h6 .framer-18nwjwv,
+  .framer-c57h6 .framer-d63esj {
+    display: contents !important;
+  }
+  .framer-c57h6 .framer-1wgz76y {
+    gap: 10px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+  .framer-c57h6 .framer-xl2nkg {
+    flex-basis: 100% !important;
+    width: 100% !important;
+    margin-bottom: 2px !important;
+  }
+  .framer-c57h6 .framer-xl2nkg .framer-text {
+    text-align: center !important;
+    --framer-text-alignment: center !important;
+  }
+  /* Data/Craft/System strip: slightly narrower than the words row */
+  .framer-c57h6 .framer-25ip3p {
+    width: min(340px, 82vw) !important;
+  }
+
+  .framer-c57h6 .framer-1gmsbj2,
+  .framer-c57h6 .framer-krhpmx,
+  .framer-c57h6 .framer-1dv9wgl,
+  .framer-c57h6 .framer-1pzmip5 {
+    border-radius: 24px !important;
+    padding: 16px !important;
+  }
+
+  .framer-c57h6 .framer-itx7f,
+  .framer-c57h6 .framer-19ebriy,
+  .framer-c57h6 .framer-7byk6d,
+  .framer-c57h6 .framer-1kfbg45,
+  .framer-c57h6 .framer-jwdy93 {
+    min-height: 180px !important;
+    border-radius: 16px !important;
+    padding: 12px !important;
+  }
+
+  .framer-c57h6 .framer-1m7zsgh {
+    padding: 20px 16px 48px !important;
+  }
+
+  .framer-c57h6 .framer-1226555 {
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 12px !important;
+  }
+
+  .framer-c57h6 .framer-1uret37,
+  .framer-c57h6 .framer-7lal85 {
+    width: 64px !important;
+    height: 64px !important;
+    flex-shrink: 0 !important;
+  }
+
+  .framer-c57h6 .framer-1meizq7 {
+    width: 64px !important;
+  }
+
+  /* Hero badges row wraps */
+  .framer-c57h6 .framer-1wgz76y,
+  .framer-c57h6 .framer-18nwjwv,
+  .framer-c57h6 .framer-d63esj {
+    flex-wrap: wrap !important;
+    justify-content: center !important;
+  }
+
+  .framer-c57h6 .framer-5vaexd {
+    position: relative !important;
+    top: auto !important;
+    left: auto !important;
+    transform: none !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 0 16px !important;
+    box-sizing: border-box !important;
+  }
+}
+
+/* ── Small mobile (≤ 400px) ───────────────────────────────────────────── */
+@media (max-width: 400px) {
+  .framer-c57h6 .framer-1jhguc6 {
+    padding-top: 88px !important;
+  }
+
+  .framer-c57h6 .framer-c3k5qs {
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+  }
+
+  .framer-c57h6 .framer-1gmsbj2,
+  .framer-c57h6 .framer-krhpmx,
+  .framer-c57h6 .framer-1dv9wgl,
+  .framer-c57h6 .framer-1pzmip5 {
+    border-radius: 20px !important;
+  }
+}
