@@ -3,9 +3,75 @@
  * Loaded after Framer SSR styles — uses !important only where Framer sets inline/fixed values.
  */
 
-/* Brand font — single source of truth for the site typeface. */
+/* ── Brand font — single source of truth for the site typeface ──────────
+   Switch the WHOLE site between PP Mori and Sora by toggling which line is
+   commented below. Only ONE --font-brand line should be active at a time.
+   (Sora is a Google Font under the SIL Open Font License — safe to ship.
+    It's loaded via a <link> in index.html <head>.) */
 :root {
-  --font-brand: 'PP Mori', 'PP Mori Placeholder', sans-serif;
+  /* --font-brand: 'PP Mori', 'PP Mori Placeholder', sans-serif;  */ /* PP Mori */
+  --font-brand: 'Sora', 'PP Mori Placeholder', sans-serif;          /* Sora ← ACTIVE */
+}
+
+/* Propagate --font-brand to every text node (Framer text + injected footer).
+   Only font-FAMILY is overridden here — weights/sizes stay as Framer set them,
+   so switching typefaces never disturbs the layout hierarchy. */
+.framer-c57h6 [data-framer-component-type],
+.framer-c57h6 [data-framer-component-type] *,
+.framer-c57h6 .framer-text,
+.framer-c57h6 .framer-text *,
+#ad-footer,
+#ad-footer * {
+  --framer-font-family: var(--font-brand) !important;
+  font-family: var(--font-brand) !important;
+}
+
+/* Tighten tracking — Sora runs wide at text sizes. Target elements by their
+   inline Framer weight so REGULAR & MEDIUM copy (weights 300–600) get pulled
+   in the most; heading weights (700–900) already ship negative tracking and
+   are left untouched. Matches on the inline --framer-font-weight substring. */
+.framer-c57h6 [style*="--framer-font-weight:300"],
+.framer-c57h6 [style*="--framer-font-weight:400"],
+.framer-c57h6 [style*="--framer-font-weight:500"],
+.framer-c57h6 [style*="--framer-font-weight:600"],
+#ad-footer .adf-cta {
+  --framer-letter-spacing: -0.02em !important;
+  letter-spacing: -0.02em !important;
+}
+
+/* ── Anthro-horse hero centerpiece ──────────────────────────────────────
+   The diorama is injected in its own in-flow band ABOVE the hero content.
+   The Three.js character (#ad-horse) is a body-level overlay anchored over
+   the hero top. To make room, the hero grows and its vertically-centred
+   content column is pushed down with margin-top (safe on abs-pos elements),
+   so the character sits snugly above the "Hey, I'm Ajeet" heading. */
+/* Remove the "Bangalore / 5+ Years" location pill from the hero */
+.framer-c57h6 .framer-5vaexd .framer-lgi26s {
+  display: none !important;
+}
+
+.ad-horse-on .framer-c57h6 .framer-1jhguc6 {
+  min-height: 740px !important;
+}
+.ad-horse-on .framer-c57h6 .framer-5vaexd {
+  margin-top: 80px !important;
+  row-gap: 14px !important;
+  gap: 14px !important;
+}
+/* Shrink the hero sub-headline "Designing for complexity, Building for scale".
+   Framer serializes the inline custom property WITH a space, so the attribute
+   selector must include it. Cover the container + its bold runs. */
+.ad-horse-on .framer-c57h6 .framer-1yfgaui,
+.ad-horse-on .framer-c57h6 .framer-1yfgaui .framer-text,
+.ad-horse-on .framer-c57h6 .framer-1yfgaui [style*="--framer-font-size: 20px"] {
+  --framer-font-size: 16px !important;
+  font-size: 16px !important;
+  --framer-line-height: 24px !important;
+  line-height: 24px !important;
+}
+@media (max-width: 640px) {
+  .ad-horse-on .framer-c57h6 .framer-1jhguc6 { min-height: 700px !important; }
+  .ad-horse-on .framer-c57h6 .framer-5vaexd { margin-top: 132px !important; }
 }
 
 /* ── Base ─────────────────────────────────────────────────────────────── */
