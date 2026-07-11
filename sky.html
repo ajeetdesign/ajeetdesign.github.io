@@ -51,12 +51,15 @@
     box-shadow: 0 8px 32px rgba(15, 30, 50, 0.12);
   }
   .sky-nav .brand { font-weight: 800; font-size: 15px; letter-spacing: -0.02em; color: var(--ink-dark); text-decoration: none; }
-  .sky-nav .back {
+  .sky-nav .links { display: flex; align-items: center; gap: 4px; }
+  .sky-nav .link {
     font-size: 13px; font-weight: 600; text-decoration: none; color: var(--ink-dark);
-    padding: 8px 14px; border-radius: 999px; background: rgba(255,255,255,0.5);
+    padding: 8px 14px; border-radius: 999px; background: transparent;
     transition: background .25s ease;
+    white-space: nowrap;
   }
-  .sky-nav .back:hover { background: rgba(255,255,255,0.85); }
+  .sky-nav .link:hover { background: rgba(255,255,255,0.6); }
+  .sky-nav .link.on { background: rgba(255,255,255,0.85); }
 
   /* ── shared section scaffolding ─────────────────────────────────────── */
   section { position: relative; min-height: 100vh; display: grid; place-items: center; padding: 18vh 5vw; }
@@ -112,19 +115,23 @@
 
   /* ── 0 · hero (overcast) ────────────────────────────────────────────── */
   #s-hero { text-align: center; color: var(--ink-dark); }
-  #s-hero h1 {
-    font-size: clamp(38px, 6.1vw, 74px); font-weight: 800; letter-spacing: -0.032em;
-    line-height: 1.08; margin: 0 0 18px;
-  }
-  #s-hero .role { font-size: clamp(17px, 2vw, 22px); font-weight: 600; color: var(--ink-soft); margin: 0 0 26px; }
-  #s-hero .role strong { color: var(--ink-dark); }
-  .chips { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
-  .chip {
-    font-size: 13px; font-weight: 600; color: var(--ink-dark);
-    padding: 9px 16px; border-radius: 999px;
-    background: rgba(255,255,255,0.34); border: 1px solid rgba(255,255,255,0.55);
+  .hero-meta { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin: 0 0 28px; }
+  .meta-chip {
+    font-size: 12px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--ink-dark); padding: 8px 16px; border-radius: 999px;
+    background: rgba(255,255,255,0.32); border: 1px solid rgba(255,255,255,0.55);
     backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
   }
+  #s-hero h1 {
+    font-size: clamp(30px, 4.6vw, 56px); font-weight: 700; letter-spacing: -0.024em;
+    line-height: 1.18; margin: 0 0 16px;
+  }
+  #s-hero h1 .h1-role { font-weight: 600; color: var(--ink-dark); opacity: 0.92; }
+  #s-hero .role {
+    font-size: clamp(15px, 1.6vw, 19px); font-weight: 400; color: var(--ink-soft);
+    line-height: 1.6; margin: 0 auto; max-width: 44ch;
+  }
+  #s-hero .role strong { font-weight: 600; color: var(--ink-dark); }
   .scroll-cue {
     position: absolute; bottom: 4.5vh; left: 50%; transform: translateX(-50%);
     display: flex; flex-direction: column; align-items: center; gap: 8px;
@@ -246,7 +253,11 @@
 
 <nav class="sky-nav">
   <a class="brand" href="#s-hero">ajeet.design</a>
-  <a class="back" href="index.html">Classic site →</a>
+  <div class="links">
+    <a class="link" href="#s-intro">About me</a>
+    <a class="link" href="#s-work">Work</a>
+    <a class="link" href="#s-ai">AI Playground</a>
+  </div>
 </nav>
 
 <main>
@@ -254,13 +265,12 @@
   <!-- 0 · overcast landing -->
   <section id="s-hero">
     <div class="ovl">
-      <h1 class="reveal">Hey, I’m Ajeet<br>Senior Product Designer</h1>
-      <p class="role reveal d1">Designing for <strong>complexity</strong>, building for <strong>scale</strong></p>
-      <div class="chips reveal d2">
-        <span class="chip">Porter</span>
-        <span class="chip">Juspay</span>
-        <span class="chip">Convin.ai</span>
+      <div class="hero-meta reveal">
+        <span class="meta-chip">Bangalore</span>
+        <span class="meta-chip">5+ years</span>
       </div>
+      <h1 class="reveal d1">Hey, I’m Ajeet<br><span class="h1-role">Senior Product Designer</span></h1>
+      <p class="role reveal d2">Building products that <strong>scale across borders</strong> for millions,<br>and experimenting with what <strong>AI</strong> makes possible</p>
     </div>
     <div class="scroll-cue"><span class="dot"></span>Ascend</div>
   </section>
@@ -381,5 +391,61 @@
 </main>
 
 <script type="module" src="js/sky.js?v=46"></script>
+<script>
+  /* nav active state — rect-based like the reveals (IO never fires in captures) */
+  (function () {
+    const links = [...document.querySelectorAll('.sky-nav .link')];
+    const secs = links.map(a => document.querySelector(a.getAttribute('href')));
+
+    /* slow eased jump — native scroll-behavior:smooth is ~500ms and not tunable,
+       and the sky needs time to fly through the scene change */
+    const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let anim = 0;
+    function glideTo(el) {
+      cancelAnimationFrame(anim);
+      const max = document.documentElement.scrollHeight - innerHeight;
+      const from = scrollY;
+      const to = Math.min(max, Math.max(0, from + el.getBoundingClientRect().top));
+      const dist = Math.abs(to - from);
+      if (REDUCED || dist < 4) { scrollTo({ top: to, behavior: 'instant' }); return; }
+      /* longer trips get more time, but the pace stays leisurely either way */
+      const dur = Math.min(3600, Math.max(1600, dist * 0.6));
+      const t0 = performance.now();
+      /* easeInOutCubic — gentle lift-off, long glide, soft landing */
+      const ease = t => t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+      const stop = () => cancelAnimationFrame(anim);
+      addEventListener('wheel', stop, { once: true, passive: true });
+      addEventListener('touchstart', stop, { once: true, passive: true });
+      (function step(now) {
+        const t = Math.min(1, (now - t0) / dur);
+        scrollTo({ top: from + (to - from) * ease(t), behavior: 'instant' });
+        if (t < 1) anim = requestAnimationFrame(step);
+        else { removeEventListener('wheel', stop); removeEventListener('touchstart', stop); }
+      })(t0);
+    }
+    [...document.querySelectorAll('.sky-nav a[href^="#"]')].forEach(a => {
+      a.addEventListener('click', e => {
+        const el = document.querySelector(a.getAttribute('href'));
+        if (!el) return;
+        e.preventDefault();
+        glideTo(el);
+      });
+    });
+
+    function sync() {
+      const mid = innerHeight * 0.5;
+      let hit = -1;
+      secs.forEach((s, i) => {
+        if (!s) return;
+        const r = s.getBoundingClientRect();
+        if (r.top <= mid && r.bottom >= mid) hit = i;
+      });
+      links.forEach((a, i) => a.classList.toggle('on', i === hit));
+    }
+    addEventListener('scroll', sync, { passive: true });
+    setInterval(sync, 600);
+    sync();
+  })();
+</script>
 </body>
 </html>
