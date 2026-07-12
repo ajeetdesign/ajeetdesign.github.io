@@ -82,7 +82,8 @@
   .sky-nav.open .nav-toggle span:nth-child(2) { transform: translate(-50%, -1px) rotate(-45deg); }
 
   /* ── shared section scaffolding ─────────────────────────────────────── */
-  section { position: relative; min-height: 100vh; display: grid; place-items: center; padding: 18vh 5vw; }
+  /* scoped to the journey — the About overlay has its own <section> panels */
+  main > section { position: relative; min-height: 100vh; display: grid; place-items: center; padding: 18vh 5vw; }
   /* flight-only gaps: the sky transitions play out here with no text on
      screen — the whole scene change completes before the section arrives */
   #s-intro { margin-top: 90vh; }
@@ -244,6 +245,132 @@
     color: var(--ink-soft); text-align: center;
   }
 
+  /* ── splash: dark curtain that parts along a horizontal seam ───────────── */
+  .splash-on, .splash-on body { overflow: hidden; }
+  #splash { position: fixed; inset: 0; z-index: 60; pointer-events: none; }
+  /* top and bottom halves pull apart — the seam runs across the screen */
+  .sp-half {
+    position: absolute; left: 0; right: 0; height: 50.2vh; /* .2 overlap: no hairline gap */
+    background: #0e1520;
+    will-change: transform;
+  }
+  .sp-half.t { top: 0; }
+  .sp-half.b { bottom: 0; }
+  #splash.open .sp-half.t { transform: translateY(-100%); transition: transform 1.45s cubic-bezier(.72, 0, .18, 1); }
+  #splash.open .sp-half.b { transform: translateY(100%); transition: transform 1.45s cubic-bezier(.72, 0, .18, 1); }
+  .sp-word {
+    position: absolute; inset: 0;
+    /* flex, not grid — grid items would stack each letter on its own row */
+    display: flex; align-items: center; justify-content: center;
+    font-size: clamp(22px, 2.4vw, 30px); font-weight: 600;
+    letter-spacing: 0.16em; text-indent: 0.16em; /* text-indent offsets the trailing track so it stays optically centred */
+    color: #f2f6fb;
+    text-transform: lowercase;
+  }
+  .sp-word .ch {
+    display: inline-block; opacity: 0;
+    filter: blur(9px);
+    transition: filter .8s cubic-bezier(.2,.7,.2,1); /* anime drives transform/opacity only */
+    will-change: transform, opacity, filter;
+  }
+  .sp-word .ch.lit { filter: blur(0); }
+  #splash.gone { display: none; }
+
+  /* ── About overlay: content scrolls over a held-still hero sky ─────────── */
+  .about-open, .about-open body { overflow: hidden; } /* freeze the journey behind */
+  /* the journey's own content must go — the glass panels are translucent and
+     the sticky project cards would show straight through them. visibility,
+     not opacity: a faded layer still composites (it ghosted through), and
+     display:none would zero out the section rects sky.js measures. */
+  .about-open main, .about-open .sky-nav { visibility: hidden; pointer-events: none; }
+  #about {
+    position: fixed; inset: 0; z-index: 20;
+    overflow-y: auto; overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+    padding: 12vh 5vw 14vh;
+    opacity: 0; visibility: hidden;
+    transform: translateY(18px);
+    transition: opacity .5s ease, transform .6s cubic-bezier(.2,.9,.25,1), visibility 0s linear .5s;
+  }
+  #about.on {
+    opacity: 1; visibility: visible; transform: none;
+    transition: opacity .5s ease, transform .6s cubic-bezier(.2,.9,.25,1), visibility 0s;
+  }
+  .about-close {
+    position: fixed; top: 18px; right: 18px; z-index: 22;
+    width: 46px; height: 46px; border: 0; border-radius: 999px; cursor: pointer;
+    display: grid; place-items: center; color: var(--ink-dark);
+    background: rgba(255, 255, 255, 0.55);
+    border: 1px solid rgba(255, 255, 255, 0.65);
+    backdrop-filter: blur(12px) saturate(1.4);
+    -webkit-backdrop-filter: blur(12px) saturate(1.4);
+    box-shadow: 0 8px 32px rgba(15, 30, 50, 0.14);
+    transition: transform .35s cubic-bezier(.2,.9,.25,1), background .25s ease;
+  }
+  .about-close:hover { background: rgba(255,255,255,0.85); transform: rotate(90deg); }
+  .about-close svg { width: 18px; height: 18px; }
+  .about-inner { display: flex; flex-direction: column; align-items: center; gap: clamp(18px, 2.4vw, 28px); }
+  /* the overlay scrolls inside itself, so it gets its own reveal pass */
+  .a-reveal { opacity: 0; transform: translateY(26px); transition: opacity .8s cubic-bezier(.2,.7,.2,1), transform .8s cubic-bezier(.2,.7,.2,1); }
+  .a-reveal.in { opacity: 1; transform: none; }
+
+  .about-head { text-align: center; color: var(--ink-dark); padding: 4vh 0 2vh; }
+  .about-head h1 { font-size: clamp(30px, 4.4vw, 52px); font-weight: 700; letter-spacing: -0.03em; line-height: 1.15; margin: 0 0 14px; }
+  .about-head p { font-size: clamp(15px, 1.5vw, 18px); color: var(--ink-soft); line-height: 1.6; margin: 0 auto; max-width: 46ch; }
+  .about-head p strong { font-weight: 600; color: var(--ink-dark); }
+  .about-chips { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin: 0 0 24px; }
+
+  .apanel { width: min(94vw, 900px); padding: clamp(30px, 4vw, 52px); color: var(--ink-dark); }
+  .apanel h2 { font-size: clamp(24px, 2.8vw, 36px); font-weight: 800; letter-spacing: -0.03em; line-height: 1.2; margin: 0 0 18px; }
+  .apanel p { font-size: clamp(14px, 1.4vw, 17px); line-height: 1.7; color: var(--ink-soft); margin: 0 0 16px; }
+  .apanel p:last-child { margin-bottom: 0; }
+  .apanel p strong { font-weight: 600; color: var(--ink-dark); }
+
+  .hobby-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: clamp(12px, 1.6vw, 20px); margin-top: 24px; }
+  .hobby {
+    padding: clamp(18px, 2vw, 24px); border-radius: 20px;
+    background: rgba(255, 255, 255, 0.34);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    transition: transform .4s cubic-bezier(.2,.9,.25,1);
+  }
+  .hobby:hover { transform: translateY(-4px); }
+  .hobby h3 { font-size: clamp(15px, 1.5vw, 18px); font-weight: 700; letter-spacing: -0.02em; margin: 0 0 6px; }
+  .hobby p { font-size: 14px; line-height: 1.6; margin: 0; }
+
+  .train { list-style: none; margin: 24px 0 0; padding: 0; }
+  .train li {
+    display: grid; grid-template-columns: minmax(120px, 0.6fr) 1.6fr;
+    gap: clamp(12px, 2vw, 26px); align-items: baseline;
+    padding: 14px 0; border-bottom: 1px solid rgba(28, 43, 58, 0.1);
+  }
+  .train li:last-child { border-bottom: 0; padding-bottom: 0; }
+  .train b { font-size: clamp(15px, 1.5vw, 17px); font-weight: 700; letter-spacing: -0.01em; }
+  .train span { font-size: 14px; line-height: 1.6; color: var(--ink-soft); }
+
+  /* photo grid — swap each .photo div for <img class="photo" src="…"> */
+  .photo-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(10px, 1.4vw, 16px); margin-top: 24px; }
+  .photo {
+    position: relative; width: 100%; aspect-ratio: 4 / 5; object-fit: cover;
+    border-radius: 16px; border: 1px solid rgba(255, 255, 255, 0.55);
+    display: grid; place-items: center; overflow: hidden;
+    transition: transform .45s cubic-bezier(.2,.9,.25,1);
+  }
+  .photo:hover { transform: translateY(-4px) scale(1.01); }
+  .photo.wide { aspect-ratio: 16 / 10; grid-column: span 2; }
+  div.photo::after {
+    content: attr(data-n); font-size: 11px; font-weight: 700;
+    letter-spacing: 0.2em; text-transform: uppercase; color: rgba(255, 255, 255, 0.85);
+  }
+  .ph-a { background: linear-gradient(140deg, #f3d8ae, #eba268 60%, #c96f5e); }
+  .ph-b { background: linear-gradient(140deg, #9cc4cb, #6f9fb8 60%, #46648a); }
+  .ph-c { background: linear-gradient(140deg, #eddcbc, #cfae8a 60%, #96705c); }
+  .ph-d { background: linear-gradient(140deg, #aacfd1, #e8cfa2 55%, #d98d63); }
+  .ph-e { background: linear-gradient(140deg, #29405c, #6a7ea0 60%, #c9d6ea); }
+  .ph-f { background: linear-gradient(140deg, #f0e2ba, #d9b184 60%, #a97a5f); }
+
+  .about-foot { text-align: center; color: var(--ink-dark); padding: 4vh 0 2vh; }
+  .about-foot h2 { font-size: clamp(24px, 3vw, 38px); font-weight: 700; letter-spacing: -0.03em; margin: 0 0 24px; }
+
   /* ── 2 · work (blue sky, stacking deck) ─────────────────────────────── */
   #s-work { display: block; padding: 22vh 5vw 10vh; color: var(--ink-light); }
   #s-work header { text-align: center; margin-bottom: 12vh; text-shadow: 0 2px 24px rgba(10, 40, 80, 0.35); }
@@ -363,7 +490,7 @@
   }
 
   @media (max-width: 760px) {
-    section { padding: 16vh 6vw; }
+    main > section { padding: 16vh 6vw; }
     .tile.big, .tile.tall, .tile.med, .tile.sm { grid-column: span 6; grid-row: auto; }
     .pcard {
       grid-template-columns: 1fr; min-height: 0; margin-bottom: 42vh;
@@ -405,6 +532,13 @@
     .sky-nav.open .link:nth-child(2) { transition-delay: .12s; }
     .sky-nav.open .link:nth-child(3) { transition-delay: .18s; }
 
+    #about { padding: 11vh 5vw 12vh; }
+    .about-close { top: 14px; right: 14px; width: 42px; height: 42px; }
+    .apanel { padding: 26px 20px; }
+    .hobby-grid { grid-template-columns: 1fr; }
+    .photo-grid { grid-template-columns: repeat(2, 1fr); }
+    .photo.wide { grid-column: span 2; }
+    .train li { grid-template-columns: 1fr; gap: 4px; }
     .pillars { column-gap: 12px; }
     .pillar .word { font-size: 20px; }
     /* the 94vw panel + the section's 6vw side padding ran past the viewport */
@@ -420,9 +554,21 @@
   }
   /* #instant mode (reduced motion / capture probes): reveals snap, no tween */
   .sky-instant .reveal { transition: none !important; }
+  /* instant mode (reduced motion / capture probes): the overlay snaps open */
+  .sky-instant #about, .sky-instant .a-reveal { transition: none !important; }
+  @media (prefers-reduced-motion: reduce) {
+    #about, .a-reveal { transition: none !important; }
+    .a-reveal { opacity: 1; transform: none; }
+  }
 </style>
 </head>
 <body>
+
+<div id="splash" aria-hidden="true">
+  <div class="sp-half t"></div>
+  <div class="sp-half b"></div>
+  <div class="sp-word" id="sp-word"><span class="ch">a</span><span class="ch">j</span><span class="ch">e</span><span class="ch">e</span><span class="ch">t</span></div>
+</div>
 
 <canvas id="sky-canvas" aria-hidden="true"></canvas>
 <div id="flashfx" aria-hidden="true"></div>
@@ -430,7 +576,7 @@
 <nav class="sky-nav" id="sky-nav">
   <a class="brand" href="#s-hero">ajeet.design</a>
   <div class="links" id="nav-links">
-    <a class="link" href="about.html">About me</a>
+    <a class="link" href="#about" id="about-open">About me</a>
     <a class="link" href="#s-work">Work</a>
     <a class="link" href="#s-ai">AI Playground</a>
   </div>
@@ -647,7 +793,206 @@
 
 </main>
 
-<script type="module" src="js/sky.js?v=47"></script>
+<!-- About: rendered over the held-still hero sky, closed with the × -->
+<div id="about" role="dialog" aria-modal="true" aria-label="About Ajeet" aria-hidden="true">
+  <div class="about-inner">
+
+    <header class="about-head a-reveal">
+      <div class="about-chips">
+        <span class="meta-chip">Bangalore</span>
+        <span class="meta-chip">Photographer</span>
+        <span class="meta-chip">Fitness</span>
+      </div>
+      <h1>The human behind the pixels.</h1>
+      <p>Designer by profession — <strong>photographer</strong>, <strong>athlete</strong> and relentless <strong>tinkerer</strong> the rest of the time.</p>
+    </header>
+
+    <section class="apanel glass a-reveal">
+      <p class="label">01 — My story</p>
+      <h2>From writing code to designing what the code should feel like.</h2>
+      <p>I started in <strong>computer science</strong>, which means I can read and write the code behind the screens I design. Somewhere along the way I realised I cared less about how the system worked and more about how it felt to the person using it — so I crossed over, and never looked back.</p>
+      <p>Five-plus years later I've shipped design across <strong>logistics, fintech and AI</strong> — at Porter, Juspay and Convin — building products used by millions across borders. The engineering roots never left: I prototype in code, argue in data, and think in systems.</p>
+      <p>Outside work you'll find me chasing light with a camera, on a badminton court, or shipping small ideas end-to-end with <strong>Claude</strong> — including a wallpaper app built from photos I clicked myself.</p>
+    </section>
+
+    <section class="apanel glass a-reveal">
+      <p class="label">02 — Hobbies</p>
+      <h2>Things I do when I'm not pushing pixels.</h2>
+      <div class="hobby-grid">
+        <div class="hobby">
+          <h3>Photography</h3>
+          <p>Landscapes, streets and skies — mostly chasing golden hour. The camera taught me more about framing and restraint than any design course.</p>
+        </div>
+        <div class="hobby">
+          <h3>Badminton</h3>
+          <p>Self-certified mediocre player, dangerously competitive anyway. Weekly games, occasional bruised ego.</p>
+        </div>
+        <div class="hobby">
+          <h3>Fitness</h3>
+          <p>Strength training most mornings. Show up, lift, repeat — the discipline carries straight into the work.</p>
+        </div>
+        <div class="hobby">
+          <h3>Building with AI</h3>
+          <p>Small ideas shipped end-to-end — wallpaper apps, trackers, experiments like this site. If it can be built in a weekend, it will be.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="apanel glass a-reveal">
+      <p class="label">03 — Training</p>
+      <h2>Always a student of something.</h2>
+      <ul class="train">
+        <li><b>Strength &amp; conditioning</b><span>Early-morning sessions, five days a week — consistency over intensity.</span></li>
+        <li><b>Badminton drills</b><span>Footwork and net play, slowly earning the right to drop "mediocre" from the bio.</span></li>
+        <li><b>Craft &amp; tools</b><span>Motion design, Three.js and AI-assisted workflows — the toolkit behind experiments like this Sky Edition.</span></li>
+      </ul>
+    </section>
+
+    <section class="apanel glass a-reveal">
+      <p class="label">04 — Photography</p>
+      <h2>Frames I've chased.</h2>
+      <p>A few favourites from my camera roll — skies, streets and everything golden hour touches. Over <strong>200K views and downloads</strong>, including the shots behind my wallpaper app.</p>
+      <div class="photo-grid">
+        <div class="photo wide ph-a" data-n="Photo 01"></div>
+        <div class="photo ph-b" data-n="Photo 02"></div>
+        <div class="photo ph-c" data-n="Photo 03"></div>
+        <div class="photo ph-d" data-n="Photo 04"></div>
+        <div class="photo ph-e" data-n="Photo 05"></div>
+        <div class="photo wide ph-f" data-n="Photo 06"></div>
+      </div>
+    </section>
+
+    <footer class="about-foot a-reveal">
+      <h2>That's me. Now let's talk about you.</h2>
+      <div class="contact-row">
+        <a class="cta-btn cta-solid" href="mailto:ajeet.kr646@gmail.com">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3.5" y="5.5" width="17" height="13" rx="2.5"/><path d="m4.5 7 7.5 6 7.5-6"/>
+          </svg>
+          Email me
+        </a>
+        <button class="cta-btn cta-ghost" id="about-back" type="button">Back to the journey</button>
+      </div>
+    </footer>
+
+  </div>
+</div>
+<button class="about-close" id="about-close" type="button" aria-label="Close about" hidden>
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+    <path d="M6 6l12 12M18 6L6 18"/>
+  </svg>
+</button>
+<script>
+  (function () {
+    var panel = document.getElementById('about');
+    var closeBtn = document.getElementById('about-close');
+    var openers = [document.getElementById('about-open')];
+    var backBtn = document.getElementById('about-back');
+    var reveals = Array.prototype.slice.call(panel.querySelectorAll('.a-reveal'));
+
+    // the overlay scrolls inside itself, so window scroll events never fire —
+    // run our own rect-based pass on the panel's scroll instead
+    function check() {
+      var h = innerHeight;
+      for (var i = reveals.length - 1; i >= 0; i--) {
+        var b = reveals[i].getBoundingClientRect();
+        if (b.top < h * 0.9 && b.bottom > 0) {
+          reveals[i].classList.add('in');
+          reveals.splice(i, 1);
+        }
+      }
+    }
+    panel.addEventListener('scroll', check, { passive: true });
+
+    function open(e) {
+      if (e) e.preventDefault();
+      document.body.setAttribute('data-sky-lock', '0'); // hold the hero sky still
+      document.documentElement.classList.add('about-open');
+      panel.classList.add('on');
+      panel.setAttribute('aria-hidden', 'false');
+      closeBtn.hidden = false;
+      panel.scrollTop = 0;
+      // reduced-motion / capture mode: reveal everything at once (rAF and the
+      // scroll pass are unreliable there)
+      if (document.documentElement.classList.contains('sky-instant')) {
+        while (reveals.length) reveals.pop().classList.add('in');
+      }
+      requestAnimationFrame(check);
+      setTimeout(check, 60);
+      closeBtn.focus();
+    }
+    function close() {
+      panel.classList.remove('on');
+      panel.setAttribute('aria-hidden', 'true');
+      closeBtn.hidden = true;
+      document.documentElement.classList.remove('about-open');
+      document.body.removeAttribute('data-sky-lock'); // journey resumes where it was
+    }
+    openers.forEach(function (a) { if (a) a.addEventListener('click', open); });
+    closeBtn.addEventListener('click', close);
+    if (backBtn) backBtn.addEventListener('click', close);
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && panel.classList.contains('on')) close();
+    });
+    if (location.hash === '#about') open();
+  })();
+</script>
+
+<script src="js/anime.min.js"></script>
+<script>
+  (function () {
+    var splash = document.getElementById('splash');
+    var word = document.getElementById('sp-word');
+    var reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var instant = reduced || location.hash === '#instant'; // capture probes + reduced motion skip it
+
+    var done = false;
+    function finish() {
+      if (done) return;
+      done = true;
+      splash.classList.add('gone');
+      document.documentElement.classList.remove('splash-on');
+    }
+    if (instant || !window.anime) { finish(); return; } // no anime.js → no curtain
+
+    document.documentElement.classList.add('splash-on'); // hold the scroll under the curtain
+    setTimeout(finish, 7000);     // failsafe: never trap the visitor behind the curtain
+    splash.addEventListener('click', function () { splash.classList.add('open'); setTimeout(finish, 700); });
+    splash.style.pointerEvents = 'auto'; // click anywhere to skip
+
+    var chars = word.querySelectorAll('.ch');
+    // NB: no `filter` tweens here — animating blur() through anime stalled its
+    // rAF loop and froze the whole timeline. The blur is a CSS transition
+    // (.ch → .ch.lit), anime just drives transform/opacity.
+    anime.timeline({ easing: 'easeOutExpo' })
+      // letters rise and settle, one after the next
+      .add({
+        targets: chars,
+        opacity: [0, 1],
+        translateY: [26, 0],
+        duration: 1000,
+        delay: anime.stagger(90),
+        begin: function () {
+          for (var i = 0; i < chars.length; i++) {
+            (function (el, d) { setTimeout(function () { el.classList.add('lit'); }, d); })(chars[i], i * 90);
+          }
+        }
+      })
+      // a beat, then they lift away before the curtain moves
+      .add({
+        targets: chars,
+        opacity: [1, 0],
+        translateY: -14,
+        duration: 560,
+        easing: 'easeInQuad',
+        delay: anime.stagger(38)
+      }, '+=560')
+      // curtain parts on the sky, which has been booting behind it all along
+      .add({ duration: 10, complete: function () { splash.classList.add('open'); } })
+      .add({ duration: 1500, complete: finish });
+  })();
+</script>
+<script type="module" src="js/sky.js?v=48"></script>
 <script>
   /* nav active state — rect-based like the reveals (IO never fires in captures) */
   (function () {
