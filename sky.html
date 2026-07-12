@@ -323,11 +323,12 @@
     section { padding: 16vh 6vw; }
     .tile.big, .tile.tall, .tile.med, .tile.sm { grid-column: span 6; grid-row: auto; }
     .pcard { min-height: 50vh; margin-bottom: 42vh; }
-    /* nav: full-width bar + drop-down sheet (the pill overflowed at 390px) */
+    /* nav: compact centred pill + drop-down sheet (the full link row overflowed at 390px) */
     .sky-nav {
-      left: 12px; right: 12px; transform: none;
+      left: 50%; right: auto; transform: translateX(-50%);
+      width: min(86vw, 320px);
       justify-content: space-between; gap: 10px;
-      padding: 8px 8px 8px 18px; border-radius: 22px;
+      padding: 7px 7px 7px 16px; border-radius: 999px;
     }
     .nav-toggle { display: block; }
     .sky-nav .links {
@@ -359,7 +360,9 @@
 
     .pillars { column-gap: 12px; }
     .pillar .word { font-size: 20px; }
-    .intro-top { grid-template-columns: 1fr; }
+    /* the 94vw panel + the section's 6vw side padding ran past the viewport */
+    #s-intro .panel { width: 100%; padding: 28px 22px; }
+    .intro-top { grid-template-columns: 1fr; gap: 26px; }
     .xp-row { grid-template-columns: auto 1fr; row-gap: 4px; }
     .xp-yr { grid-column: 2; }
   }
