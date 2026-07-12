@@ -873,16 +873,21 @@ import * as THREE from './three.module.min.js';
   dome.add(stars); // dome follows the camera, so the stars do too
 
   // ── scroll → master progress ────────────────────────────────────────────
+  // data-sky-lock="N" on <body> pins the journey to scene N — about.html
+  // reuses the hero sky as a static backdrop while its content scrolls
+  var LOCK = document.body.hasAttribute('data-sky-lock')
+    ? parseFloat(document.body.getAttribute('data-sky-lock')) : null;
   var sections = ['s-hero', 's-intro', 's-work', 's-ai', 's-contact']
     .map(function (id) { return document.getElementById(id); });
   var tops = [0, 0, 0, 0, 0];
   function measure() {
     var sy = window.pageYOffset;
     for (var i = 0; i < sections.length; i++) {
-      tops[i] = sections[i].getBoundingClientRect().top + sy;
+      if (sections[i]) tops[i] = sections[i].getBoundingClientRect().top + sy;
     }
   }
   function targetS() {
+    if (LOCK !== null) return LOCK;
     var y = window.pageYOffset, vh = innerHeight, s = 0;
     var maxY = document.documentElement.scrollHeight - vh;
     for (var i = 1; i < sections.length; i++) {
