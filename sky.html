@@ -307,6 +307,7 @@
     box-shadow: 0 8px 32px rgba(15, 30, 50, 0.14);
     transition: transform .35s cubic-bezier(.2,.9,.25,1), background .25s ease;
   }
+  .about-close[hidden] { display: none; } /* class sets display:grid, which beats [hidden] */
   .about-close:hover { background: rgba(255,255,255,0.85); transform: rotate(90deg); }
   .about-close svg { width: 18px; height: 18px; }
   .about-inner { display: flex; flex-direction: column; align-items: center; gap: clamp(18px, 2.4vw, 28px); }
@@ -996,7 +997,9 @@
 <script>
   /* nav active state — rect-based like the reveals (IO never fires in captures) */
   (function () {
-    const links = [...document.querySelectorAll('.sky-nav .link')];
+    /* section links only — the About trigger points at the fixed overlay, whose
+       rect always straddles the midline, so it would read as "current" forever */
+    const links = [...document.querySelectorAll('.sky-nav .link[href^="#s-"]')];
     const secs = links.map(a => document.querySelector(a.getAttribute('href')));
 
     /* slow eased jump — native scroll-behavior:smooth is ~500ms and not tunable,
@@ -1025,7 +1028,7 @@
         else { removeEventListener('wheel', stop); removeEventListener('touchstart', stop); }
       })(t0);
     }
-    [...document.querySelectorAll('.sky-nav a[href^="#"]')].forEach(a => {
+    [...document.querySelectorAll('.sky-nav a[href^="#s-"]')].forEach(a => {
       a.addEventListener('click', e => {
         const el = document.querySelector(a.getAttribute('href'));
         if (!el) return;
