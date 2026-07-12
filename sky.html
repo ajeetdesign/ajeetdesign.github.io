@@ -61,6 +61,26 @@
   .sky-nav .link:hover { background: rgba(255,255,255,0.6); }
   .sky-nav .link.on { background: rgba(255,255,255,0.85); }
 
+  /* hamburger — phone only; two bars that cross into an X */
+  .nav-toggle {
+    display: none; position: relative;
+    width: 38px; height: 38px; padding: 0; margin: 0;
+    border: 0; border-radius: 999px; cursor: pointer;
+    background: rgba(255, 255, 255, 0.45);
+    transition: background .25s ease;
+  }
+  .nav-toggle:hover { background: rgba(255, 255, 255, 0.72); }
+  .nav-toggle span {
+    position: absolute; left: 50%; top: 50%;
+    width: 16px; height: 2px; border-radius: 2px;
+    background: var(--ink-dark);
+    transition: transform .45s cubic-bezier(.2,.9,.25,1);
+  }
+  .nav-toggle span:nth-child(1) { transform: translate(-50%, -5px); }
+  .nav-toggle span:nth-child(2) { transform: translate(-50%, 3px); }
+  .sky-nav.open .nav-toggle span:nth-child(1) { transform: translate(-50%, -1px) rotate(45deg); }
+  .sky-nav.open .nav-toggle span:nth-child(2) { transform: translate(-50%, -1px) rotate(-45deg); }
+
   /* ── shared section scaffolding ─────────────────────────────────────── */
   section { position: relative; min-height: 100vh; display: grid; place-items: center; padding: 18vh 5vw; }
   /* flight-only gaps: the sky transitions play out here with no text on
@@ -303,7 +323,40 @@
     section { padding: 16vh 6vw; }
     .tile.big, .tile.tall, .tile.med, .tile.sm { grid-column: span 6; grid-row: auto; }
     .pcard { min-height: 50vh; margin-bottom: 42vh; }
-    .sky-nav { gap: 8px; }
+    /* nav: full-width bar + drop-down sheet (the pill overflowed at 390px) */
+    .sky-nav {
+      left: 12px; right: 12px; transform: none;
+      justify-content: space-between; gap: 10px;
+      padding: 8px 8px 8px 18px; border-radius: 22px;
+    }
+    .nav-toggle { display: block; }
+    .sky-nav .links {
+      position: absolute; top: calc(100% + 10px); left: 0; right: 0;
+      flex-direction: column; align-items: stretch; gap: 2px;
+      padding: 8px; border-radius: 22px;
+      background: rgba(255, 255, 255, 0.62);
+      backdrop-filter: blur(14px) saturate(1.4);
+      -webkit-backdrop-filter: blur(14px) saturate(1.4);
+      border: 1px solid rgba(255, 255, 255, 0.55);
+      box-shadow: 0 18px 44px rgba(15, 30, 50, 0.16);
+      /* closed: collapsed toward the button, untouchable */
+      opacity: 0; pointer-events: none;
+      transform: translateY(-10px) scale(0.96);
+      transform-origin: top right;
+      transition: opacity .28s ease, transform .42s cubic-bezier(.2,.9,.25,1);
+    }
+    .sky-nav.open .links { opacity: 1; pointer-events: auto; transform: none; }
+    .sky-nav .link {
+      padding: 13px 16px; border-radius: 14px; font-size: 15px;
+      /* each link drifts down + unblurs, staggered behind the sheet */
+      opacity: 0; transform: translateY(-8px); filter: blur(6px);
+      transition: opacity .34s ease, transform .44s cubic-bezier(.2,.9,.25,1), filter .34s ease, background .25s ease;
+    }
+    .sky-nav.open .link { opacity: 1; transform: none; filter: blur(0); }
+    .sky-nav.open .link:nth-child(1) { transition-delay: .06s; }
+    .sky-nav.open .link:nth-child(2) { transition-delay: .12s; }
+    .sky-nav.open .link:nth-child(3) { transition-delay: .18s; }
+
     .pillars { column-gap: 12px; }
     .pillar .word { font-size: 20px; }
     .intro-top { grid-template-columns: 1fr; }
@@ -324,14 +377,34 @@
 <canvas id="sky-canvas" aria-hidden="true"></canvas>
 <div id="flashfx" aria-hidden="true"></div>
 
-<nav class="sky-nav">
+<nav class="sky-nav" id="sky-nav">
   <a class="brand" href="#s-hero">ajeet.design</a>
-  <div class="links">
+  <div class="links" id="nav-links">
     <a class="link" href="#s-intro">About me</a>
     <a class="link" href="#s-work">Work</a>
     <a class="link" href="#s-ai">AI Playground</a>
   </div>
+  <button class="nav-toggle" id="nav-toggle" aria-label="Menu" aria-expanded="false" aria-controls="nav-links">
+    <span></span><span></span>
+  </button>
 </nav>
+<script>
+  (function () {
+    var nav = document.getElementById('sky-nav');
+    var btn = document.getElementById('nav-toggle');
+    function set(open) {
+      nav.classList.toggle('open', open);
+      btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    }
+    btn.addEventListener('click', function () { set(!nav.classList.contains('open')); });
+    /* a tap on a link navigates — let the sheet close behind it */
+    nav.querySelectorAll('.link').forEach(function (a) {
+      a.addEventListener('click', function () { set(false); });
+    });
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape') set(false); });
+    document.addEventListener('click', function (e) { if (!nav.contains(e.target)) set(false); });
+  })();
+</script>
 
 <main>
 
