@@ -1,6 +1,6 @@
 /**
- * Responsive overrides for Framer export (1440px desktop canvas).
- * Loaded after Framer SSR styles — uses !important only where Framer sets inline/fixed values.
+ * Responsive overrides for legacy export (1440px desktop canvas).
+ * Loaded after the export’s server-rendered styles — uses !important only where the legacy export sets inline/fixed values.
  */
 
 /* ── Brand font — single source of truth for the site typeface ──────────
@@ -13,8 +13,8 @@
   --font-brand: 'Sora', 'PP Mori Placeholder', sans-serif;          /* Sora ← ACTIVE */
 }
 
-/* Propagate --font-brand to every text node (Framer text + injected footer).
-   Only font-FAMILY is overridden here — weights/sizes stay as Framer set them,
+/* Propagate --font-brand to every text node (exported text + injected footer).
+   Only font-FAMILY is overridden here — weights/sizes stay as the legacy export set them,
    so switching typefaces never disturbs the layout hierarchy. */
 .framer-c57h6 [data-framer-component-type],
 .framer-c57h6 [data-framer-component-type] *,
@@ -27,7 +27,7 @@
 }
 
 /* Tighten tracking — Sora runs wide at text sizes. Target elements by their
-   inline Framer weight so REGULAR & MEDIUM copy (weights 300–600) get pulled
+   inline the legacy export weight so REGULAR & MEDIUM copy (weights 300–600) get pulled
    in the most; heading weights (700–900) already ship negative tracking and
    are left untouched. Matches on the inline --framer-font-weight substring. */
 .framer-c57h6 [style*="--framer-font-weight:300"],
@@ -59,7 +59,7 @@
   gap: 14px !important;
 }
 /* Shrink the hero sub-headline "Designing for complexity, Building for scale".
-   Framer serializes the inline custom property WITH a space, so the attribute
+   the legacy export serializes the inline custom property WITH a space, so the attribute
    selector must include it. Cover the container + its bold runs. */
 .ad-horse-on .framer-c57h6 .framer-1yfgaui,
 .ad-horse-on .framer-c57h6 .framer-1yfgaui .framer-text,
@@ -173,7 +173,7 @@ body,
 }
 
 /* ── Nav link typography → match the "Contact Me" CTA (PP Mori 700) ─────
-   Framer ships nav labels in Geist-600 / Neue Regrade; retype them to the
+   the legacy export ships nav labels in Geist-600 / Neue Regrade; retype them to the
    footer CTA's font + weight. Font-SIZE is deliberately left untouched. */
 .framer-c57h6 .framer-od3clj .framer-text,
 .framer-c57h6 .framer-od3clj .framer-text * {
@@ -200,7 +200,7 @@ body,
   content: 'Senior Product Designer';
   display: block;
   font-family: var(--font-brand);
-  /* fluid — a pseudo-element can't inherit Framer's font-size media queries,
+  /* fluid — a pseudo-element can't inherit the export’s font-size media queries,
      and at a fixed 48px/nowrap it forced the whole layout to 500px+ on phones */
   font-size: clamp(27px, 6.7vw, 48px);
   font-weight: 700;
@@ -434,7 +434,7 @@ svg#svg297365751_11010 {
 /* framer-xiaegt is the section wrapper with opacity:0 set by Framer JS.
    CSS !important overrides the inline style so the background and borders
    are visible from the start. The children (framer-1i5ns50, framer-1gmsbj2)
-   keep their own Framer scroll animations and still fade in on scroll. */
+   keep their own the legacy export scroll animations and still fade in on scroll. */
 .framer-c57h6 .framer-xiaegt {
   opacity: 1 !important;
   transform: none !important;
@@ -498,7 +498,7 @@ svg#svg297365751_11010 {
 }
 
 /* Data / Craft / System row — words on top, icon strip directly below.
-   The group was a fixed 422x83 Framer Group (icons absolutely at 50/30);
+   The group was a fixed 422x83 the legacy export Group (icons absolutely at 50/30);
    flow it as a centred column instead so the strip always sits under the words. */
 .framer-c57h6 .framer-ml6zjt {
   width: min-content !important;
@@ -701,7 +701,7 @@ svg#svg297365751_11010 {
   margin-left: 2px;
 }
 
-/* Framer border system inside the dark band → faint white */
+/* the legacy export border system inside the dark band → faint white */
 .framer-c57h6 .framer-fs20qu .framer-xinqve,
 .framer-c57h6 .framer-fs20qu .framer-hyxuu,
 .framer-c57h6 .framer-fs20qu .framer-jnm7s7 {
@@ -779,7 +779,7 @@ svg#svg297365751_11010 {
   --border-color: rgba(255, 255, 255, 0.10) !important;
 }
 
-/* ── Section headers — Framer gives these fixed widths (up to 1010px);
+/* ── Section headers — the legacy export gives these fixed widths (up to 1010px);
    below ~1100px they centre-overflow the viewport and clip. ─────────── */
 @media (max-width: 1100px) {
   .framer-c57h6 .framer-1i5ns50,
@@ -830,7 +830,7 @@ svg#svg297365751_11010 {
   display: none !important;
 }
 
-/* ── Contact — fluid layout (Framer had it absolute-positioned for 1440) ── */
+/* ── Contact — fluid layout (the legacy export had it absolute-positioned for 1440) ── */
 .framer-c57h6 .framer-18911x {
   width: 100% !important;
   left: 0 !important;
@@ -904,7 +904,7 @@ svg#svg297365751_11010 {
   letter-spacing: -0.05em !important;
 }
 
-/* ── Typography scale (Framer CSS variables) ──────────────────────────── */
+/* ── Typography scale (the legacy export CSS variables) ──────────────────────────── */
 @media (max-width: 1024px) {
   [data-framer-root] [style*="--framer-font-size:48px"] {
     --framer-font-size: 40px !important;
@@ -1054,7 +1054,7 @@ svg#svg297365751_11010 {
     padding: 16px !important;
   }
 
-  /* About section — auto heights down the whole chain; Framer's fixed
+  /* About section — auto heights down the whole chain; the export’s fixed
      heights clipped the Data/Craft/System strip under overflow:hidden */
   .framer-c57h6 .framer-xiaegt {
     height: auto !important;

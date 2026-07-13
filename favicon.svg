@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- The Sky Edition, distilled: sunset gradient, sun high right, the lone
+       summit over the cloud sea. Corner radius matches the pillar tiles (30%). -->
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#9cc8cf"/>
+      <stop offset="0.52" stop-color="#f0e2ba"/>
+      <stop offset="1" stop-color="#eec092"/>
+    </linearGradient>
+    <radialGradient id="sun" cx="0.72" cy="0.3" r="0.5">
+      <stop offset="0" stop-color="#fff6de" stop-opacity="0.95"/>
+      <stop offset="1" stop-color="#fff6de" stop-opacity="0"/>
+    </radialGradient>
+    <clipPath id="sq"><rect x="0" y="0" width="64" height="64" rx="19"/></clipPath>
+  </defs>
+  <g clip-path="url(#sq)">
+    <rect width="64" height="64" fill="url(#sky)"/>
+    <rect width="64" height="64" fill="url(#sun)"/>
+    <circle cx="46" cy="19" r="6.5" fill="#fff3d4"/>
+    <!-- summit -->
+    <path d="M8 50 L24 22 L31 33 L36 27 L50 50 Z" fill="#1c2b3a" opacity="0.88"/>
+    <!-- snow cap -->
+    <path d="M20.5 28.2 L24 22 L27.5 27.6 L25.6 30.4 L24 28.4 L22.3 30.6 Z" fill="#f4f8fc"/>
+    <!-- cloud sea the peak rises from -->
+    <path d="M-2 52 Q10 46 22 51 Q34 56 46 50 Q56 46 66 52 L66 66 L-2 66 Z" fill="#f7ead6" opacity="0.95"/>
+  </g>
+</svg>

@@ -1,8 +1,8 @@
 # React Migration Plan — Ajeet Design Portfolio
 
-> Goal: convert the current **Framer static export** (`index.html` + `js/*.mjs` runtime + `responsive.css` overrides + injected GSAP scripts) into a clean, maintainable **React (Vite)** project — keeping the exact look, the GSAP/Lenis animation layer, and the design system, while deleting the ~6 MB of Framer runtime we no longer need.
+> Goal: convert the current **legacy static export** (`index.html` + `js/*.mjs` runtime + `responsive.css` overrides + injected GSAP scripts) into a clean, maintainable **React (Vite)** project — keeping the exact look, the GSAP/Lenis animation layer, and the design system, while deleting the ~6 MB of the legacy export runtime we no longer need.
 >
-> Read alongside **`DESIGN-CONTEXT.md`** — that doc is the source of truth for colors, type, spacing, components, and the animation layer. This plan maps the existing Framer markup to React components and lists exactly what to keep vs delete.
+> Read alongside **`DESIGN-CONTEXT.md`** — that doc is the source of truth for colors, type, spacing, components, and the animation layer. This plan maps the existing the legacy export markup to React components and lists exactly what to keep vs delete.
 
 ---
 
@@ -10,7 +10,7 @@
 
 - **Stack:** Vite + React 18 + CSS Modules (design tokens as CSS variables) + GSAP (`@gsap/react`) + Lenis (`lenis/react`).
 - **Keep:** image/mockup assets, the **PP Mori** font (+ any actually-used fonts), favicons, all copy, the GSAP/Lenis animation behaviour, the design values in `DESIGN-CONTEXT.md`.
-- **Delete:** the entire `js/` Framer runtime (~5.9 MB), `test.html` (duplicate of `index.html`), `.DS_Store`, and — once ported — `index.html` + `responsive.css`.
+- **Delete:** the entire `js/` the legacy export runtime (~5.9 MB), `test.html` (duplicate of `index.html`), `.DS_Store`, and — once ported — `index.html` + `responsive.css`.
 - **Approach:** rebuild section-by-section as components; port the custom animation scripts into React hooks; self-host fonts; verify visually against the current site at each step.
 
 ---
@@ -33,17 +33,17 @@ All copy is recoverable from `js/searchindex-p0tgozwd93j8.json` (extract before 
 
 ## 2. Asset audit — keep vs delete
 
-### 2.1 DELETE (Framer runtime & cruft) — ~6.4 MB
+### 2.1 DELETE (the legacy export runtime & cruft) — ~6.4 MB
 | Path | Size | Why |
 |---|---|---|
-| `js/google-3fcakcac.*.mjs` | 2.5 MB | Framer-bundled font/icon payload |
-| `js/framer.*.mjs` | 436 KB | Framer runtime |
-| `js/hi9gms….mjs`, `js/hxiiyb….mjs` | ~900 KB | Framer page bundles |
-| `js/motion.*.mjs` | 151 KB | Framer's motion (replaced by GSAP) |
-| `js/react.*.mjs` | 145 KB | Framer's bundled React (we bring our own) |
+| `js/google-3fcakcac.*.mjs` | 2.5 MB | the legacy export-bundled font/icon payload |
+| `js/legacy export.*.mjs` | 436 KB | the legacy export runtime |
+| `js/hi9gms….mjs`, `js/hxiiyb….mjs` | ~900 KB | legacy page bundles |
+| `js/motion.*.mjs` | 151 KB | the export’s motion (replaced by GSAP) |
+| `js/react.*.mjs` | 145 KB | the export’s bundled React (we bring our own) |
 | `js/fontshare-*.mjs`, `js/framer-font-*.mjs`, `js/google-*.mjs` | ~250 KB | Framer font loaders (self-host instead) |
-| `js/init.mjs`, `js/script_main.*.mjs`, `js/rolldown-runtime.*.mjs`, `js/shared-lib.*.mjs`, `js/px9*.mjs`, `js/aohx*.mjs` | small | Framer bootstrap |
-| `js/rerouter.js`, `js/sitesnotfoundpage*.js` | small | Framer routing/404 |
+| `js/init.mjs`, `js/script_main.*.mjs`, `js/rolldown-runtime.*.mjs`, `js/shared-lib.*.mjs`, `js/px9*.mjs`, `js/aohx*.mjs` | small | the legacy export bootstrap |
+| `js/rerouter.js`, `js/sitesnotfoundpage*.js` | small | the legacy export routing/404 |
 | `test.html` | 453 KB | **Exact duplicate** of `index.html` |
 | `.DS_Store` | — | macOS cruft |
 
@@ -52,9 +52,9 @@ All copy is recoverable from `js/searchindex-p0tgozwd93j8.json` (extract before 
 ### 2.2 KEEP — migrate into the React project
 | What | Where now | Move to | Notes |
 |---|---|---|---|
-| Mockups / screenshots | `images/*.png`, `*.webp`, `*.gif` (23 files) | `src/assets/img/` | **Audit usage first** — Framer exports unused assets. Keep only referenced ones; rename to human-readable. |
+| Mockups / screenshots | `images/*.png`, `*.webp`, `*.gif` (23 files) | `src/assets/img/` | **Audit usage first** — the legacy export exports unused assets. Keep only referenced ones; rename to human-readable. |
 | **PP Mori** font | `images/*.woff2` | `public/fonts/` or `src/assets/fonts/` | Brand font — required. |
-| Other fonts | `images/*.woff2` (31 total) | — | **Audit** — most are unused (Geist, Lato, Fira, IBM Plex etc. that Framer bundled). Keep only what the design actually uses (PP Mori, maybe Neue Regrade). Likely drop 20+ files. |
+| Other fonts | `images/*.woff2` (31 total) | — | **Audit** — most are unused (Geist, Lato, Fira, IBM Plex etc. that the legacy export bundled). Keep only what the design actually uses (PP Mori, maybe Neue Regrade). Likely drop 20+ files. |
 | Favicons | `images/default-favicon-*.png`, `app-icon.png` | `public/` | |
 | All copy | `js/searchindex-*.json` | component JSX / a `content.js` | Extract then delete. |
 | Design values | `DESIGN-CONTEXT.md` | `src/styles/tokens.css` | Convert §2–§4 to CSS variables. |
@@ -91,16 +91,16 @@ ajeet-portfolio/
 │  ├─ data/content.js        # copy extracted from searchindex
 │  ├─ App.jsx
 │  └─ main.jsx
-├─ index.html                # minimal Vite entry (NOT the Framer one)
+├─ index.html                # minimal Vite entry (NOT the the legacy export one)
 ├─ vite.config.js
 └─ package.json
 ```
 
 ---
 
-## 4. Component breakdown (Framer class → React component)
+## 4. Component breakdown (the legacy export class → React component)
 
-| Component | Replaces (Framer class) | Contents / props |
+| Component | Replaces (the legacy export class) | Contents / props |
 |---|---|---|
 | `Nav` | `framer-1ooizrb` / `framer-od3clj` | logo, links, active "Home" pill. Liquid-glass styles from context §5.1 |
 | `Hero` | `framer-1jhguc6` → `framer-1sllspy` | wraps the pieces below; owns side-lines + grid bg |
@@ -123,7 +123,7 @@ ajeet-portfolio/
 
 ## 5. Porting the custom animation layer
 
-Everything currently in injected `<script>`s (see `DESIGN-CONTEXT.md` §6) → React. The Framer-hydration workarounds (visibility-fix, `data-gsap-managed`, `<use>`-sprite reflection, `::after` role line) **all disappear** — in React we own the DOM, so these hacks are no longer needed.
+Everything currently in injected `<script>`s (see `DESIGN-CONTEXT.md` §6) → React. The the legacy export-hydration workarounds (visibility-fix, `data-gsap-managed`, `<use>`-sprite reflection, `::after` role line) **all disappear** — in React we own the DOM, so these hacks are no longer needed.
 
 | Current (vanilla, in index.html) | React replacement |
 |---|---|
@@ -144,7 +144,7 @@ Keep the **values** identical (durations, easings, offsets) — they're all docu
 
 ## 6. Migration steps (phased — verify after each)
 
-> **Status:** project built in `ajeet-portfolio/` (Vite). Phases 1–8 ✅ done & verified (renders, no JS errors, smooth scroll + reveals fire on scroll, hero pixel-faithful). Phase 9 (deleting the original Framer files) **pending user confirmation** — destructive, kept until parity is confirmed. Phase 10 = user's side-by-side check.
+> **Status:** project built in `ajeet-portfolio/` (Vite). Phases 1–8 ✅ done & verified (renders, no JS errors, smooth scroll + reveals fire on scroll, hero pixel-faithful). Phase 9 (deleting the original the legacy export files) **pending user confirmation** — destructive, kept until parity is confirmed. Phase 10 = user's side-by-side check.
 
 1. ✅ **Scaffold** — Vite + React; added `gsap @gsap/react lenis`. (Built `package.json`/`vite.config.js` manually rather than `npm create` for control.)
 2. ✅ **Extract content** — copy → `src/data/content.js`. Assets copied to `src/assets/img` + `public/fonts`. PP Mori is paid (Pangram Pangram, not on a CDN) → self-hosted the one embedded weight as `ppmori-semibold.woff2`.
@@ -154,7 +154,7 @@ Keep the **values** identical (durations, easings, offsets) — they're all docu
 6. ✅ **Smooth scroll** — `useSmoothScroll` hook (manual Lenis + GSAP ticker; values from context §6.1).
 7. ✅ **Animation layer** — `useScrollReveal` hook (data-reveal / data-reveal-group); hero load stagger; subtitle loop; hero icons (now 3 real inline SVGs — no `<use>` hack); grid parallax.
 8. ✅ **Polish & responsive** — `clamp()` rules ported; mobile breakpoints added.
-9. ⏳ **Cleanup (PENDING CONFIRM)** — delete `js/`, `test.html`, Framer `index.html`, `responsive.css`, `.DS_Store`. Keep `DESIGN-CONTEXT.md` + this file + `ajeet-portfolio/`.
+9. ⏳ **Cleanup (PENDING CONFIRM)** — delete `js/`, `test.html`, the legacy export `index.html`, `responsive.css`, `.DS_Store`. Keep `DESIGN-CONTEXT.md` + this file + `ajeet-portfolio/`.
 10. ⏳ **Verify** — user side-by-side check (run `npm run dev` in `ajeet-portfolio/`).
 
 ### Known follow-ups / refinements
@@ -190,9 +190,9 @@ Keep the **values** identical (durations, easings, offsets) — they're all docu
 ## 8. Risks & gotchas
 
 - **Font audit is the biggest cleanup win** — 31 woff2 are bundled but the design really only uses **PP Mori** (brand) + maybe Neue Regrade. Don't blindly copy all 31. Confirm via `@font-face`/`--font-family` usage in the current CSS.
-- **Mockup fidelity** — the Selected Work / bento mockups are detailed Framer vector/screenshot recreations. Easiest path: export each as a static image (already are PNGs in `images/`) rather than rebuilding in JSX. Rebuild only if crispness/theming demands it.
+- **Mockup fidelity** — the Selected Work / bento mockups are detailed the legacy export vector/screenshot recreations. Easiest path: export each as a static image (already are PNGs in `images/`) rather than rebuilding in JSX. Rebuild only if crispness/theming demands it.
 - **Exact spacing** — the hero rhythm and section gutters are tuned (context §4, §5.3). Port the `clamp()` values verbatim.
-- **No more hydration hacks** — once off Framer, remove the visibility-fix, `data-gsap-managed`, and `<use>`-sprite tricks entirely. They exist only to fight Framer's runtime.
+- **No more hydration hacks** — once off the legacy export, remove the visibility-fix, `data-gsap-managed`, and `<use>`-sprite tricks entirely. They exist only to fight the export’s runtime.
 - **GSAP + React strict mode** — use `@gsap/react`'s `useGSAP()` (handles cleanup, double-invoke in dev StrictMode).
 
 ---
@@ -201,6 +201,6 @@ Keep the **values** identical (durations, easings, offsets) — they're all docu
 
 - Visual parity with the current site (hero, sections, nav glass, gradients, lines, type).
 - All animations working: smooth scroll, section reveals, hero load stagger, subtitle loop, floating icons, grid parallax.
-- `js/`, `test.html`, Framer `index.html`, `responsive.css`, `.DS_Store` removed.
+- `js/`, `test.html`, the legacy export `index.html`, `responsive.css`, `.DS_Store` removed.
 - Bundle ~6 MB → <500 KB (excl. images/fonts).
 - `DESIGN-CONTEXT.md` still accurate; this plan checked off.

@@ -1,8 +1,8 @@
 # Portfolio Design Context — Ajeet Design
 
 > Reference doc for building **new case-study pages** that match the existing portfolio
-> (`index.html`, live at `vivacious-blackberry-492653.framer.app`).
-> Source is a **Framer export** (static SSR HTML + `js/*.mjs` runtime + `images/`).
+> (`index.html`, live at `vivacious-blackberry-492653.legacy export.app`).
+> Source is a **legacy export** (static SSR HTML + `js/*.mjs` runtime + `images/`).
 > All visual values below were measured from the live, rendered site.
 > Last updated to reflect manual post-export modifications in `responsive.css` + `index.html`.
 
@@ -10,35 +10,35 @@
 
 ## 1. Overview & Tech
 
-- **Origin:** Built in Framer, exported to static HTML/JS. Single page today (`/` and `/test` are the same).
+- **Origin:** Built in the legacy export, exported to static HTML/JS. Single page today (`/` and `/test` are the same).
 - **Design canvas width:** `1440px` desktop-first, now **fully responsive** via `responsive.css` (viewport meta is `device-width`). Breakpoints: ≤1100 (section headers — Framer gives them fixed widths up to 1010px, must be 100%), ≤1024/768/480 (type steps), ≤900 (cards/bento/About stack), ≤640 (hero flows in-document, nav compact, chips wrap), ≤400 (tightest). Key mobile facts: hero `framer-c3k5qs` needs `flex:none` (its `flex:1 0 0` collapses to height 0); the `::after` role line must use fluid `clamp()` type (pseudo-elements don't inherit Framer's font-size media vars); Contact is converted from absolute 1440-only layout to fluid flex; the icon scroll-flight is desktop-only (≥768 — below that the native About strip shows). Mobile structure changes (≤900/≤640): `framer-1ytk2nj` (About inner wrapper) has FIXED `height:797px + overflow:hidden` — must be auto/visible or it clips the Data/Craft/System strip; `framer-62b2oa` is an empty desktop spacer frame — `display:none` on mobile (it rendered as a huge blank block); company chips wrappers (`framer-18nwjwv`/`framer-d63esj`) get `display:contents` so the label takes its own line and the three chips wrap as one centred row (their container needs `width:100%` — it's min-content otherwise). NOTE: headless Chrome clamps windows to 500px min — test phones via the ≤640 branch at 500px; use a `[data-framer-root] { transform: translateY(-N px) }` debug shift to screenshot page regions (headless scroll doesn't paint).
 - **Page background:** pure white `#FFFFFF`.
 - **Centered content column:** ~`1020px` wide cards/sections, horizontally centered on the 1440 canvas.
 - **Section gutters:** `clamp(16px, 5vw, 180px)` left/right padding, set in `responsive.css`.
 - **Fonts load from:** Google Fonts (Geist, IBM Plex Sans, Fira Code, Lato) + local `images/*.woff2` (PP Mori, Inter, Neue Regrade).
-- **Local dev server:** `python3 -m http.server 8080` at `http://localhost:8080` (Framer JS modules blocked over `file://`).
+- **Local dev server:** `python3 -m http.server 8080` at `http://localhost:8080` (the legacy export JS modules blocked over `file://`).
 
 ### Two font worlds (important)
 1. **Portfolio chrome** (everything you design — headings, cards, nav, buttons): **`PP Mori`**. This is the brand font. Always use it.
 2. **Embedded product mockups** (screenshots inside case-study cards): use product-native fonts (`Inter`, `Geist`, `IBM Plex Sans`, `Fira Code`).
 
 ### Modification layer
-All customisations live in two places — never edit Framer's generated files:
+All customisations live in two places — never edit the export’s generated files:
 - **`responsive.css`** — CSS overrides (layout, spacing, borders, gradients, nav glass, hero load keyframes, added content via `::after`)
 - **`index.html` `<head>`** — three CDN `<script>` tags: GSAP 3.12.5, ScrollTrigger, Lenis 1.1.14 (load over `https://` so they work even on `file://`)
 - **`index.html` (before `</body>`)** — injected blocks, in order:
   1. `<style>` — subtitle loop keyframe/class CSS
-  2. Visibility-fix `<script>` — strips `opacity:0` from Framer's SSR inline styles (Framer JS is blocked over `file://`, so initial animation states stay stuck). **Skips `[data-gsap-managed]` elements** so GSAP-revealed items stay hidden until scrolled to.
+  2. Visibility-fix `<script>` — strips `opacity:0` from the export’s SSR inline styles (the legacy export JS is blocked over `file://`, so initial animation states stay stuck). **Skips `[data-gsap-managed]` elements** so GSAP-revealed items stay hidden until scrolled to.
   3. Subtitle-loop `<script>` — replaces the static subtitle element with two alternating phrases
   4. Lenis + GSAP ticker `<script>` — smooth scroll, synced to ScrollTrigger
   5. GSAP scroll-reveal `<script>` — unified entrance animations for every section (see §6)
   6. (Removed) the old IntersectionObserver About reveal — superseded by the GSAP layer
 
-### Key Framer patterns to know
-- **Border system:** Framer uses `::after` pseudo-elements on `data-border="true"` elements with CSS variables (`--border-left-width`, `--border-color`, etc.). Override the variables to control borders.
-- **React hydration:** Framer uses React 18 hydration, which destroys JS-injected DOM nodes. Use CSS `::after` pseudo-elements for persistent added content — not `insertAdjacentElement`. A non-fatal React #405 hydration warning is expected (the visibility-fix mutates SSR markup before React hydrates); it has no visible effect.
+### Key the legacy export patterns to know
+- **Border system:** the legacy export uses `::after` pseudo-elements on `data-border="true"` elements with CSS variables (`--border-left-width`, `--border-color`, etc.). Override the variables to control borders.
+- **React hydration:** the legacy export uses React 18 hydration, which destroys JS-injected DOM nodes. Use CSS `::after` pseudo-elements for persistent added content — not `insertAdjacentElement`. A non-fatal React #405 hydration warning is expected (the visibility-fix mutates SSR markup before React hydrates); it has no visible effect.
 - **Framer class prefix:** All Framer rules are scoped to `.framer-c57h6`. Use this in every override selector.
-- **GSAP over Framer:** GSAP scroll animations run on a ~700ms post-hydration delay and query elements fresh, then tag them `data-gsap-managed`. ScrollTrigger is synced to Lenis via the shared `gsap.ticker`.
+- **GSAP over the legacy export:** GSAP scroll animations run on a ~700ms post-hydration delay and query elements fresh, then tag them `data-gsap-managed`. ScrollTrigger is synced to Lenis via the shared `gsap.ticker`.
 
 ---
 
@@ -166,7 +166,7 @@ All measured from the live site. `letter-spacing` is consistently slightly negat
 - `framer-od3clj` (inner nav wrapper) border softened to `rgba(255,255,255,0.1)`.
 - Left: **logo** "ajeet design" (white). Right: links **Home / Work / About Me**, divider, **Resume / LinkedIn** (dimmer).
 - Nav link text is retyped to **PP Mori 700** (matches the footer "Contact Me" CTA / site headings) via `responsive.css` on `.framer-od3clj .framer-text` — Framer originally shipped them in Geist-600 / Neue Regrade. Font-size left as Framer set it.
-- Active link ("Home") is Framer's original **white pill** (a JS glass-tab attempt was tried and reverted — white-on-dark glass looked muddy).
+- Active link ("Home") is the export’s original **white pill** (a JS glass-tab attempt was tried and reverted — white-on-dark glass looked muddy).
 
 ### 5.2 Buttons (primary pill)
 - "Read Case Study", "Contact Me", "Add Lender" style.
@@ -178,7 +178,7 @@ All measured from the live site. `letter-spacing` is consistently slightly negat
   above the viewport top — lavender `rgba(168,85,247,0.16)` centre, indigo `0.13` left, sky
   `0.11` right, pink `0.07` hint — over `#fff`; fades out by mid-hero. Grid texture sits above it.
 
-Framer class keys:
+the legacy export class keys:
 - `framer-1jhguc6` — outer hero wrapper. `min-height: 700px`, `padding-top: 110px` (nav clearance), `position: relative`. Pseudo-elements `::before`/`::after` draw the vertical side lines at `left/right: clamp(16px, 5vw, 180px)`.
 - `framer-c3k5qs` — inner flex fill (`flex: 1 0 0`), `padding: 0`, `place-content: center`.
 - `framer-5vaexd` — content column, `position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%)`, `width: 100%`. Content is vertically centered by absolute positioning and spans full width between the vertical lines.
@@ -198,7 +198,7 @@ Content (top → bottom):
   background: linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.05) 12%, rgba(0,0,0,0.05) 88%, transparent 100%);
   ```
   Positioned at `left/right: clamp(16px, 5vw, 180px)` — fade in from top, hold faint in middle, fade out at bottom. (Opacity `0.05` — user wanted them subtle.)
-- **All other structure lines are light solid** (in `responsive.css`): the Framer wrapper
+- **All other structure lines are light solid** (in `responsive.css`): the the legacy export wrapper
   borders (`xiaegt/eh96xg/e64r2n/1szzpcb/xsn7i4/cqrbvk/1xl1f7w/1m7zsgh/n5o53k`) are forced
   `--border-style: solid` with `--border-color: rgba(0,0,0,0.05)` (lighter than the original
   `#e5e5e5`, formerly dashed in places). Main sections keep 1px L/R side rails. AI dark band
@@ -266,7 +266,7 @@ Used before each major section ("Selected Work", "Building with AI", "Give it a 
 ### 5.11 Contact / Footer — custom green notched panel
 - **The original Framer contact section (`framer-yanuq0`) is `display:none`** — replaced by a
   bespoke footer. The new footer (`#ad-footer`) is a **static block appended to `<body>` by a
-  small script, OUTSIDE the Framer root**, so React hydration can never destroy it (same
+  small script, OUTSIDE the the legacy export root**, so React hydration can never destroy it (same
   persistence trick as the splash / icon-flight overlays). All its CSS + markup live in one
   injected `<style>`+`<script>` block at the end of `index.html`.
 - **Structure** (mirrors a reference footer): dark `#050505` outer band → a big **brand-green
@@ -290,7 +290,7 @@ Used before each major section ("Selected Work", "Building with AI", "Give it a 
 
 ## 6. Motion & Animation
 
-The animation system is now **GSAP + Lenis driven** (added post-export), layered on top of Framer's own runtime. Three pillars:
+The animation system is now **GSAP + Lenis driven** (added post-export), layered on top of the export’s own runtime. Three pillars:
 
 ### 6.1 Smooth scroll (Lenis)
 - `lenis@1.1.14`, init in `index.html` before `</body>`.
@@ -331,7 +331,7 @@ Hero content fades up on page load via `@keyframes hero-reveal` (in `responsive.
 ```
 JS alternates `.sub-active` / `.sub-leaving` every 3000ms (380ms leave delay).
 
-### 6.4 Framer's own primitives (still present underneath)
+### 6.4 the export’s own primitives (still present underneath)
 - `opacity 0.4s ease-out` — fade. `transform 0.1s cubic-bezier(0.2, 0, 0, 1)` — snappy transforms. Heavy `will-change`.
 
 ### 6.5 "Building with AI" cursor parallax
@@ -364,7 +364,7 @@ Own `<script>` in `index.html`. Desktop only (`hover: hover` + `pointer: fine`).
 
 ### 6.7 Splash / loader (Uber-style)
 Static overlay `#ad-splash` + `<style>` + `<script>` injected before `</body>` (outside the
-Framer root — hydration never touches it), plus a boot `<style>`/`<script>` in `<head>`:
+the legacy export root — hydration never touches it), plus a boot `<style>`/`<script>` in `<head>`:
 - `<head>` script adds `splash-boot` (hides `[data-framer-root]` to prevent a pre-splash flash)
   and `splash-hold` (pauses the hero load animations via `animation-play-state`) on `<html>`.
   No-JS never gets the classes; the site renders normally.
@@ -449,14 +449,14 @@ Keep the **same chrome and rhythm** so it feels native:
 
 - Fonts: `images/*.woff2` (PP Mori = `images/noxivf8lirswba6eqtlfnbfsk.woff2`, Neue Regrade = `images/r91fiovskzbql1ki7ts58rfrnbm.woff2`, plus Inter set). Google-hosted: Geist, IBM Plex Sans, Fira Code, Lato.
 - Imagery/mockups + favicons live in `images/` (PNG/WEBP/GIF).
-- Runtime/logic: `js/framer.*.mjs`, `js/motion.*.mjs`, `js/react.*.mjs`, `js/script_main.*.mjs`, `js/init.mjs`.
+- Runtime/logic: `js/legacy export.*.mjs`, `js/motion.*.mjs`, `js/react.*.mjs`, `js/script_main.*.mjs`, `js/init.mjs`.
 - Search/content index: `js/searchindex-*.json` (good source of all page copy).
 
 ---
 
-## 10. Framer Class Map (hero section)
+## 10. the legacy export Class Map (hero section)
 
-| Class | Framer name | Role |
+| Class | the legacy export name | Role |
 |---|---|---|
 | `framer-1jhguc6` | (hero outer) | Full-width hero wrapper with side-line pseudo-elements |
 | `framer-c3k5qs` | (inner fill) | Flex-fill container, `place-content: center` |
