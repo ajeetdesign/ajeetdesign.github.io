@@ -276,6 +276,21 @@
   .sp-word .ch.lit { filter: blur(0); }
   #splash.gone { display: none; }
 
+  /* ── case-study layer: full-screen, in-page — no navigation ────────────── */
+  .case-open, .case-open body { overflow: hidden; }
+  .case-open main, .case-open .sky-nav { visibility: hidden; pointer-events: none; }
+  #case {
+    position: fixed; inset: 0; z-index: 40;
+    opacity: 0; visibility: hidden;
+    transform: translateY(22px) scale(0.985);
+    transition: opacity .45s ease, transform .6s cubic-bezier(.2,.9,.25,1), visibility 0s linear .45s;
+  }
+  #case.on {
+    opacity: 1; visibility: visible; transform: none;
+    transition: opacity .45s ease, transform .6s cubic-bezier(.2,.9,.25,1), visibility 0s;
+  }
+  #case iframe { width: 100%; height: 100%; border: 0; display: block; background: #f7f9fc; }
+
   /* ── About overlay: content scrolls over a held-still hero sky ─────────── */
   .about-open, .about-open body { overflow: hidden; } /* freeze the journey behind */
   /* the journey's own content must go — the glass panels are translucent and
@@ -699,7 +714,7 @@
           <div class="top"><span class="idx">01</span><span class="org">Porter</span></div>
           <h3>Improving conversion of a rewards program</h3>
           <p>Rebuilt the rewards journey for driver-partners — clearer earning states, faster redemption, measurable lift in conversion.</p>
-          <a class="cta" href="#">Read case study <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M12 5l7 7-7 7"/></svg></a>
+          <a class="cta" href="case.html?id=porter">Read case study <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M12 5l7 7-7 7"/></svg></a>
         </div>
         <div class="art art-a"></div>
       </article>
@@ -708,7 +723,7 @@
           <div class="top"><span class="idx">02</span><span class="org">Juspay · Hyperswitch</span></div>
           <h3>Volume-based payment routing</h3>
           <p>A visual way to split payment traffic across processors — percentages, priorities and fallbacks without touching code.</p>
-          <a class="cta" href="#">Read case study <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M12 5l7 7-7 7"/></svg></a>
+          <a class="cta" href="case.html?id=juspay">Read case study <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M12 5l7 7-7 7"/></svg></a>
         </div>
         <div class="art art-b"></div>
       </article>
@@ -717,7 +732,7 @@
           <div class="top"><span class="idx">03</span><span class="org">Vedantu</span></div>
           <h3>FinOps lender management</h3>
           <p>Ranking lenders, distributing lead share and configuring education-loan flows — an ops platform that scales with the funnel.</p>
-          <a class="cta" href="#">Read case study <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M12 5l7 7-7 7"/></svg></a>
+          <a class="cta" href="case.html?id=vedantu">Read case study <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M12 5l7 7-7 7"/></svg></a>
         </div>
         <div class="art art-c"></div>
       </article>
@@ -726,7 +741,7 @@
           <div class="top"><span class="idx">04</span><span class="org">Convin.ai</span></div>
           <h3>AI conversation intelligence</h3>
           <p>Designing AI-assisted QA workflows that help support teams review every conversation — not just a sample.</p>
-          <a class="cta" href="#">Read case study <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M12 5l7 7-7 7"/></svg></a>
+          <a class="cta" href="case.html?id=convin">Read case study <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M12 5l7 7-7 7"/></svg></a>
         </div>
         <div class="art art-d"></div>
       </article>
@@ -793,6 +808,48 @@
   </section>
 
 </main>
+
+<!-- Case study: same page, full-screen layer (case.html renders inside) -->
+<div id="case" role="dialog" aria-modal="true" aria-label="Case study" aria-hidden="true">
+  <iframe id="case-frame" title="Case study" src="about:blank"></iframe>
+</div>
+<script>
+  (function () {
+    var layer = document.getElementById('case');
+    var frame = document.getElementById('case-frame');
+    var lastY = 0;
+
+    function open(id) {
+      lastY = scrollY;
+      frame.src = 'case.html?id=' + id + '&embed=1';
+      document.documentElement.classList.add('case-open');
+      layer.classList.add('on');
+      layer.setAttribute('aria-hidden', 'false');
+    }
+    function close() {
+      layer.classList.remove('on');
+      layer.setAttribute('aria-hidden', 'true');
+      document.documentElement.classList.remove('case-open');
+      scrollTo({ top: lastY, behavior: 'instant' }); // land back where the card was
+      setTimeout(function () { if (!layer.classList.contains('on')) frame.src = 'about:blank'; }, 500);
+    }
+
+    document.querySelectorAll('.pcard .cta').forEach(function (a) {
+      a.addEventListener('click', function (e) {
+        var m = /id=([a-z]+)/.exec(a.getAttribute('href'));
+        if (!m) return;              // no id → let the link navigate normally
+        e.preventDefault();
+        open(m[1]);
+      });
+    });
+    addEventListener('message', function (e) { if (e.data === 'case:close') close(); });
+    addEventListener('keydown', function (e) { if (e.key === 'Escape' && layer.classList.contains('on')) close(); });
+
+    /* sky.html?case=porter deep-links straight into a study */
+    var deep = new URLSearchParams(location.search).get('case');
+    if (deep && document.querySelector('.pcard .cta[href*="' + deep + '"]')) open(deep);
+  })();
+</script>
 
 <!-- About: rendered over the held-still hero sky, closed with the × -->
 <div id="about" role="dialog" aria-modal="true" aria-label="About Ajeet" aria-hidden="true">
