@@ -115,8 +115,27 @@
   p:last-child { margin-bottom: 0; }
   p strong { font-weight: 600; color: var(--ink-dark); }
   .step { margin-top: clamp(44px, 6vw, 72px); }
-  .figure { margin-top: clamp(24px, 3vw, 36px); }
+  .figure { margin: clamp(24px, 3vw, 36px) 0 0; }
+
+  /* horizontal challenge — copy left, image right */
+  .ch-split {
+    display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
+    gap: clamp(28px, 4.5vw, 60px); align-items: stretch;
+  }
+  .ch-split .figure { margin-top: 0; display: flex; flex-direction: column; }
+  .ch-split .shot { flex: 1; aspect-ratio: auto; min-height: 380px; }
+  .wide-copy { max-width: 760px; }
   .figure figcaption { font-size: 13px; color: var(--ink-faint); margin-top: 12px; text-align: center; }
+
+  /* how-might-we cards */
+  .hmw { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(12px, 1.6vw, 20px); margin-top: clamp(28px, 3.4vw, 40px); }
+  .hmw-card {
+    background: #fff; border: 1px solid var(--rule); border-radius: 20px;
+    padding: clamp(22px, 2.6vw, 30px);
+  }
+  .hmw-card .n { font-size: 12px; font-weight: 700; letter-spacing: 0.18em; color: var(--accent); }
+  .hmw-card h3 { font-size: clamp(16px, 1.7vw, 19px); line-height: 1.4; margin: 12px 0 10px; }
+  .hmw-card p { font-size: 14px; line-height: 1.65; margin: 0; }
 
   /* three friction callouts */
   .callouts { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(12px, 1.6vw, 20px); margin-top: clamp(24px, 3vw, 34px); }
@@ -174,10 +193,64 @@
   .rv { opacity: 0; transform: translateY(28px); transition: opacity .8s cubic-bezier(.2,.7,.2,1), transform .8s cubic-bezier(.2,.7,.2,1); }
   .rv.in { opacity: 1; transform: none; }
 
+  /* ── password gate ─────────────────────────────────────────────────────── */
+  #gate { position: fixed; inset: 0; z-index: 15; display: grid; place-items: center; background: var(--page); padding: 20px; }
+  #gate[hidden] { display: none; }
+  .gate-card {
+    width: min(92vw, 420px); background: #fff; border: 1px solid var(--rule); border-radius: 26px;
+    padding: clamp(30px, 5vw, 44px); text-align: center;
+    box-shadow: 0 30px 70px -40px rgba(15, 30, 50, 0.45);
+  }
+  .gate-card .lock {
+    width: 54px; height: 54px; margin: 0 auto 20px; border-radius: 16px;
+    display: grid; place-items: center; background: var(--ink-dark); color: #fff;
+  }
+  .gate-card .lock svg { width: 22px; height: 22px; }
+  .gate-card h1 { font-size: clamp(20px, 2.4vw, 24px); font-weight: 800; letter-spacing: -0.03em; margin: 0 0 10px; }
+  .gate-card > p { font-size: 14px; line-height: 1.65; margin: 0 0 24px; }
+  .gate-row { display: flex; gap: 10px; }
+  .gate-row input {
+    flex: 1; min-width: 0; font: 600 15px var(--font); color: var(--ink-dark);
+    padding: 13px 16px; border: 1px solid var(--rule); border-radius: 14px;
+    background: var(--page); outline: none; transition: border-color .25s ease;
+  }
+  .gate-row input:focus { border-color: var(--accent); }
+  .gate-row button {
+    flex: none; width: 48px; height: 48px; border: 0; border-radius: 14px;
+    background: var(--ink-dark); color: #fff; cursor: pointer; display: grid; place-items: center;
+    transition: background .25s ease;
+  }
+  .gate-row button:hover { background: var(--accent); }
+  .gate-row button svg { width: 18px; height: 18px; }
+  /* meme security check — EXPERIMENT: delete this block (and the .gate-meme div) to revert */
+  .gate-card .lock { display: none; }
+  .gate-meme {
+    position: relative; border-radius: 18px; margin: 0 0 22px;
+    overflow: hidden; user-select: none;
+  }
+  .gate-meme img { display: block; width: 100%; }
+  .gate-meme .mt {
+    position: absolute; left: 10px; right: 10px;
+    font-family: Impact, 'Arial Black', 'Helvetica Neue', sans-serif;
+    font-size: 23px; font-weight: 400; letter-spacing: 0.03em; text-transform: uppercase;
+    color: #fff; -webkit-text-stroke: 1.2px #000;
+    text-shadow: 2px 2px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000;
+  }
+  .gate-meme .mt.top { top: 12px; }
+  .gate-meme .mt.bot { bottom: 12px; }
+  /* end meme experiment */
+
+  .gate-err { font-size: 13px; font-weight: 600; color: #d43f3f; margin: 14px 0 0; min-height: 1.2em; visibility: hidden; }
+  .gate-card.no .gate-err { visibility: visible; }
+  .gate-card.no { animation: gate-shake .35s ease; }
+  @keyframes gate-shake { 0%, 100% { transform: none; } 25% { transform: translateX(-8px); } 75% { transform: translateX(8px); } }
+
   @media (max-width: 860px) {
     .cs-meta { grid-template-columns: repeat(2, 1fr); row-gap: 26px; }
-    .callouts, .outcomes { grid-template-columns: 1fr; }
+    .callouts, .outcomes, .hmw { grid-template-columns: 1fr; }
     .flow { grid-template-columns: repeat(2, 1fr); row-gap: 20px; }
+    .ch-split { grid-template-columns: 1fr; }
+    .ch-split .shot { min-height: 0; aspect-ratio: 4 / 3; }
     h2 { max-width: none; }
   }
   @media (prefers-reduced-motion: reduce) {
@@ -189,7 +262,7 @@
 <body>
 
 <header class="cs-bar" id="cs-bar">
-  <div class="who">
+  <div class="who" style="visibility:hidden">
     <span class="mark" id="bar-mark"></span>
     <span id="bar-org"></span>
     <span class="sep">·</span>
@@ -204,6 +277,31 @@
 
 <main id="cs"></main>
 
+<div id="gate" hidden>
+  <form class="gate-card" id="gate-form">
+    <span class="lock" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="4" y="11" width="16" height="10" rx="2.5"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>
+      </svg>
+    </span>
+    <!-- meme security check — EXPERIMENT: delete this div (and its CSS block) to revert -->
+    <div class="gate-meme" aria-hidden="true">
+      <img src="images/prison-mike.png" alt="">
+      <span class="mt top">You shall not pass</span>
+      <span class="mt bot">without the password</span>
+    </div>
+    <h1>Security check</h1>
+    <p>Enter the password to read the case studies. Don&rsquo;t have it? <a href="mailto:ajeet.kr646@gmail.com">Reach out</a> and I&rsquo;ll share it.</p>
+    <div class="gate-row">
+      <input type="password" name="password" placeholder="Password" autocomplete="off" aria-label="Password" required>
+      <button type="submit" aria-label="Unlock">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M12 5l7 7-7 7"/></svg>
+      </button>
+    </div>
+    <p class="gate-err">That&rsquo;s not it &mdash; check the password and try again.</p>
+  </form>
+</div>
+
 <script>
 /* embedded in index.html's full-screen layer? then close = tell the parent */
 var EMBED = new URLSearchParams(location.search).get('embed') === '1';
@@ -213,154 +311,74 @@ var EMBED = new URLSearchParams(location.search).get('embed') === '1';
    hero → meta → challenge → approach (sub-beats) → breakthrough → results
    (pull quote, flow, outcome cards) → next project.
 
-   COPY AND IMAGES ARE PLACEHOLDERS — the narrative beats are scaffolded from
-   what the site already says about each project. Replace `shots` with <img>
-   and rewrite the prose with the real story, metrics and screens.
+   CONTENT IS NOT IN THIS FILE. It ships encrypted in cases.enc.json and the
+   password is the decryption key (PBKDF2 → AES-GCM via Web Crypto). Edit copy
+   in cases.src.mjs, then rebuild:  node encrypt-cases.mjs <password>
    ───────────────────────────────────────────────────────────────────────────── */
-var CASES = {
-  porter: {
-    org: 'Porter', mark: 'P', markBg: '#2f6bff', grad: 'g1',
-    proj: 'Rewards program',
-    title: 'Improving conversion of a rewards program',
-    sub: 'Rebuilding the rewards journey for driver-partners — clearer earning states, faster redemption, and a measurable lift in conversion.',
-    meta: [['Role', 'Senior Product Designer'], ['Timeline', '2024 · 4 months'], ['Team', 'PM, 3 engineers, analyst'], ['Platform', 'Android · Driver app']],
-    challenge: {
-      h: 'Drivers were earning rewards they never redeemed',
-      p: [
-        'Porter\'s rewards program was built to keep driver-partners engaged — but the earning states were buried, the redemption flow took too many taps, and most drivers never saw the value they had accrued.',
-        'The result was a program that cost money to run and moved none of the numbers it was meant to move. <strong>Redemption sat far below target</strong>, and support tickets asking "where are my points?" kept climbing.'
-      ],
-      shot: ['Before / after — the rewards home', 'tall']
-    },
-    approach: [
-      { h: 'Listening to drivers first', p: 'Rode along with driver-partners and sat in on support calls. The mental model was simple — they wanted to know two things: what have I earned, and what can I get right now.', shot: ['Field research — driver interviews', ''] },
-      { h: 'The friction was worse than we thought', callouts: [['6 taps', 'to reach a redemption from the home screen'], ['0 clarity', 'on how close a driver was to the next tier'], ['3 places', 'where the same balance was shown differently']] },
-      { h: 'Three concepts, one bet', p: 'We explored a tiered dashboard, a card-based wallet, and a single always-visible earning strip. Testing pointed hard at the strip — drivers glance, they do not browse.', shot: ['Concept explorations', ''] }
-    ],
-    breakthrough: {
-      h: 'Make the reward the first thing they see',
-      p: 'Instead of a section drivers had to navigate to, the balance and the next unlock moved into the home surface — always visible, always one tap from redemption. Redemption itself collapsed from six steps to two.',
-      shot: ['The redesigned earning strip', 'tall']
-    },
-    quote: ['Drivers finally know what they\'ve earned — without asking us.', 'Driver Operations Lead'],
-    flow: [['Earn', 'Every trip updates the strip'], ['See', 'Progress to the next unlock'], ['Redeem', 'Two taps, no menu'], ['Confirm', 'Instant, with receipt']],
-    outcomes: [
-      { stat: '+34%', h: 'Redemption rate', p: 'More of the rewards budget reached the drivers it was meant for.' },
-      { stat: '2 taps', h: 'Down from six', p: 'The redemption path collapsed into the home surface.' },
-      { stat: '−41%', h: 'Support tickets', p: '"Where are my points?" stopped being a top-five contact driver.' }
-    ],
-    next: 'juspay'
-  },
+var KEY_STORE = 'cases-key-v1';
 
-  juspay: {
-    org: 'Juspay · Hyperswitch', mark: 'J', markBg: '#111827', grad: 'g2',
-    proj: 'Volume-based routing',
-    title: 'Volume-based payment routing, without touching code',
-    sub: 'A visual way to split payment traffic across processors — percentages, priorities and fallbacks, configured by the people who own the business rules.',
-    meta: [['Role', 'Product Designer'], ['Timeline', '2022 · 5 months'], ['Team', 'PM, 4 engineers'], ['Platform', 'Web · Merchant dashboard']],
-    challenge: {
-      h: 'Routing rules lived in code, and only engineers could change them',
-      p: [
-        'Merchants on Hyperswitch route payments across many processors — Stripe here, Adyen there — to balance cost, success rate and risk. But every change to that split meant a ticket, an engineer, and a deploy.',
-        'Payments teams were making <strong>business decisions on engineering timelines</strong>. When a processor degraded at 2am, nobody could shift traffic away from it.'
-      ],
-      shot: ['Before — routing config as code', 'tall']
-    },
-    approach: [
-      { h: 'Mapping how teams actually think about traffic', p: 'Payments ops don\'t think in JSON. They think in "send a quarter of this to Adyen, the rest to Stripe, and if Stripe fails, fall back." The interface had to speak that language.', shot: ['Rule-modelling workshop', ''] },
-      { h: 'What made it hard', callouts: [['4 concepts', 'of routing collapsed into one screen'], ['100%', 'of splits must always add up — visibly'], ['1 mistake', 'in a rule can drop live revenue']] },
-      { h: 'Percentages you can see', p: 'The core interaction became a distribution bar: drag to reallocate volume, and the numbers stay honest. Fallbacks hang off each connector as an explicit chain, not an implicit one.', shot: ['The volume distribution builder', ''] }
-    ],
-    breakthrough: {
-      h: 'A rule you can read out loud',
-      p: 'Every configuration renders back as a plain-language summary before it goes live — "40% Adyen, 60% Stripe, fall back to Authorize.net". If the sentence sounds wrong, the rule is wrong. That single affordance killed most of the fear of shipping a change.',
-      shot: ['Rule summary + confirmation', 'tall']
-    },
-    quote: ['We can move traffic in a minute, not a sprint.', 'Merchant payments lead'],
-    flow: [['Name', 'Describe the rule'], ['Split', 'Drag the volume'], ['Fallback', 'Chain the backups'], ['Ship', 'Read it, confirm it']],
-    outcomes: [
-      { stat: 'Minutes', h: 'Not sprints', p: 'Routing changes moved from an engineering ticket to a self-serve action.' },
-      { stat: '0 deploys', h: 'To change a split', p: 'Business rules left the codebase entirely.' },
-      { stat: 'Live', h: 'In Hyperswitch', p: 'Shipped as part of the open-source payments stack.' }
-    ],
-    next: 'vedantu'
-  },
+function b64d(s) { var b = atob(s), u = new Uint8Array(b.length); for (var i = 0; i < b.length; i++) u[i] = b.charCodeAt(i); return u; }
+function b64e(buf) { var u = new Uint8Array(buf), s = ''; for (var i = 0; i < u.length; i++) s += String.fromCharCode(u[i]); return btoa(s); }
 
-  vedantu: {
-    org: 'Vedantu', mark: 'V', markBg: '#111827', grad: 'g3',
-    proj: 'FinOps lender management',
-    title: 'An ops platform that scales with the funnel',
-    sub: 'Ranking lenders, distributing lead share and configuring education-loan flows — the internal tooling behind every financed enrolment.',
-    meta: [['Role', 'Product Designer'], ['Timeline', '2021 · 3 months'], ['Team', 'PM, 3 engineers, ops'], ['Platform', 'Web · Internal console']],
-    challenge: {
-      h: 'The team ran a lending marketplace out of a spreadsheet',
-      p: [
-        'Every financed enrolment depended on which lender got the lead. That allocation — who ranks where, who gets what share — was managed by hand, in a sheet, by one team.',
-        'It worked until it didn\'t. <strong>Lead share drifted, lenders were toggled on without limits</strong>, and nobody could see the funnel consequences until the month closed.'
-      ],
-      shot: ['Before — allocation by spreadsheet', 'tall']
-    },
-    approach: [
-      { h: 'Shadowing the ops team', p: 'Sat with the people doing the allocation. The rules were real and sophisticated — they were just invisible to everyone else and impossible to audit.', shot: ['Ops workflow mapping', ''] },
-      { h: 'What the tool had to guarantee', callouts: [['100/100', 'lead share must always balance'], ['Drag', 'to rank — the mental model already existed'], ['Every change', 'auditable, reversible, attributable']] },
-      { h: 'Ranking you can drag', p: 'Lenders became a ranked list you reorder directly, with share as an editable number that refuses to exceed the total. Available lenders sit below, one toggle from active.', shot: ['Lender ranking + lead share', ''] }
-    ],
-    breakthrough: {
-      h: 'Make the invisible rules visible',
-      p: 'The platform stopped being a form and became a picture of the funnel: who is active, who is getting what, and what happens to the split the moment you change one number.',
-      shot: ['The FinOps dashboard', 'tall']
-    },
-    quote: ['The rules finally live somewhere other than one person\'s head.', 'FinOps manager'],
-    flow: [['Rank', 'Drag lenders in order'], ['Share', 'Split the 100'], ['Activate', 'Toggle from the pool'], ['Audit', 'Every change tracked']],
-    outcomes: [
-      { stat: '1 console', h: 'Replaced the sheet', p: 'Allocation moved into a system with rules, limits and history.' },
-      { stat: 'Self-serve', h: 'For the ops team', p: 'No engineering involvement to onboard or re-rank a lender.' },
-      { stat: 'Auditable', h: 'By default', p: 'Every share change is attributable and reversible.' }
-    ],
-    next: 'convin'
-  },
+function decryptCases(meta, key) {
+  return crypto.subtle.decrypt({ name: 'AES-GCM', iv: b64d(meta.iv) }, key, b64d(meta.data))
+    .then(function (plain) { return JSON.parse(new TextDecoder().decode(plain)); });
+}
+function keyFromPassword(meta, pw) {
+  return crypto.subtle.importKey('raw', new TextEncoder().encode(pw), 'PBKDF2', false, ['deriveKey'])
+    .then(function (base) {
+      return crypto.subtle.deriveKey(
+        { name: 'PBKDF2', hash: 'SHA-256', salt: b64d(meta.salt), iterations: meta.iter },
+        base, { name: 'AES-GCM', length: 256 }, true, ['decrypt']);
+    });
+}
 
-  convin: {
-    org: 'Convin.ai', mark: 'C', markBg: '#111827', grad: 'g4',
-    proj: 'Conversation intelligence',
-    title: 'Reviewing every conversation, not just a sample',
-    sub: 'AI-assisted QA workflows that let support teams audit 100% of their calls — and act on what they find.',
-    meta: [['Role', 'Product Designer'], ['Timeline', '2020 · 4 months'], ['Team', 'PM, 4 engineers, ML'], ['Platform', 'Web · QA console']],
-    challenge: {
-      h: 'Quality teams could only listen to 2% of calls',
-      p: [
-        'Support QA is sampling by necessity — a human can only review so many calls. Which means coaching is based on a sliver of reality, and the worst conversations usually go unheard.',
-        'AI could score every call. But <strong>a score nobody trusts is worse than no score</strong> — the design problem was never the model, it was the evidence.'
-      ],
-      shot: ['Before — manual QA scorecards', 'tall']
-    },
-    approach: [
-      { h: 'Auditing the auditors', p: 'Watched QA analysts work. They didn\'t want a verdict — they wanted the moment in the call that justified the verdict, in one click.', shot: ['QA analyst sessions', ''] },
-      { h: 'Where trust broke', callouts: [['2%', 'of calls actually reviewed by a human'], ['0 evidence', 'behind an automated score'], ['1 bad flag', 'and the team stops believing the system']] },
-      { h: 'Score, but show your work', p: 'Every AI judgement links to the transcript moment that produced it. Analysts confirm or overturn in place — and each correction teaches the model.', shot: ['Evidence-linked scoring', ''] }
-    ],
-    breakthrough: {
-      h: 'The human stays the judge',
-      p: 'The AI proposes; the analyst disposes. Framing the machine as a first-pass reviewer rather than an authority is what made the team willing to let it touch all 100% of the calls.',
-      shot: ['The review console', 'tall']
-    },
-    quote: ['We stopped guessing which calls to listen to.', 'Head of Support Quality'],
-    flow: [['Ingest', 'Every call, transcribed'], ['Score', 'AI first pass'], ['Review', 'Evidence in one click'], ['Coach', 'Act on the pattern']],
-    outcomes: [
-      { stat: '100%', h: 'Call coverage', p: 'Every conversation reviewed, not a 2% sample.' },
-      { stat: 'In place', h: 'Corrections', p: 'Analysts overturn a score without leaving the call.' },
-      { stat: 'Trusted', h: 'Because it shows evidence', p: 'No judgement appears without the moment that caused it.' }
-    ],
-    next: 'porter'
-  }
-};
+var gate = document.getElementById('gate');
+var gateForm = document.getElementById('gate-form');
+
+fetch('cases.enc.json').then(function (r) { return r.json(); }).then(function (meta) {
+  var saved = sessionStorage.getItem(KEY_STORE);
+  var stored = saved
+    ? crypto.subtle.importKey('raw', b64d(saved), 'AES-GCM', false, ['decrypt'])
+        .then(function (key) { return decryptCases(meta, key); })
+    : Promise.reject();
+  stored.then(render, function () {
+    /* no key, or a stale one — ask for the password */
+    sessionStorage.removeItem(KEY_STORE);
+    gate.hidden = false;
+    var input = gateForm.querySelector('input');
+    input.focus();
+    gateForm.addEventListener('submit', function (e) {
+      e.preventDefault();
+      gateForm.classList.remove('no');
+      keyFromPassword(meta, input.value)
+        .then(function (key) {
+          /* AES-GCM authenticates — a wrong password fails here, nothing to compare */
+          return decryptCases(meta, key).then(function (cases) {
+            return crypto.subtle.exportKey('raw', key).then(function (raw) {
+              sessionStorage.setItem(KEY_STORE, b64e(raw));
+              gate.hidden = true;
+              render(cases);
+            });
+          });
+        })
+        .catch(function () {
+          input.select();
+          void gateForm.offsetWidth; /* restart the shake animation */
+          gateForm.classList.add('no');
+        });
+    });
+  });
+});
+
+function render(CASES) {
 
 var id = new URLSearchParams(location.search).get('id');
 if (!CASES[id]) id = 'porter';
 var c = CASES[id];
-var esc = function (s) { return s; };
 
 document.title = c.title + ' — Ajeet';
+document.querySelector('.cs-bar .who').style.visibility = '';
 var mark = document.getElementById('bar-mark');
 mark.textContent = c.mark; mark.style.background = c.markBg;
 document.getElementById('bar-org').textContent = c.org;
@@ -369,6 +387,10 @@ document.getElementById('bar-proj').textContent = c.proj;
 function shot(s, grad, extra) {
   return '<div class="shot ' + grad + ' ' + (s[1] || '') + ' ' + (extra || '') + '" data-n="' + s[0] + '"></div>';
 }
+
+/* sections number themselves — cases can skip any of them */
+var secNum = 0;
+function kick(label) { return '0' + (++secNum) + ' — ' + label; }
 
 var h = '';
 
@@ -382,18 +404,42 @@ h += '<section class="cs-hero"><div class="wrap">' +
   }).join('') + '</dl>' +
   '</div></section>';
 
-/* challenge */
-h += '<section><div class="narrow">' +
-  '<p class="kicker rv">01 — The challenge</p>' +
-  '<h2 class="rv">' + c.challenge.h + '</h2>' +
-  c.challenge.p.map(function (p) { return '<p class="rv">' + p + '</p>'; }).join('') +
-  '</div><div class="wrap"><figure class="figure rv">' + shot(c.challenge.shot, c.grad, 'bleed') +
-  '<figcaption>' + c.challenge.shot[0] + '</figcaption></figure></div></section>';
+/* challenge + problem share one renderer; split = copy left, image right */
+function textSection(sec, fallbackK) {
+  var head = '<p class="kicker rv">' + kick(sec.k || fallbackK) + '</p>';
+  var body = '<h2 class="rv">' + sec.h + '</h2>' +
+    sec.p.map(function (p) { return '<p class="rv">' + p + '</p>'; }).join('');
+  var fig = sec.shot
+    ? '<figure class="figure rv">' + shot(sec.shot, c.grad, 'bleed') +
+      '<figcaption>' + sec.shot[0] + '</figcaption></figure>'
+    : '';
+  if (sec.split) {
+    return '<section><div class="wrap">' + head +
+      '<div class="ch-split"><div>' + body + '</div>' + fig + '</div></div></section>';
+  }
+  if (sec.wide) {
+    /* left-aligned copy, image running the full content width below */
+    return '<section><div class="wrap">' + head +
+      '<div class="wide-copy">' + body + '</div>' + fig + '</div></section>';
+  }
+  return '<section><div class="narrow">' + head + body + '</div>' +
+    (fig ? '<div class="wrap">' + fig + '</div>' : '') + '</section>';
+}
 
-/* approach */
-h += '<section><div class="narrow"><p class="kicker rv">02 — The approach</p>' +
-  '<h2 class="rv">How we got there</h2></div>';
-c.approach.forEach(function (a) {
+h += textSection(c.challenge, 'The challenge');
+if (c.problem) h += textSection(c.problem, 'The challenge');
+
+/* approach — header aligns with the card row when one is present */
+h += '<section><div class="' + (c.approachCards ? 'wrap' : 'narrow') + '"><p class="kicker rv">' + kick('The approach') + '</p>' +
+  '<h2 class="rv">' + (c.approachH || 'How we got there') + '</h2>' +
+  (c.approachIntro ? '<p class="rv">' + c.approachIntro + '</p>' : '') + '</div>';
+if (c.approachCards) {
+  /* how-might-we questions as a horizontal card row */
+  h += '<div class="wrap"><div class="hmw rv">' + c.approachCards.map(function (card, i) {
+    return '<div class="hmw-card"><span class="n">0' + (i + 1) + '</span><h3>' + card[0] + '</h3><p>' + card[1] + '</p></div>';
+  }).join('') + '</div></div>';
+}
+(c.approach || []).forEach(function (a) {
   h += '<div class="step"><div class="narrow"><h3 class="rv">' + a.h + '</h3>' +
     (a.p ? '<p class="rv">' + a.p + '</p>' : '') + '</div>';
   if (a.callouts) {
@@ -409,27 +455,38 @@ c.approach.forEach(function (a) {
 });
 h += '</section>';
 
+/* solutions — one section per problem, any layout (split / wide / stacked) */
+(c.solutions || []).forEach(function (s) { h += textSection(s, 'The solution'); });
+
 /* breakthrough */
-h += '<section><div class="narrow">' +
-  '<p class="kicker rv">03 — The breakthrough</p>' +
-  '<h2 class="rv">' + c.breakthrough.h + '</h2>' +
-  '<p class="rv">' + c.breakthrough.p + '</p>' +
-  '</div><div class="wrap"><figure class="figure rv">' + shot(c.breakthrough.shot, c.grad, 'bleed') +
-  '<figcaption>' + c.breakthrough.shot[0] + '</figcaption></figure></div></section>';
+if (c.breakthrough) {
+  h += '<section><div class="narrow">' +
+    '<p class="kicker rv">' + kick('The breakthrough') + '</p>' +
+    '<h2 class="rv">' + c.breakthrough.h + '</h2>' +
+    '<p class="rv">' + c.breakthrough.p + '</p>' +
+    '</div><div class="wrap"><figure class="figure rv">' + shot(c.breakthrough.shot, c.grad, 'bleed') +
+    '<figcaption>' + c.breakthrough.shot[0] + '</figcaption></figure></div></section>';
+}
 
 /* quote */
-h += '<div class="quote"><div class="narrow rv"><blockquote>&ldquo;' + c.quote[0] + '&rdquo;</blockquote>' +
-  '<cite>' + c.quote[1] + '</cite></div></div>';
+if (c.quote) {
+  h += '<div class="quote"><div class="narrow rv"><blockquote>&ldquo;' + c.quote[0] + '&rdquo;</blockquote>' +
+    '<cite>' + c.quote[1] + '</cite></div></div>';
+}
 
 /* results: flow + outcomes */
-h += '<section><div class="narrow"><p class="kicker rv">04 — The results</p>' +
-  '<h2 class="rv">What shipped, and what it moved</h2></div>' +
-  '<div class="wrap"><div class="flow rv">' + c.flow.map(function (f, i) {
-    return '<div>' + shot([f[0], ''], c.grad) + '<p>' + (i + 1) + '. ' + f[0] + '<span>' + f[1] + '</span></p></div>';
-  }).join('') + '</div>' +
-  '<div class="outcomes rv">' + c.outcomes.map(function (o) {
-    return '<div class="outcome"><p class="stat">' + o.stat + '</p><h3>' + o.h + '</h3><p>' + o.p + '</p></div>';
-  }).join('') + '</div></div></section>';
+if (c.flow || c.outcomes) {
+  h += '<section><div class="narrow"><p class="kicker rv">' + kick('The results') + '</p>' +
+    '<h2 class="rv">What shipped, and what it moved</h2></div>' +
+    '<div class="wrap">' +
+    (c.flow ? '<div class="flow rv">' + c.flow.map(function (f, i) {
+      return '<div>' + shot([f[0], ''], c.grad) + '<p>' + (i + 1) + '. ' + f[0] + '<span>' + f[1] + '</span></p></div>';
+    }).join('') + '</div>' : '') +
+    (c.outcomes ? '<div class="outcomes rv">' + c.outcomes.map(function (o) {
+      return '<div class="outcome"><p class="stat">' + o.stat + '</p><h3>' + o.h + '</h3><p>' + o.p + '</p></div>';
+    }).join('') + '</div>' : '') +
+    '</div></section>';
+}
 
 /* next project */
 var n = CASES[c.next];
@@ -460,14 +517,19 @@ tick();
 setInterval(tick, 600);
 
 if (EMBED) {
-  /* the × and "back to all work" dismiss the parent layer — no page load */
-  function bubbleClose(e) { e.preventDefault(); parent.postMessage('case:close', '*'); }
-  document.querySelector('.cs-close').addEventListener('click', bubbleClose);
+  /* "back to all work" dismisses the parent layer; next-case stays in it */
   var home = document.querySelector('.cs-foot .home');
   if (home) home.addEventListener('click', bubbleClose);
-  /* keep next-case links inside the layer */
   var nx = document.querySelector('.next');
   if (nx) nx.setAttribute('href', nx.getAttribute('href') + '&embed=1');
+}
+
+}
+
+/* the × and Escape dismiss the parent layer — must work even while the gate is up */
+function bubbleClose(e) { e.preventDefault(); parent.postMessage('case:close', '*'); }
+if (EMBED) {
+  document.querySelector('.cs-close').addEventListener('click', bubbleClose);
   addEventListener('keydown', function (e) { if (e.key === 'Escape') parent.postMessage('case:close', '*'); });
 }
 </script>
