@@ -824,7 +824,8 @@
 
     function open(id) {
       lastY = scrollY;
-      frame.src = 'case.html?id=' + id + '&embed=1';
+      /* v= busts stale iframe caches — bump after case.html template changes */
+      frame.src = 'case.html?id=' + id + '&embed=1&v=9';
       document.documentElement.classList.add('case-open');
       layer.classList.add('on');
       layer.setAttribute('aria-hidden', 'false');

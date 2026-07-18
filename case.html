@@ -59,22 +59,22 @@
   .cs-close svg { width: 17px; height: 17px; }
 
   /* ── hero ──────────────────────────────────────────────────────────────── */
-  .cs-hero { padding: clamp(120px, 16vh, 180px) 0 clamp(40px, 6vh, 70px); text-align: center; }
+  .cs-hero { padding: clamp(100px, 13vh, 140px) 0 clamp(32px, 5vh, 54px); text-align: center; }
   .cs-hero .badge {
     display: inline-grid; place-items: center; width: 54px; height: 54px; border-radius: 16px;
     color: #fff; font-size: 24px; font-weight: 800; letter-spacing: -0.03em; margin-bottom: 26px;
     box-shadow: 0 14px 34px -14px rgba(15, 30, 50, 0.55);
   }
   .cs-hero h1 {
-    font-size: clamp(32px, 5vw, 62px); font-weight: 800; letter-spacing: -0.04em;
-    line-height: 1.08; margin: 0 auto 22px; max-width: 18ch;
+    font-size: clamp(30px, 4.4vw, 52px); font-weight: 800; letter-spacing: -0.04em;
+    line-height: 1.08; margin: 0 auto 18px; max-width: 18ch;
   }
-  .cs-hero .sub { font-size: clamp(15px, 1.6vw, 19px); line-height: 1.65; color: var(--ink-soft); margin: 0 auto; max-width: 60ch; }
+  .cs-hero .sub { font-size: clamp(14px, 1.5vw, 17px); line-height: 1.6; color: var(--ink-soft); margin: 0 auto; max-width: 62ch; }
 
   /* meta row — role / timeline / team / platform */
   .cs-meta {
     display: grid; grid-template-columns: repeat(4, 1fr); gap: clamp(16px, 3vw, 40px);
-    padding: clamp(26px, 3.4vw, 38px) 0; margin-top: clamp(30px, 4vw, 48px);
+    padding: clamp(20px, 2.6vw, 28px) 0; margin-top: clamp(24px, 3vw, 36px);
     border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule);
     text-align: left;
   }
@@ -100,22 +100,45 @@
   .g4 { background: linear-gradient(135deg, #e8d5ff, #b98cf5 55%, #8a6bf7); }
   .g5 { background: linear-gradient(135deg, #cfe0f2, #8fa9c6 55%, #5b7796); }
 
+  /* ── section nav: sticks under the top bar, underline marks the section ── */
+  .secnav {
+    position: sticky; z-index: 15; top: 0;
+    background: rgba(247, 249, 252, 0.88);
+    backdrop-filter: blur(14px) saturate(1.3);
+    -webkit-backdrop-filter: blur(14px) saturate(1.3);
+    padding-top: 16px;
+  }
+  .secnav .wrap { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: clamp(16px, 3vw, 40px); }
+  .secnav a {
+    display: block; min-width: 0; text-decoration: none; color: var(--ink-dark);
+    padding-bottom: 14px; border-bottom: 3px solid var(--rule);
+    transition: border-color .35s ease;
+  }
+  .secnav a b { display: block; font-size: 14px; font-weight: 700; letter-spacing: -0.01em; }
+  .secnav a span {
+    display: block; margin-top: 3px; font-size: 13px; color: var(--ink-soft);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .secnav a:hover { border-bottom-color: var(--ink-faint); }
+  .secnav a.on { border-bottom-color: var(--ink-dark); }
+  #cs section { scroll-margin-top: 160px; }
+
   /* ── sections ──────────────────────────────────────────────────────────── */
-  section { padding: clamp(56px, 9vh, 110px) 0; }
+  section { padding: clamp(40px, 6vh, 68px) 0; }
   .kicker {
-    font-size: 12px; font-weight: 700; letter-spacing: 0.22em; text-transform: uppercase;
-    color: var(--accent); margin: 0 0 18px;
+    font-size: 11px; font-weight: 700; letter-spacing: 0.22em; text-transform: uppercase;
+    color: var(--accent); margin: 0 0 14px;
   }
   h2 {
-    font-size: clamp(26px, 3.4vw, 42px); font-weight: 800; letter-spacing: -0.035em;
-    line-height: 1.16; margin: 0 0 24px; max-width: 20ch;
+    font-size: clamp(24px, 3vw, 34px); font-weight: 800; letter-spacing: -0.035em;
+    line-height: 1.16; margin: 0 0 18px; max-width: 24ch;
   }
-  h3 { font-size: clamp(19px, 2vw, 24px); font-weight: 700; letter-spacing: -0.025em; margin: 0 0 12px; }
-  p { font-size: clamp(15px, 1.5vw, 17px); line-height: 1.75; color: var(--ink-soft); margin: 0 0 18px; }
+  h3 { font-size: clamp(18px, 1.9vw, 22px); font-weight: 700; letter-spacing: -0.025em; margin: 0 0 10px; }
+  p { font-size: clamp(14px, 1.45vw, 16px); line-height: 1.7; color: var(--ink-soft); margin: 0 0 16px; }
   p:last-child { margin-bottom: 0; }
   p strong { font-weight: 600; color: var(--ink-dark); }
-  .step { margin-top: clamp(44px, 6vw, 72px); }
-  .figure { margin: clamp(24px, 3vw, 36px) 0 0; }
+  .step { margin-top: clamp(36px, 5vw, 56px); }
+  .figure { margin: clamp(18px, 2.4vw, 28px) 0 0; }
 
   /* horizontal challenge — copy left, image right */
   .ch-split {
@@ -123,19 +146,66 @@
     gap: clamp(28px, 4.5vw, 60px); align-items: stretch;
   }
   .ch-split .figure { margin-top: 0; display: flex; flex-direction: column; }
-  .ch-split .shot { flex: 1; aspect-ratio: auto; min-height: 380px; }
+  .ch-split .shot { flex: 1; aspect-ratio: auto; min-height: 320px; }
   .wide-copy { max-width: 760px; }
   .figure figcaption { font-size: 13px; color: var(--ink-faint); margin-top: 12px; text-align: center; }
 
   /* how-might-we cards */
-  .hmw { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(12px, 1.6vw, 20px); margin-top: clamp(28px, 3.4vw, 40px); }
+  .hmw { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(12px, 1.6vw, 18px); margin-top: clamp(22px, 2.8vw, 32px); }
   .hmw-card {
-    background: #fff; border: 1px solid var(--rule); border-radius: 20px;
-    padding: clamp(22px, 2.6vw, 30px);
+    background: #fff; border: 1px solid var(--rule); border-radius: 18px;
+    padding: clamp(18px, 2.2vw, 24px);
   }
-  .hmw-card .n { font-size: 12px; font-weight: 700; letter-spacing: 0.18em; color: var(--accent); }
-  .hmw-card h3 { font-size: clamp(16px, 1.7vw, 19px); line-height: 1.4; margin: 12px 0 10px; }
-  .hmw-card p { font-size: 14px; line-height: 1.65; margin: 0; }
+  .hmw-card .n { font-size: 11px; font-weight: 700; letter-spacing: 0.18em; color: var(--accent); }
+  .hmw-card h3 { font-size: clamp(15px, 1.6vw, 17px); line-height: 1.4; margin: 10px 0 8px; }
+  .hmw-card p { font-size: 13px; line-height: 1.6; margin: 0; }
+  .ap-outro { max-width: 720px; margin-top: clamp(22px, 2.8vw, 32px); }
+  .ap-outro p { font-size: 14px; font-weight: 400; line-height: 1.7; }
+
+  /* problem walkthroughs inside the approach */
+  .prob { margin-top: clamp(44px, 5.5vw, 68px); }
+  .prob-h {
+    font-size: clamp(20px, 2.4vw, 27px); font-weight: 800; letter-spacing: -0.03em;
+    margin: 0 0 16px;
+  }
+  .prob-h span { color: var(--accent); margin-right: 12px; }
+
+  /* ── solution blocks: copy, image rows, insight + result callouts ───────── */
+  .wide-copy p { max-width: 720px; }
+  .shot-row { display: grid; gap: clamp(12px, 1.6vw, 18px); margin-bottom: clamp(22px, 2.8vw, 32px); }
+  .shot-row.n2 { grid-template-columns: repeat(2, 1fr); }
+  .shot-row.n3 { grid-template-columns: repeat(3, 1fr); }
+  .shot-row.n1 .shot { aspect-ratio: 2 / 1; }
+  .shot-row.n2 .shot { aspect-ratio: 3 / 2; }
+  .insight {
+    max-width: 720px; margin: clamp(20px, 2.6vw, 28px) 0;
+    border-left: 3px solid var(--accent); background: #fff;
+    border-radius: 0 16px 16px 0;
+    padding: clamp(16px, 2vw, 22px) clamp(18px, 2.4vw, 26px);
+    font-size: clamp(15px, 1.7vw, 18px); line-height: 1.55; color: var(--ink-soft);
+    box-shadow: 0 18px 40px -30px rgba(15, 30, 50, 0.35);
+  }
+  .insight strong { color: var(--ink-dark); font-weight: 700; }
+  .bq {
+    max-width: 700px; margin: clamp(18px, 2.4vw, 26px) 0;
+    padding: 2px 0 2px 20px; border-left: 3px solid var(--rule);
+    font-style: italic; color: var(--ink-soft);
+    font-size: clamp(15px, 1.6vw, 17px); line-height: 1.65;
+  }
+  .bq cite { display: block; margin-top: 8px; font-style: normal; font-size: 12px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-faint); }
+  .blist { max-width: 720px; margin: 0 0 16px; padding-left: 22px; color: var(--ink-soft); font-size: clamp(14px, 1.45vw, 16px); line-height: 1.7; }
+  .blist li { margin-bottom: 6px; }
+  .blist li::marker { color: var(--accent); }
+  .result-card {
+    max-width: 720px; margin-top: clamp(22px, 2.8vw, 32px);
+    background: var(--ink-dark); color: #fff; border-radius: 18px;
+    padding: clamp(18px, 2.4vw, 26px);
+  }
+  .result-card .rk { font-size: 11px; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: rgba(255, 255, 255, 0.6); }
+  .result-card p { margin: 8px 0 0; color: rgba(255, 255, 255, 0.85); font-size: clamp(14px, 1.45vw, 16px); }
+  .result-card strong { color: #fff; font-weight: 700; }
+  .result-card .rrow { display: flex; flex-wrap: wrap; gap: 10px clamp(20px, 3.4vw, 48px); margin-top: 10px; }
+  .result-card .rrow span { font-size: clamp(14px, 1.5vw, 16px); font-weight: 700; color: #fff; white-space: nowrap; }
 
   /* three friction callouts */
   .callouts { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(12px, 1.6vw, 20px); margin-top: clamp(24px, 3vw, 34px); }
@@ -172,7 +242,7 @@
   .outcome p { font-size: 14px; line-height: 1.6; margin: 0; }
 
   /* ── footer: next project + back ────────────────────────────────────────── */
-  .cs-foot { border-top: 1px solid var(--rule); padding: clamp(50px, 8vh, 90px) 0 clamp(40px, 6vh, 70px); }
+  .cs-foot { border-top: 1px solid var(--rule); padding: clamp(28px, 4vh, 44px) 0; }
   .cs-foot .lead { font-size: 12px; font-weight: 700; letter-spacing: 0.22em; text-transform: uppercase; color: var(--ink-faint); margin: 0 0 14px; }
   .next {
     display: flex; align-items: center; justify-content: space-between; gap: 20px;
@@ -186,7 +256,7 @@
   .next .o { font-size: 13px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-faint); margin-bottom: 6px; }
   .next svg { width: 22px; height: 22px; flex: none; transition: transform .35s cubic-bezier(.2,.9,.25,1); }
   .next:hover svg { transform: translateX(4px); }
-  .cs-foot .home { display: block; margin-top: 28px; text-align: center; font-size: 13px; font-weight: 600; color: var(--ink-faint); text-decoration: none; }
+  .cs-foot .home { display: block; text-align: center; font-size: 13px; font-weight: 600; color: var(--ink-faint); text-decoration: none; }
   .cs-foot .home:hover { color: var(--ink-dark); }
 
   /* reveals */
@@ -248,6 +318,9 @@
   @media (max-width: 860px) {
     .cs-meta { grid-template-columns: repeat(2, 1fr); row-gap: 26px; }
     .callouts, .outcomes, .hmw { grid-template-columns: 1fr; }
+    .secnav a span { display: none; }
+    .secnav a { padding-bottom: 10px; }
+    .shot-row.n2, .shot-row.n3 { grid-template-columns: 1fr; }
     .flow { grid-template-columns: repeat(2, 1fr); row-gap: 20px; }
     .ch-split { grid-template-columns: 1fr; }
     .ch-split .shot { min-height: 0; aspect-ratio: 4 / 3; }
@@ -336,7 +409,7 @@ function keyFromPassword(meta, pw) {
 var gate = document.getElementById('gate');
 var gateForm = document.getElementById('gate-form');
 
-fetch('cases.enc.json').then(function (r) { return r.json(); }).then(function (meta) {
+fetch('cases.enc.json', { cache: 'no-store' }).then(function (r) { return r.json(); }).then(function (meta) {
   var saved = sessionStorage.getItem(KEY_STORE);
   var stored = saved
     ? crypto.subtle.importKey('raw', b64d(saved), 'AES-GCM', false, ['decrypt'])
@@ -407,6 +480,9 @@ h += '<section class="cs-hero"><div class="wrap">' +
 /* challenge + problem share one renderer; split = copy left, image right */
 function textSection(sec, fallbackK) {
   var head = '<p class="kicker rv">' + kick(sec.k || fallbackK) + '</p>';
+  if (sec.blocks) {
+    return '<section><div class="wrap">' + head + '<h2 class="rv">' + sec.h + '</h2>' + blocksHtml(sec.blocks) + '</div></section>';
+  }
   var body = '<h2 class="rv">' + sec.h + '</h2>' +
     sec.p.map(function (p) { return '<p class="rv">' + p + '</p>'; }).join('');
   var fig = sec.shot
@@ -426,6 +502,28 @@ function textSection(sec, fallbackK) {
     (fig ? '<div class="wrap">' + fig + '</div>' : '') + '</section>';
 }
 
+/* content blocks: paragraphs, image rows, insight + result callouts */
+function blocksHtml(blocks) {
+  var bh = '';
+  blocks.forEach(function (b) {
+    if (b.p) bh += '<div class="wide-copy"><p class="rv">' + b.p + '</p></div>';
+    else if (b.quote) bh += '<blockquote class="bq rv">&ldquo;' + b.quote + '&rdquo;' +
+      (b.cite ? '<cite>' + b.cite + '</cite>' : '') + '</blockquote>';
+    else if (b.list) bh += '<ul class="blist rv">' + b.list.map(function (li) { return '<li>' + li + '</li>'; }).join('') + '</ul>';
+    else if (b.insight) bh += '<aside class="insight rv">' + b.insight + '</aside>';
+    else if (b.shots) bh += '<div class="shot-row n' + b.shots.length + '">' + b.shots.map(function (s) {
+      return '<figure class="figure rv">' + shot(s, c.grad, 'bleed') + '<figcaption>' + s[0] + '</figcaption></figure>';
+    }).join('') + '</div>';
+    else if (b.result) {
+      bh += '<div class="result-card rv"><span class="rk">Result</span>' +
+        (Array.isArray(b.result)
+          ? '<div class="rrow">' + b.result.map(function (r) { return '<span>' + r + '</span>'; }).join('') + '</div>'
+          : '<p>' + b.result + '</p>') + '</div>';
+    }
+  });
+  return bh;
+}
+
 h += textSection(c.challenge, 'The challenge');
 if (c.problem) h += textSection(c.problem, 'The challenge');
 
@@ -439,6 +537,17 @@ if (c.approachCards) {
     return '<div class="hmw-card"><span class="n">0' + (i + 1) + '</span><h3>' + card[0] + '</h3><p>' + card[1] + '</p></div>';
   }).join('') + '</div></div>';
 }
+if (c.approachOutro) {
+  h += '<div class="wrap"><div class="ap-outro">' + [].concat(c.approachOutro).map(function (p) {
+    return '<p class="rv">' + p + '</p>';
+  }).join('') + '</div></div>';
+}
+/* problem walkthroughs — the approach, one problem at a time */
+(c.problems || []).forEach(function (pr, i) {
+  h += '<div class="wrap prob">' +
+    '<h3 class="prob-h rv"><span>0' + (i + 1) + '</span>' + pr.h + '</h3>' +
+    blocksHtml(pr.blocks) + '</div>';
+});
 (c.approach || []).forEach(function (a) {
   h += '<div class="step"><div class="narrow"><h3 class="rv">' + a.h + '</h3>' +
     (a.p ? '<p class="rv">' + a.p + '</p>' : '') + '</div>';
@@ -488,18 +597,37 @@ if (c.flow || c.outcomes) {
     '</div></section>';
 }
 
-/* next project */
-var n = CASES[c.next];
+/* footer — just the way back, no next-project card */
 h += '<footer class="cs-foot"><div class="wrap">' +
-  '<p class="lead rv">Next case study</p>' +
-  '<a class="next rv" href="case.html?id=' + c.next + '">' +
-  '<span><span class="o">' + n.org + '</span><br><span class="t">' + n.title + '</span></span>' +
-  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M12 5l7 7-7 7"/></svg>' +
-  '</a>' +
   '<a class="home" href="index.html#s-work">← Back to all work</a>' +
   '</div></footer>';
 
 document.getElementById('cs').innerHTML = h;
+
+/* section nav — built from the rendered kickers, sticks under the top bar */
+var navSecs = [].slice.call(document.querySelectorAll('#cs section')).filter(function (s) { return s.querySelector('.kicker'); });
+if (navSecs.length > 1) {
+  var secnav = document.createElement('nav');
+  secnav.className = 'secnav';
+  secnav.setAttribute('aria-label', 'Case study sections');
+  secnav.innerHTML = '<div class="wrap">' + navSecs.map(function (s, i) {
+    s.id = 'sec' + (i + 1);
+    var label = s.querySelector('.kicker').textContent.replace(/^\d+\s*—\s*/, '');
+    var sub = s.querySelector('h2') ? s.querySelector('h2').textContent : '';
+    return '<a href="#sec' + (i + 1) + '"><b>' + label + '</b><span>' + sub + '</span></a>';
+  }).join('') + '</div>';
+  document.getElementById('cs').insertBefore(secnav, navSecs[0]);
+  secnav.style.top = document.getElementById('cs-bar').offsetHeight + 'px';
+  var navLinks = [].slice.call(secnav.querySelectorAll('a'));
+  var navTick = function () {
+    var edge = secnav.getBoundingClientRect().bottom + 80;
+    var cur = 0;
+    navSecs.forEach(function (s, i) { if (s.getBoundingClientRect().top <= edge) cur = i; });
+    navLinks.forEach(function (a, i) { a.classList.toggle('on', i === cur); });
+  };
+  addEventListener('scroll', navTick, { passive: true });
+  navTick();
+}
 
 /* reveals + sticky bar border (rect-based, same pattern as the rest of the site) */
 var rv = [].slice.call(document.querySelectorAll('.rv'));
