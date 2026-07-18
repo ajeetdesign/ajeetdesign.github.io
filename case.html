@@ -42,6 +42,7 @@
     transition: border-color .3s ease;
   }
   .cs-bar.stuck { border-bottom-color: var(--rule); }
+  .cs-bar .progress { position: absolute; left: 0; bottom: -1px; height: 2px; width: 0; background: var(--accent); }
   .cs-bar .who { display: flex; align-items: center; gap: 12px; font-size: 14px; font-weight: 600; }
   .cs-bar .who .mark {
     width: 30px; height: 30px; border-radius: 9px; display: grid; place-items: center;
@@ -58,28 +59,34 @@
   .cs-close:hover { background: var(--ink-dark); color: #fff; transform: rotate(90deg); }
   .cs-close svg { width: 17px; height: 17px; }
 
-  /* ── hero ──────────────────────────────────────────────────────────────── */
-  .cs-hero { padding: clamp(100px, 13vh, 140px) 0 clamp(32px, 5vh, 54px); text-align: center; }
-  .cs-hero .badge {
-    display: inline-grid; place-items: center; width: 54px; height: 54px; border-radius: 16px;
-    color: #fff; font-size: 24px; font-weight: 800; letter-spacing: -0.03em; margin-bottom: 26px;
-    box-shadow: 0 14px 34px -14px rgba(15, 30, 50, 0.55);
-  }
+  /* ── hero: eyebrow → title → intro | meta rail → feature banner ────────── */
+  .cs-hero { padding: clamp(96px, 12vh, 132px) 0 clamp(36px, 5.5vh, 56px); }
   .cs-hero h1 {
-    font-size: clamp(30px, 4.4vw, 52px); font-weight: 800; letter-spacing: -0.04em;
-    line-height: 1.08; margin: 0 auto 18px; max-width: 18ch;
+    font-size: clamp(30px, 4vw, 50px); font-weight: 800; letter-spacing: -0.035em;
+    line-height: 1.1; margin: 0 0 clamp(20px, 2.6vw, 30px); max-width: 21ch;
   }
-  .cs-hero .sub { font-size: clamp(14px, 1.5vw, 17px); line-height: 1.6; color: var(--ink-soft); margin: 0 auto; max-width: 62ch; }
+  .cs-hero .sub { font-size: clamp(14px, 1.5vw, 17px); line-height: 1.7; color: var(--ink-soft); margin: 0; max-width: 58ch; }
+  .hero-banner {
+    margin: clamp(36px, 5.5vw, 64px) 0 0;
+    overflow: hidden; border-radius: 24px;
+    box-shadow: 0 40px 90px -50px rgba(15, 30, 50, 0.5);
+  }
+  .hero-banner .shot {
+    border: 0; border-radius: 0; box-shadow: none;
+    aspect-ratio: auto; height: clamp(420px, 58vh, 620px);
+    will-change: transform;
+  }
 
-  /* meta row — role / timeline / team / platform */
-  .cs-meta {
-    display: grid; grid-template-columns: repeat(4, 1fr); gap: clamp(16px, 3vw, 40px);
-    padding: clamp(20px, 2.6vw, 28px) 0; margin-top: clamp(24px, 3vw, 36px);
-    border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule);
-    text-align: left;
+  /* hero grid: intro left, meta rail right */
+  .hero-grid {
+    display: grid; grid-template-columns: minmax(0, 1fr) clamp(200px, 22vw, 250px);
+    gap: clamp(36px, 6vw, 110px); align-items: start;
   }
-  .cs-meta dt { font-size: 11px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink-faint); margin: 0 0 8px; }
-  .cs-meta dd { margin: 0; font-size: clamp(14px, 1.4vw, 16px); font-weight: 600; line-height: 1.5; }
+  .cs-meta { margin: 0; }
+  .cs-meta > div { padding: 11px 0; border-top: 1px solid var(--rule); }
+  .cs-meta > div:first-child { border-top: 0; padding-top: 0; }
+  .cs-meta dt { font-size: 10px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink-faint); margin: 0 0 5px; }
+  .cs-meta dd { margin: 0; font-size: 13px; font-weight: 600; line-height: 1.5; }
 
   /* ── image placeholders — swap each .shot for <img class="shot" src="…"> ─ */
   .shot {
@@ -124,7 +131,7 @@
   #cs section { scroll-margin-top: 160px; }
 
   /* ── sections ──────────────────────────────────────────────────────────── */
-  section { padding: clamp(40px, 6vh, 68px) 0; }
+  section { padding: clamp(60px, 9vh, 104px) 0; }
   .kicker {
     font-size: 11px; font-weight: 700; letter-spacing: 0.22em; text-transform: uppercase;
     color: var(--accent); margin: 0 0 14px;
@@ -149,13 +156,17 @@
   .ch-split .shot { flex: 1; aspect-ratio: auto; min-height: 320px; }
   .wide-copy { max-width: 760px; }
   .figure figcaption { font-size: 13px; color: var(--ink-faint); margin-top: 12px; text-align: center; }
+  .figure .shot { transition: transform .6s cubic-bezier(.2,.7,.2,1), box-shadow .6s ease; }
+  .figure:hover .shot { transform: scale(1.015) translateY(-2px); box-shadow: 0 36px 80px -42px rgba(15, 30, 50, 0.55); }
 
   /* how-might-we cards */
   .hmw { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(12px, 1.6vw, 18px); margin-top: clamp(22px, 2.8vw, 32px); }
   .hmw-card {
     background: #fff; border: 1px solid var(--rule); border-radius: 18px;
     padding: clamp(18px, 2.2vw, 24px);
+    transition: transform .4s cubic-bezier(.2,.9,.25,1), box-shadow .4s ease;
   }
+  .hmw-card:hover { transform: translateY(-4px); box-shadow: 0 24px 50px -30px rgba(15, 30, 50, 0.5); }
   .hmw-card .n { font-size: 11px; font-weight: 700; letter-spacing: 0.18em; color: var(--accent); }
   .hmw-card h3 { font-size: clamp(15px, 1.6vw, 17px); line-height: 1.4; margin: 10px 0 8px; }
   .hmw-card p { font-size: 13px; line-height: 1.6; margin: 0; }
@@ -163,12 +174,15 @@
   .ap-outro p { font-size: 14px; font-weight: 400; line-height: 1.7; }
 
   /* problem walkthroughs inside the approach */
-  .prob { margin-top: clamp(44px, 5.5vw, 68px); }
+  .prob { margin-top: clamp(64px, 8vw, 100px); }
   .prob-h {
     font-size: clamp(20px, 2.4vw, 27px); font-weight: 800; letter-spacing: -0.03em;
     margin: 0 0 16px;
   }
-  .prob-h span { color: var(--accent); margin-right: 12px; }
+  .prob-h span {
+    display: block; font-size: 11px; font-weight: 700; letter-spacing: 0.2em;
+    text-transform: uppercase; color: var(--accent); margin: 0 0 8px;
+  }
 
   /* ── solution blocks: copy, image rows, insight + result callouts ───────── */
   .wide-copy p { max-width: 720px; }
@@ -211,6 +225,7 @@
   .result-card strong { color: #fff; font-weight: 700; }
   .result-card .rrow { display: flex; flex-wrap: wrap; gap: 10px clamp(20px, 3.4vw, 48px); margin-top: 10px; }
   .result-card .rrow span { font-size: clamp(14px, 1.5vw, 16px); font-weight: 700; color: #fff; white-space: nowrap; }
+  .result-card .stat { font-size: clamp(24px, 2.8vw, 34px); font-weight: 800; letter-spacing: -0.02em; color: #fff; margin: 6px 0 2px; }
 
   /* three friction callouts */
   .callouts { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(12px, 1.6vw, 20px); margin-top: clamp(24px, 3vw, 34px); }
@@ -321,7 +336,7 @@
   @keyframes gate-shake { 0%, 100% { transform: none; } 25% { transform: translateX(-8px); } 75% { transform: translateX(8px); } }
 
   @media (max-width: 860px) {
-    .cs-meta { grid-template-columns: repeat(2, 1fr); row-gap: 26px; }
+    .hero-grid { grid-template-columns: 1fr; gap: 22px; }
     .callouts, .outcomes, .hmw { grid-template-columns: 1fr; }
     .secnav a span { display: none; }
     .secnav a { padding-bottom: 10px; }
@@ -334,6 +349,8 @@
   @media (prefers-reduced-motion: reduce) {
     html { scroll-behavior: auto; }
     .rv { opacity: 1; transform: none; transition: none; }
+    .hero-banner .shot { transform: none !important; }
+    .figure:hover .shot, .hmw-card:hover { transform: none; }
   }
 </style>
 </head>
@@ -351,6 +368,7 @@
       <path d="M6 6l12 12M18 6L6 18"/>
     </svg>
   </a>
+  <span class="progress" id="cs-progress" aria-hidden="true"></span>
 </header>
 
 <main id="cs"></main>
@@ -472,21 +490,26 @@ function kick(label) { return '0' + (++secNum) + ' — ' + label; }
 
 var h = '';
 
-/* hero + meta */
+/* hero: banner on top, then a left-aligned title block + slim meta strip */
 h += '<section class="cs-hero"><div class="wrap">' +
-  '<span class="badge rv" style="background:' + c.markBg + '">' + c.mark + '</span>' +
+  '<div class="hero-grid">' +
+  '<div class="hero-main">' +
   '<h1 class="rv">' + c.title + '</h1>' +
   '<p class="sub rv">' + c.sub + '</p>' +
+  '</div>' +
   '<dl class="cs-meta rv">' + c.meta.map(function (m) {
     return '<div><dt>' + m[0] + '</dt><dd>' + m[1] + '</dd></div>';
   }).join('') + '</dl>' +
+  '</div>' +
+  (c.banner ? '<figure class="hero-banner rv">' + shot([c.banner[0] || 'Cover', ''], c.grad, 'banner') + '</figure>' : '') +
   '</div></section>';
 
 /* challenge + problem share one renderer; split = copy left, image right */
 function textSection(sec, fallbackK) {
+  var open = '<section' + (sec.nav ? ' data-nav="' + sec.nav + '"' : '') + '>';
   var head = '<p class="kicker rv">' + kick(sec.k || fallbackK) + '</p>';
   if (sec.blocks) {
-    return '<section><div class="wrap">' + head + '<h2 class="rv">' + sec.h + '</h2>' + blocksHtml(sec.blocks) + '</div></section>';
+    return open + '<div class="wrap">' + head + '<h2 class="rv">' + sec.h + '</h2>' + blocksHtml(sec.blocks) + '</div></section>';
   }
   var body = '<h2 class="rv">' + sec.h + '</h2>' +
     sec.p.map(function (p) { return '<p class="rv">' + p + '</p>'; }).join('');
@@ -495,15 +518,15 @@ function textSection(sec, fallbackK) {
       '<figcaption>' + sec.shot[0] + '</figcaption></figure>'
     : '';
   if (sec.split) {
-    return '<section><div class="wrap">' + head +
+    return open + '<div class="wrap">' + head +
       '<div class="ch-split"><div>' + body + '</div>' + fig + '</div></div></section>';
   }
   if (sec.wide) {
     /* left-aligned copy, image running the full content width below */
-    return '<section><div class="wrap">' + head +
+    return open + '<div class="wrap">' + head +
       '<div class="wide-copy">' + body + '</div>' + fig + '</div></section>';
   }
-  return '<section><div class="narrow">' + head + body + '</div>' +
+  return open + '<div class="narrow">' + head + body + '</div>' +
     (fig ? '<div class="wrap">' + fig + '</div>' : '') + '</section>';
 }
 
@@ -524,10 +547,11 @@ function blocksHtml(blocks) {
       return '<figure class="figure rv">' + shot(s, c.grad, 'bleed') + '<figcaption>' + s[0] + '</figcaption></figure>';
     }).join('') + '</div>';
     else if (b.result) {
-      bh += '<div class="result-card rv"><span class="rk">Result</span>' +
-        (Array.isArray(b.result)
-          ? '<div class="rrow">' + b.result.map(function (r) { return '<span>' + r + '</span>'; }).join('') + '</div>'
-          : '<p>' + b.result + '</p>') + '</div>';
+      var inner;
+      if (Array.isArray(b.result)) inner = '<div class="rrow">' + b.result.map(function (r) { return '<span>' + r + '</span>'; }).join('') + '</div>';
+      else if (typeof b.result === 'object') inner = '<p class="stat">' + b.result.stat + '</p><p>' + b.result.p + '</p>';
+      else inner = '<p>' + b.result + '</p>';
+      bh += '<div class="result-card rv"><span class="rk">Result</span>' + inner + '</div>';
     }
   });
   return bh;
@@ -537,7 +561,8 @@ h += textSection(c.challenge, 'The challenge');
 if (c.problem) h += textSection(c.problem, 'The challenge');
 
 /* approach — header aligns with the card row when one is present */
-h += '<section><div class="' + (c.approachCards ? 'wrap' : 'narrow') + '"><p class="kicker rv">' + kick('The approach') + '</p>' +
+h += '<section' + (c.approachNav ? ' data-nav="' + c.approachNav + '"' : '') + '>' +
+  '<div class="' + (c.approachCards ? 'wrap' : 'narrow') + '"><p class="kicker rv">' + kick('The approach') + '</p>' +
   '<h2 class="rv">' + (c.approachH || 'How we got there') + '</h2>' +
   (c.approachIntro ? '<p class="rv">' + c.approachIntro + '</p>' : '') + '</div>';
 if (c.approachCards) {
@@ -554,7 +579,7 @@ if (c.approachOutro) {
 /* problem walkthroughs — the approach, one problem at a time */
 (c.problems || []).forEach(function (pr, i) {
   h += '<div class="wrap prob">' +
-    '<h3 class="prob-h rv"><span>0' + (i + 1) + '</span>' + pr.h + '</h3>' +
+    '<h3 class="prob-h rv"><span>Problem 0' + (i + 1) + '</span>' + pr.h + '</h3>' +
     blocksHtml(pr.blocks) + '</div>';
 });
 (c.approach || []).forEach(function (a) {
@@ -622,7 +647,7 @@ if (navSecs.length > 1) {
   secnav.innerHTML = '<div class="wrap">' + navSecs.map(function (s, i) {
     s.id = 'sec' + (i + 1);
     var label = s.querySelector('.kicker').textContent.replace(/^\d+\s*—\s*/, '');
-    var sub = s.querySelector('h2') ? s.querySelector('h2').textContent : '';
+    var sub = s.getAttribute('data-nav') || (s.querySelector('h2') ? s.querySelector('h2').textContent : '');
     return '<a href="#sec' + (i + 1) + '"><b>' + label + '</b><span>' + sub + '</span></a>';
   }).join('') + '</div>';
   document.getElementById('cs').insertBefore(secnav, navSecs[0]);
@@ -632,22 +657,38 @@ if (navSecs.length > 1) {
     var edge = secnav.getBoundingClientRect().bottom + 80;
     var cur = 0;
     navSecs.forEach(function (s, i) { if (s.getBoundingClientRect().top <= edge) cur = i; });
-    navLinks.forEach(function (a, i) { a.classList.toggle('on', i === cur); });
+    navLinks.forEach(function (a, i) {
+      a.classList.toggle('on', i === cur);
+      if (i === cur) a.setAttribute('aria-current', 'true'); else a.removeAttribute('aria-current');
+    });
   };
   addEventListener('scroll', navTick, { passive: true });
   navTick();
 }
 
-/* reveals + sticky bar border (rect-based, same pattern as the rest of the site) */
+/* reveals + sticky bar border (rect-based, same pattern as the rest of the site),
+   plus scroll progress and a soft parallax on the hero banner */
 var rv = [].slice.call(document.querySelectorAll('.rv'));
 var bar = document.getElementById('cs-bar');
+var prog = document.getElementById('cs-progress');
+var heroShot = document.querySelector('.hero-banner .shot');
 function tick() {
-  var vh = innerHeight;
-  for (var i = rv.length - 1; i >= 0; i--) {
+  var vh = innerHeight, batch = 0;
+  for (var i = 0; i < rv.length; i++) {
     var b = rv[i].getBoundingClientRect();
-    if (b.top < vh * 0.9 && b.bottom > 0) { rv[i].classList.add('in'); rv.splice(i, 1); }
+    if (b.top < vh * 0.9 && b.bottom > 0) {
+      /* stagger elements that reveal together */
+      rv[i].style.transitionDelay = Math.min(batch * 70, 420) + 'ms'; batch++;
+      rv[i].classList.add('in');
+      rv.splice(i, 1); i--;
+    }
   }
   bar.classList.toggle('stuck', scrollY > 12);
+  if (prog) prog.style.width = Math.min(100, scrollY / (document.body.scrollHeight - vh) * 100) + '%';
+  if (heroShot) {
+    var hr = heroShot.parentElement.getBoundingClientRect();
+    if (hr.bottom > 0 && hr.top < vh) heroShot.style.transform = 'scale(1.08) translateY(' + (-hr.top * 0.08).toFixed(1) + 'px)';
+  }
 }
 addEventListener('scroll', tick, { passive: true });
 tick();
