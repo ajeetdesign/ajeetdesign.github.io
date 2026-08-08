@@ -294,6 +294,103 @@
   }
   #case iframe { width: 100%; height: 100%; border: 0; display: block; background: #f7f9fc; }
 
+  /* ── quick bites: full-screen story player ─────────────────────────────── */
+  .bites-open, .bites-open body { overflow: hidden; }
+  .bites-open main, .bites-open .sky-nav { visibility: hidden; pointer-events: none; }
+  #bites {
+    position: fixed; inset: 0; z-index: 45;
+    background: #07080c;
+    display: grid; place-items: center;
+    opacity: 0; visibility: hidden;
+    transition: opacity .4s ease, visibility 0s linear .4s;
+  }
+  #bites.on { opacity: 1; visibility: visible; transition: opacity .4s ease, visibility 0s; }
+  /* edge to edge — the bite fills the viewport, no phone-shaped frame */
+  .bstage {
+    position: relative; overflow: hidden;
+    width: 100vw; height: 100dvh; background: #11131a;
+  }
+  /* segmented progress — one bar per bite, filled by rAF (pausable) */
+  .bprog {
+    position: absolute; top: 0; left: 0; right: 0; z-index: 4;
+    display: flex; gap: 5px; padding: 16px clamp(16px, 3vw, 30px) 0;
+  }
+  .bprog i { flex: 1; height: 3px; border-radius: 999px; background: rgba(255, 255, 255, 0.32); overflow: hidden; }
+  .bprog i b { display: block; width: 0; height: 100%; border-radius: 999px; background: #fff; }
+  .bites-close {
+    position: absolute; top: 34px; right: clamp(16px, 3vw, 30px); z-index: 5;
+    width: 42px; height: 42px; border: 0; border-radius: 999px; cursor: pointer;
+    display: grid; place-items: center; color: #fff;
+    background: rgba(12, 16, 26, 0.45);
+    backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+    transition: transform .35s cubic-bezier(.2,.9,.25,1), background .25s ease;
+  }
+  .bites-close:hover { background: rgba(12, 16, 26, 0.75); transform: rotate(90deg); }
+  /* opening focuses this button for keyboard/SR users — keep the ring for them only */
+  .bites-close:focus:not(:focus-visible) { outline: none; }
+  .bites-close svg { width: 18px; height: 18px; }
+  .bslide { position: absolute; inset: 0; opacity: 0; visibility: hidden; transition: opacity .35s ease; }
+  .bslide.on { opacity: 1; visibility: visible; }
+  /* placeholder art — swap .bimg for an <img class="bimg"> when shots land */
+  .bimg { position: absolute; inset: 0; display: grid; place-items: center; object-fit: cover; }
+  .bimg::after {
+    content: 'Image'; font-size: 12px; font-weight: 700;
+    letter-spacing: 0.18em; text-transform: uppercase; color: rgba(255, 255, 255, 0.8);
+  }
+  .bslide::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 140px; z-index: 1;
+    background: linear-gradient(to bottom, rgba(4, 6, 12, 0.5), transparent);
+    pointer-events: none;
+  }
+  .g1 { background: linear-gradient(150deg, #ffd8a6, #ff9d6c 55%, #f76b8a); }
+  .g2 { background: linear-gradient(150deg, #a6d8ff, #6c9dff 55%, #7b6bf7); }
+  .g3 { background: linear-gradient(150deg, #c3f0c8, #6cc9a4 55%, #3f9d8a); }
+  .g4 { background: linear-gradient(150deg, #e8d5ff, #b98cf5 55%, #8a6bf7); }
+  .g5 { background: linear-gradient(150deg, #ffe6a6, #f7a56b 55%, #e0625f); }
+  /* copy sits above the tap zones but stays click-through */
+  .btext {
+    position: absolute; left: 0; right: 0; bottom: 0; z-index: 3;
+    padding: clamp(70px, 16vh, 190px) clamp(22px, 5vw, 84px) clamp(34px, 7vh, 74px);
+    color: #fff; pointer-events: none;
+    background: linear-gradient(to top, rgba(4, 6, 12, 0.9), rgba(4, 6, 12, 0.42) 52%, transparent);
+  }
+  /* measure stays readable even when the slide is 1440px wide */
+  .btext > * { max-width: 46ch; }
+  .btext .bk { font-size: clamp(11px, 1vw, 13px); font-weight: 800; letter-spacing: 0.2em; text-transform: uppercase; color: rgba(255, 255, 255, 0.72); }
+  .btext h3 { font-size: clamp(26px, 4.2vw, 54px); font-weight: 800; letter-spacing: -0.032em; line-height: 1.08; margin: 12px 0 10px; }
+  .btext p { font-size: clamp(15px, 1.5vw, 19px); line-height: 1.55; color: rgba(255, 255, 255, 0.8); margin: 0; }
+  /* tap zones: divs, not buttons — the real controls are the arrows + keys */
+  .bnav { position: absolute; inset: 0; z-index: 2; display: flex; }
+  .bz { cursor: pointer; -webkit-tap-highlight-color: transparent; }
+  .bz-prev { flex: 0 0 32%; }
+  .bz-next { flex: 1; }
+  /* arrows ride on top of the full-bleed slide, inset from the edges */
+  .barrow {
+    position: absolute; top: 50%; margin-top: -26px; z-index: 4;
+    width: 52px; height: 52px; border: 0; border-radius: 999px; cursor: pointer;
+    display: grid; place-items: center; color: #fff;
+    background: rgba(12, 16, 26, 0.4);
+    backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+    transition: background .25s ease, transform .3s cubic-bezier(.2,.9,.25,1);
+  }
+  .barrow:hover { background: rgba(12, 16, 26, 0.72); }
+  .barrow svg { width: 20px; height: 20px; }
+  .b-prev-o { left: clamp(14px, 2.6vw, 38px); }
+  .b-next-o { right: clamp(14px, 2.6vw, 38px); }
+  .b-next-o:hover { transform: translateX(2px); }
+  .b-prev-o:hover { transform: translateX(-2px); }
+  @media (prefers-reduced-motion: no-preference) {
+    /* slow drift so a held frame still feels alive */
+    .bslide.on .bimg { animation: bzoom 7s linear both; }
+    @keyframes bzoom { from { transform: scale(1); } to { transform: scale(1.06); } }
+  }
+  @media (max-width: 760px) {
+    .barrow { display: none; }   /* tap zones and swipe carry navigation here */
+    .btext { padding-bottom: calc(34px + env(safe-area-inset-bottom)); }
+    .bprog { padding-top: calc(16px + env(safe-area-inset-top)); }
+    .bites-close { top: calc(34px + env(safe-area-inset-top)); }
+  }
+
   /* ── About overlay: content scrolls over a held-still hero sky ─────────── */
   .about-open, .about-open body { overflow: hidden; } /* freeze the journey behind */
   /* the journey's own content must go — the glass panels are translucent and
@@ -456,22 +553,83 @@
   .art-c { background: linear-gradient(120deg, #c3f0c8, #6cc9a4 55%, #3f9d8a); }
   .art-d { background: linear-gradient(120deg, #e8d5ff, #b98cf5 55%, #8a6bf7); }
 
+  /* quick-bites pill — its own fixed element, outside the deck's flow entirely.
+     It never scrolls with the cards: JS parks it at the settled card's bottom
+     edge and fades it in a beat after card 04 lands, then out when that card
+     unpins. `top` is measured on load/resize, never per frame. */
+  .bites-wrap {
+    position: fixed; left: 0; right: 0; z-index: 6;
+    top: var(--bites-top, calc(13vh + 42px + 592px));
+    display: flex; justify-content: center; align-items: flex-start;
+    pointer-events: none;                      /* only the pill itself is clickable */
+    opacity: 0; visibility: hidden; transform: translateY(14px);
+    transition: opacity .55s ease, transform .65s cubic-bezier(.2,.9,.25,1), visibility 0s linear .55s;
+  }
+  .bites-wrap.on {
+    opacity: 1; visibility: visible; transform: none;
+    transition: opacity .55s ease, transform .65s cubic-bezier(.2,.9,.25,1), visibility 0s;
+  }
+  .bites-pill {
+    pointer-events: auto;
+    display: inline-flex; align-items: center; gap: 18px;
+    padding: 17px 30px 17px 26px; border-radius: 999px; cursor: pointer;
+    font: inherit; text-align: left; color: #fff;
+    background: #0a0e14; border: 0;
+    box-shadow: 0 22px 50px -18px rgba(6, 14, 28, 0.6);
+    transition: transform .35s cubic-bezier(.2,.9,.25,1), box-shadow .35s ease;
+  }
+  .bites-pill:hover { transform: translateY(-3px); box-shadow: 0 30px 62px -20px rgba(6, 14, 28, 0.72); }
+  .bites-pill:active { transform: translateY(-1px); }
+  .bp-icon { flex: none; display: grid; place-items: center; color: #3f8cff; }
+  .bp-icon svg { width: 27px; height: 27px; }
+  .bp-copy { display: flex; flex-direction: column; gap: 4px; }
+  .bp-h { font-size: 21px; font-weight: 800; letter-spacing: -0.022em; line-height: 1.1; }
+  .bp-s { font-size: 15px; font-weight: 500; color: rgba(255, 255, 255, 0.66); line-height: 1.1; }
+  .bp-arrow {
+    display: grid; place-items: center; color: rgba(255, 255, 255, 0.6);
+    margin-left: clamp(18px, 2.4vw, 40px);
+    transition: transform .35s cubic-bezier(.2,.9,.25,1);
+  }
+  .bp-arrow svg { width: 19px; height: 19px; }
+  .bites-pill:hover .bp-arrow { transform: translateX(3px); color: #fff; }
+
   /* ── 3 · building with AI (storm) ───────────────────────────────────── */
   #s-ai { display: block; padding: 26vh 5vw 20vh; color: var(--ink-light); }
   #s-ai .wrap { max-width: 1060px; margin: 0 auto; }
   #s-ai .label { color: var(--storm-accent); }
   #s-ai h2 { font-size: clamp(34px, 5vw, 62px); font-weight: 800; letter-spacing: -0.035em; margin: 0 0 14px; text-shadow: 0 2px 30px rgba(0,0,0,0.5); }
   #s-ai .sub { font-size: 16px; color: rgba(230, 238, 252, 0.7); margin: 0 0 7vh; max-width: 56ch; }
+  /* 4-card bento: one wide + one tall on row 1, two halves filling row 2.
+     big(4) + tall(2) = 6; then sm(2) + sm(2) + tall's second row = 6. */
   .bento { display: grid; grid-template-columns: repeat(6, 1fr); gap: 16px; }
-  .tile { padding: 28px; min-height: 180px; display: flex; flex-direction: column; justify-content: flex-end; gap: 10px; }
-  .tile h3 { font-size: clamp(18px, 2vw, 24px); font-weight: 700; letter-spacing: -0.02em; line-height: 1.25; margin: 0; color: #eef4ff; }
-  .tile p { font-size: 14px; line-height: 1.55; color: rgba(214, 226, 248, 0.66); margin: 0; }
-  .tile .k { font-size: 12px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: var(--storm-accent); }
-  .tile.big { grid-column: span 4; min-height: 240px; }
+  .tile { padding: 20px; display: flex; flex-direction: column; gap: 16px; overflow: hidden; }
+  .t-copy { display: flex; flex-direction: column; gap: 8px; }
+  .tile h3 { font-size: clamp(17px, 1.7vw, 21px); font-weight: 700; letter-spacing: -0.02em; line-height: 1.25; margin: 0; color: #eef4ff; }
+  .tile p { font-size: 13.5px; line-height: 1.55; color: rgba(214, 226, 248, 0.66); margin: 0; }
+  .tile .k { font-size: 11.5px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: var(--storm-accent); }
+  /* image placeholder — swap .t-shot for an <img class="t-shot"> when shots land */
+  .t-shot {
+    flex: 1; min-height: 118px; border-radius: 14px; overflow: hidden;
+    display: grid; place-items: center; object-fit: cover;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+  }
+  .t-shot::after {
+    content: 'Image'; font-size: 11px; font-weight: 700;
+    letter-spacing: 0.18em; text-transform: uppercase; color: rgba(255, 255, 255, 0.85);
+  }
+  /* the wide one reads side-by-side, the rest stack image over copy */
+  .tile.big { grid-column: span 4; min-height: 260px; flex-direction: row; align-items: stretch; }
+  .tile.big .t-copy { flex: 1; justify-content: center; }
+  .tile.big .t-shot { flex: 0 0 44%; min-height: 0; }
+  .tile.big h3 { font-size: clamp(20px, 2.1vw, 26px); }
+  .tile.big p { font-size: 14px; }
   .tile.tall { grid-column: span 2; grid-row: span 2; }
-  .tile.med { grid-column: span 3; }
-  .tile.sm { grid-column: span 3; min-height: 150px; }
-  .tile .num { font-size: clamp(34px, 4vw, 52px); font-weight: 800; letter-spacing: -0.03em; color: #fff; line-height: 1; }
+  .tile.tall .t-shot { min-height: 200px; }
+  /* fixed aspect + bottom-anchored copy, so the two half-cards' images line up
+     even though their copy blocks differ in height */
+  .tile.sm { grid-column: span 2; min-height: 250px; }
+  .tile.sm .t-shot { flex: 0 0 auto; aspect-ratio: 16 / 10; min-height: 0; }
+  .tile.sm .t-copy { margin-top: auto; }
 
   /* ── 4 · contact (sunny meadow) ─────────────────────────────────────── */
   #s-contact { text-align: center; color: var(--meadow-ink); padding-bottom: 8vh; }
@@ -510,12 +668,21 @@
 
   @media (max-width: 760px) {
     main > section { padding: 16vh 6vw; }
-    .tile.big, .tile.tall, .tile.med, .tile.sm { grid-column: span 6; grid-row: auto; }
+    .tile.big, .tile.tall, .tile.sm { grid-column: span 6; grid-row: auto; min-height: 0; }
+    .tile.big { flex-direction: column; }       /* side-by-side is too tight at 390px */
+    .tile.big .t-shot { flex: 1; min-height: 160px; }
     .pcard {
       grid-template-columns: 1fr; min-height: 0; margin-bottom: 42vh;
       padding: 26px 22px; gap: 22px; align-items: start;
     }
     .pcard .art { min-height: 190px; }
+    /* the pill has to fit inside a 390px card */
+    .bites-pill { gap: 13px; padding: 13px 22px 13px 19px; }
+    .bp-icon svg { width: 23px; height: 23px; }
+    .bp-h { font-size: 17px; }
+    .bp-s { font-size: 13px; }
+    .bp-arrow { margin-left: 14px; }
+    .bp-arrow svg { width: 17px; height: 17px; }
     /* nav: compact centred pill + drop-down sheet (the full link row overflowed at 390px) */
     .sky-nav {
       left: 50%; right: auto; transform: translateX(-50%);
@@ -575,6 +742,8 @@
   .sky-instant .reveal { transition: none !important; }
   /* instant mode (reduced motion / capture probes): the overlay snaps open */
   .sky-instant #about, .sky-instant .a-reveal { transition: none !important; }
+  .sky-instant #bites, .sky-instant .bslide, .sky-instant #case,
+  .sky-instant .bites-wrap { transition: none !important; }
   @media (prefers-reduced-motion: reduce) {
     #about, .a-reveal { transition: none !important; }
     .a-reveal { opacity: 1; transform: none; }
@@ -750,6 +919,22 @@
       </article>
       <div class="stack-tail" aria-hidden="true"></div>
     </div>
+    <!-- its own fixed element — parked at the settled card's bottom edge, shown
+         on a timer once card 04 lands, never moved by scrolling -->
+    <div class="bites-wrap">
+      <button class="bites-pill" id="bites-open" type="button" aria-haspopup="dialog">
+        <span class="bp-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M13.5 2 4 13.8h6.2L9.4 22 20 9.7h-6.4z"/></svg>
+        </span>
+        <span class="bp-copy">
+          <span class="bp-h">Explore Quick Bites</span>
+          <span class="bp-s">Few work highlights</span>
+        </span>
+        <span class="bp-arrow" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M12 5l7 7-7 7"/></svg>
+        </span>
+      </button>
+    </div>
   </section>
 
   <!-- 3 · storm · building with AI -->
@@ -760,31 +945,36 @@
       <p class="sub reveal d2">Where design instinct meets machine leverage — experiments, workflows and shipped things.</p>
       <div class="bento">
         <div class="tile glass-dark big reveal">
-          <span class="k">Workflow</span>
-          <h3>Prompt → prototype in hours, not weeks</h3>
-          <p>Design intent expressed in words, iterated in code, validated on real users the same day.</p>
+          <div class="t-copy">
+            <span class="k">Workflow</span>
+            <h3>Prompt → prototype in hours, not weeks</h3>
+            <p>Design intent expressed in words, iterated in code, validated on real users the same day.</p>
+          </div>
+          <div class="t-shot art-a"></div>
         </div>
         <div class="tile glass-dark tall reveal d1">
-          <span class="k">Shipped</span>
-          <h3>This site’s 3D mascot</h3>
-          <p>A voxel horse modeled, lit and animated in Three.js — pair-programmed with an AI agent, from first cube to final turntable.</p>
-        </div>
-        <div class="tile glass-dark med reveal d2">
-          <span class="k">Research</span>
-          <h3>Agentic research synthesis</h3>
-          <p>Interview transcripts → clustered insights → testable hypotheses, overnight.</p>
-        </div>
-        <div class="tile glass-dark sm reveal d3">
-          <span class="k">Systems</span>
-          <h3>Design tokens that write themselves</h3>
+          <div class="t-shot art-b"></div>
+          <div class="t-copy">
+            <span class="k">Shipped</span>
+            <h3>This site’s 3D mascot</h3>
+            <p>A voxel horse modeled, lit and animated in Three.js — pair-programmed with an AI agent, from first cube to final turntable.</p>
+          </div>
         </div>
         <div class="tile glass-dark sm reveal d2">
-          <span class="num">40+</span>
-          <p>AI experiments shipped this year</p>
+          <div class="t-shot art-c"></div>
+          <div class="t-copy">
+            <span class="k">Research</span>
+            <h3>Agentic research synthesis</h3>
+            <p>Interview transcripts → clustered insights → testable hypotheses, overnight.</p>
+          </div>
         </div>
-        <div class="tile glass-dark med reveal d3">
-          <span class="k">Belief</span>
-          <h3>Taste is the last moat — tools are for everyone.</h3>
+        <div class="tile glass-dark sm reveal d3">
+          <div class="t-shot art-d"></div>
+          <div class="t-copy">
+            <span class="k">Systems</span>
+            <h3>Design tokens that write themselves</h3>
+            <p>Tokens generated from real usage, documented and shipped without hand-kept tables.</p>
+          </div>
         </div>
       </div>
     </div>
@@ -825,7 +1015,7 @@
     function open(id) {
       lastY = scrollY;
       /* v= busts stale iframe caches — bump after case.html template changes */
-      frame.src = 'case.html?id=' + id + '&embed=1&v=18';
+      frame.src = 'case.html?id=' + id + '&embed=1&v=21';
       document.documentElement.classList.add('case-open');
       layer.classList.add('on');
       layer.setAttribute('aria-hidden', 'false');
@@ -852,6 +1042,194 @@
     /* ?case=porter deep-links straight into a study */
     var deep = new URLSearchParams(location.search).get('case');
     if (deep && document.querySelector('.pcard .cta[href*="' + deep + '"]')) open(deep);
+  })();
+</script>
+
+<!-- Quick bites: full-screen story player, one edge-to-edge .bslide per bite.
+     Swap the .bimg div for <img class="bimg" src="…"> once the shots exist. -->
+<div id="bites" role="dialog" aria-modal="true" aria-label="Quick bites" aria-hidden="true">
+  <button class="barrow b-prev-o" type="button" aria-label="Previous bite">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>
+  </button>
+
+  <div class="bstage">
+    <div class="bprog" aria-hidden="true">
+      <i><b></b></i><i><b></b></i><i><b></b></i><i><b></b></i><i><b></b></i>
+    </div>
+    <button class="bites-close" type="button" aria-label="Close quick bites">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    </button>
+
+    <div class="bslide"><div class="bimg g1"></div><div class="btext">
+      <span class="bk">Quick bite 01</span>
+      <h3>Project name</h3>
+      <p>One line of context — what it was and what changed.</p>
+    </div></div>
+
+    <div class="bslide"><div class="bimg g2"></div><div class="btext">
+      <span class="bk">Quick bite 02</span>
+      <h3>Project name</h3>
+      <p>One line of context — what it was and what changed.</p>
+    </div></div>
+
+    <div class="bslide"><div class="bimg g3"></div><div class="btext">
+      <span class="bk">Quick bite 03</span>
+      <h3>Project name</h3>
+      <p>One line of context — what it was and what changed.</p>
+    </div></div>
+
+    <div class="bslide"><div class="bimg g4"></div><div class="btext">
+      <span class="bk">Quick bite 04</span>
+      <h3>Project name</h3>
+      <p>One line of context — what it was and what changed.</p>
+    </div></div>
+
+    <div class="bslide"><div class="bimg g5"></div><div class="btext">
+      <span class="bk">Quick bite 05</span>
+      <h3>Project name</h3>
+      <p>One line of context — what it was and what changed.</p>
+    </div></div>
+
+    <div class="bnav" aria-hidden="true"><div class="bz bz-prev"></div><div class="bz bz-next"></div></div>
+  </div>
+
+  <button class="barrow b-next-o" type="button" aria-label="Next bite">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg>
+  </button>
+</div>
+<script>
+  (function () {
+    var layer = document.getElementById('bites');
+    var pill = document.getElementById('bites-open');
+    if (!layer || !pill) return;
+
+    var stage = layer.querySelector('.bstage');
+    var slides = Array.prototype.slice.call(layer.querySelectorAll('.bslide'));
+    var bars = Array.prototype.slice.call(layer.querySelectorAll('.bprog b'));
+    var closeBtn = layer.querySelector('.bites-close');
+    var DUR = 6000;                       // auto-advance per bite
+    var REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    var i = -1, elapsed = 0, last = 0, raf = 0;
+    var live = false, paused = false, lastY = 0;
+
+    function show(n) {
+      if (n < 0) n = 0;
+      if (n >= slides.length) { close(); return; }   // past the last bite → out
+      if (i >= 0 && slides[i]) slides[i].classList.remove('on');
+      i = n;
+      slides[i].classList.add('on');
+      bars.forEach(function (b, k) { b.style.width = k < i || REDUCED && k === i ? '100%' : '0%'; });
+      elapsed = 0; last = performance.now();
+    }
+    function tick(now) {
+      raf = requestAnimationFrame(tick);
+      if (!live || REDUCED) return;
+      if (paused || document.hidden) { last = now; return; }   // hold → freeze the bar
+      elapsed += now - last; last = now;
+      var p = elapsed / DUR;
+      if (p >= 1) { show(i + 1); return; }
+      bars[i].style.width = (p * 100) + '%';
+    }
+
+    function open() {
+      lastY = scrollY; live = true; paused = false;
+      document.documentElement.classList.add('bites-open');
+      layer.classList.add('on');
+      layer.setAttribute('aria-hidden', 'false');
+      i = -1; show(0);
+      cancelAnimationFrame(raf); raf = requestAnimationFrame(tick);
+      closeBtn.focus();
+    }
+    function close() {
+      live = false; cancelAnimationFrame(raf); raf = 0;
+      layer.classList.remove('on');
+      layer.setAttribute('aria-hidden', 'true');
+      document.documentElement.classList.remove('bites-open');
+      scrollTo({ top: lastY, behavior: 'instant' });   // land back on the pill
+      pill.focus();
+    }
+
+    pill.addEventListener('click', open);
+    closeBtn.addEventListener('click', close);
+    layer.querySelector('.b-prev-o').addEventListener('click', function () { show(i - 1); });
+    layer.querySelector('.b-next-o').addEventListener('click', function () { show(i + 1); });
+
+    /* press-and-hold pauses; a quick tap navigates; a drag swipes.
+       One pointer pass drives all three so a swipe never also fires the zone. */
+    var px = 0, pt = 0, swiped = false;
+    stage.addEventListener('pointerdown', function (e) {
+      px = e.clientX; pt = Date.now(); swiped = false; paused = true;
+    });
+    stage.addEventListener('pointermove', function (e) {
+      if (paused && Math.abs(e.clientX - px) > 40) swiped = true;
+    });
+    addEventListener('pointerup', function (e) {
+      if (!live || !paused) return;
+      paused = false;
+      if (swiped) show(e.clientX < px ? i + 1 : i - 1);
+    });
+    addEventListener('pointercancel', function () { paused = false; });
+
+    layer.querySelector('.bz-prev').addEventListener('click', function () { if (tapped()) show(i - 1); });
+    layer.querySelector('.bz-next').addEventListener('click', function () { if (tapped()) show(i + 1); });
+    function tapped() { return !swiped && Date.now() - pt < 400; }   // not a swipe, not a hold
+
+    addEventListener('keydown', function (e) {
+      if (!live) return;
+      if (e.key === 'Escape') close();
+      else if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); show(i + 1); }
+      else if (e.key === 'ArrowLeft') { e.preventDefault(); show(i - 1); }
+    });
+
+    /* ── the pill: settled-then-delayed, never scroll-linked ────────────────
+       Card 04 has landed once it has reached its sticky offset and is still
+       mostly on screen. That flips a timer, not a position: the pill fades in
+       DELAY ms later and fades out when the card leaves. Nothing here moves
+       with the scroll — the resting `top` is measured on load/resize only. */
+    var wrap = pill.parentNode;
+    var cards = document.querySelectorAll('.stack .pcard');
+    var lastCard = cards[cards.length - 1];
+    var DELAY = 650;
+    var landed = false, showTimer = 0, restTop = 0;
+
+    function sizeBites() {
+      if (!lastCard) return;
+      /* Read the card's OWN resolved sticky offset. Deriving it as
+         innerHeight * 0.13 + peek looks equivalent to calc(13vh + var(--peek))
+         but drifts under browser zoom, and on mobile vh tracks the large
+         viewport while innerHeight tracks the visible one — the pill then never
+         registers as landed. Fall back to the arithmetic only if `top` is auto. */
+      var cs = getComputedStyle(lastCard), t = parseFloat(cs.top);
+      restTop = isFinite(t) ? t : innerHeight * 0.13 + (parseFloat(cs.getPropertyValue('--peek')) || 0);
+      var edge = restTop + lastCard.offsetHeight - 8;
+      // a card taller than the viewport would push the pill off the bottom
+      wrap.style.setProperty('--bites-top', Math.round(Math.min(edge, innerHeight - 104)) + 'px');
+    }
+
+    function checkLanded() {
+      if (!lastCard) return;
+      var r = lastCard.getBoundingClientRect();
+      /* Landed = the card has reached its sticky offset and is still mostly on
+         screen. A range, not an equality: subpixel rounding must not decide it. */
+      var isLanded = r.top <= restTop + 4 && r.bottom > restTop + 200;
+      if (isLanded === landed) return;
+      landed = isLanded;
+      clearTimeout(showTimer);
+      if (landed) {
+        sizeBites();
+        showTimer = setTimeout(function () { wrap.classList.add('on'); }, DELAY);
+      } else {
+        wrap.classList.remove('on');
+      }
+    }
+
+    addEventListener('scroll', checkLanded, { passive: true });
+    addEventListener('resize', function () { sizeBites(); checkLanded(); });
+    addEventListener('load', sizeBites);   // webfonts can still resize the card
+    setInterval(checkLanded, 250);         // also covers landings with no scroll event
+    sizeBites();
+    checkLanded();
   })();
 </script>
 
