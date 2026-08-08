@@ -155,6 +155,7 @@
   .ch-split .figure { margin-top: 0; display: flex; flex-direction: column; }
   .ch-split .shot { flex: 1; aspect-ratio: auto; min-height: 320px; }
   .wide-copy { max-width: 760px; }
+  .wide-copy--rest { margin-top: clamp(18px, 2.4vw, 28px); }
   .figure figcaption { font-size: 13px; color: var(--ink-faint); margin-top: 12px; text-align: center; }
   .figure .shot { transition: transform .6s cubic-bezier(.2,.7,.2,1), box-shadow .6s ease; }
   .figure:hover .shot { transform: scale(1.015) translateY(-2px); box-shadow: 0 3px 10px rgba(15, 30, 50, 0.06), 0 24px 54px -30px rgba(15, 30, 50, 0.32); }
@@ -191,6 +192,15 @@
   .shot-row.n3 { grid-template-columns: repeat(3, 1fr); }
   .shot-row.n1 .shot { aspect-ratio: 2 / 1; }
   .shot-row.n2 .shot { aspect-ratio: 3 / 2; }
+  /* bento: one large tile + two stacked, taller overall block */
+  .shot-bento {
+    display: grid; gap: clamp(12px, 1.6vw, 18px);
+    grid-template-columns: 1.5fr 1fr; grid-template-rows: repeat(2, 1fr);
+    aspect-ratio: 16 / 10; margin-bottom: clamp(22px, 2.8vw, 32px);
+  }
+  .shot-bento .figure { margin: 0; min-height: 0; }
+  .shot-bento .figure:first-child { grid-row: 1 / span 2; }
+  .shot-bento .shot { width: 100%; height: 100%; aspect-ratio: auto; min-height: 0; }
   .insight {
     max-width: 720px; margin: clamp(20px, 2.6vw, 28px) 0;
     border-left: 3px solid var(--accent); background: #fff;
@@ -466,7 +476,16 @@ var c = CASES[id];
 var COVERS = { porter: 'images/porter-cover.jpg' };
 
 /* real body images keyed by case id → placeholder label */
-var FIGURES = { porter: { 'Porter-branded trucks and two-wheelers on the road': 'images/porter-context.jpg' } };
+var FIGURES = { porter: {
+  'Porter-branded trucks and two-wheelers on the road': 'images/porter-context.jpg',
+  'Partner motivations & research insights': 'images/porter-personas.jpg'
+} };
+
+/* wide sections: place the figure after paragraph index N, keyed by case id → section nav */
+var FIG_AFTER = { porter: { 'Why it couldn\'t scale': 0 } };
+
+/* collapse a multi-image row into one placeholder, keyed by case id → joined labels */
+var MERGE_SHOTS = { porter: { 'Partner motivations|Research insights': 'Partner motivations & research insights' } };
 
 document.title = c.title + ' — Ajeet';
 document.querySelector('.cs-bar .who').style.visibility = '';
@@ -521,6 +540,16 @@ function textSection(sec, fallbackK) {
       '<div class="ch-split"><div>' + body + '</div>' + fig + '</div></div></section>';
   }
   if (sec.wide) {
+    var at = fig ? (FIG_AFTER[id] || {})[sec.nav] : null;
+    if (at != null && sec.p) {
+      /* interleave: copy through paragraph N, then the image, then the rest */
+      var ps = sec.p.map(function (p) { return '<p class="rv">' + p + '</p>'; });
+      return open + '<div class="wrap">' + head +
+        '<div class="wide-copy"><h2 class="rv">' + sec.h + '</h2>' + ps.slice(0, at + 1).join('') + '</div>' +
+        fig +
+        (ps.length > at + 1 ? '<div class="wide-copy wide-copy--rest">' + ps.slice(at + 1).join('') + '</div>' : '') +
+        '</div></section>';
+    }
     /* left-aligned copy, image running the full content width below */
     return open + '<div class="wrap">' + head +
       '<div class="wide-copy">' + body + '</div>' + fig + '</div></section>';
@@ -542,9 +571,15 @@ function blocksHtml(blocks) {
       return '<div class="outcome"><p class="stat">' + m[0] + '</p><h3>' + m[1] + '</h3>' + (m[2] ? '<p>' + m[2] + '</p>' : '') + '</div>';
     }).join('') + '</div>';
     else if (b.sub) bh += '<h3 class="sub-h rv">' + b.sub + '</h3>';
-    else if (b.shots) bh += '<div class="shot-row n' + b.shots.length + '">' + b.shots.map(function (s) {
-      return '<figure class="figure rv">' + shot(s, c.grad, 'bleed') + '<figcaption>' + s[0] + '</figcaption></figure>';
-    }).join('') + '</div>';
+    else if (b.shots) {
+      var shots = b.shots;
+      var mkey = shots.map(function (s) { return s[0]; }).join('|');
+      var merged = (MERGE_SHOTS[id] || {})[mkey];
+      if (merged) shots = [[merged, '']];
+      bh += '<div class="shot-row n' + shots.length + '">' + shots.map(function (s) {
+        return '<figure class="figure rv">' + shot(s, c.grad, 'bleed') + '<figcaption>' + s[0] + '</figcaption></figure>';
+      }).join('') + '</div>';
+    }
     else if (b.result) {
       var inner;
       if (Array.isArray(b.result)) inner = '<div class="rrow">' + b.result.map(function (r) { return '<span>' + r + '</span>'; }).join('') + '</div>';
