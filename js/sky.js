@@ -26,7 +26,30 @@ import * as THREE from './three.module.min.js';
   } catch (e) { canvas.style.display = 'none'; return; }
   // fill-rate is the frame budget here (dozens of overlapping full-screen
   // cloud sprites) — DPR 2 on retina made scrolling stutter
-  renderer.setPixelRatio(Math.min(devicePixelRatio, 1.5));
+  // ── quality tier ────────────────────────────────────────────────────────
+  // Chosen once from coarse device signals: fill-rate is this scene's budget
+  // (dozens of overlapping full-screen cloud sprites), so the knobs that
+  // matter are pixel ratio and instance counts, not geometry detail.
+  var QUALITY = (function () {
+    var narrow = Math.min(innerWidth, innerHeight) < 700;
+    var coarse = matchMedia('(pointer: coarse)').matches;
+    var cores = navigator.hardwareConcurrency || 4;
+    var mem = navigator.deviceMemory || 4;
+    if ((coarse && narrow) || cores <= 4 || mem <= 3) return 'low';
+    if (coarse || cores <= 8 || devicePixelRatio > 2.5) return 'medium';
+    return 'high';
+  })();
+  // Tuft counts are deliberately TINY. A dense instanced field reads as
+  // repeated stamps no matter how well it is varied — the field has to come
+  // from the terrain's own shading, with a handful of clusters only as
+  // occasional punctuation near the camera.
+  var Q = {
+    high:   { dpr: 2,   tufts: 22, shadow: 1024 },
+    medium: { dpr: 1.5, tufts: 16, shadow: 512 },
+    low:    { dpr: 1,   tufts: 9,  shadow: 0 }
+  }[QUALITY];
+  window.__adQ = QUALITY; // verification hook
+  renderer.setPixelRatio(Math.min(devicePixelRatio, Q.dpr));
   if ('outputColorSpace' in renderer) renderer.outputColorSpace = THREE.SRGBColorSpace;
   if ('toneMapping' in renderer) {
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -46,7 +69,10 @@ import * as THREE from './three.module.min.js';
     mid: ['#f0e2ba', '#f0dcb4', '#4d9fe8', '#1c2434', '#66b5ef'].map(c => new THREE.Color(c)),
     bot: ['#eec092', '#f0c493', '#cfe9fb', '#39445a', '#d9edfb'].map(c => new THREE.Color(c)),
     fogC: ['#edd2a9', '#eed6ab', '#a9cdf0', '#232c3c', '#d9eaf7'].map(c => new THREE.Color(c)),
-    fogD: [0.0015, 0.0026, 0.0012, 0.0045, 0.0012],
+    // row 4 carries real haze now: exp2 fog is negligible on the near grass
+    // (<1% at 50 units) but ~40% on the backdrop ranges at ~380, which is what
+    // dissolves them into the sky and sells the distance
+    fogD: [0.0015, 0.0026, 0.0012, 0.0045, 0.0018],
     glowC: ['#ffc998', '#ffce9c', '#ffbe92', '#28324a', '#ffeec4'].map(c => new THREE.Color(c)),
     glowI: [1.0, 0.75, 0.62, 0.08, 0.45],
     starsOp: [0, 0, 0, 0.85, 0],
@@ -61,7 +87,7 @@ import * as THREE from './three.module.min.js';
     seaOp: [1, 0.45, 0, 0, 0],      // hero fog-sea: stays below the camera on the approach
     stormOp: [0, 0, 0, 0.55, 0],
     sunnyOp: [0, 0, 0, 0, 0.55],
-    sunOp: [0, 0, 0, 0, 1],
+    sunOp: [0, 0, 0, 0, 0.72], // dimmed: a light source, not the hero graphic
     sun2Op: [0, 0, 0.9, 0, 0],  // the work scene's low red sunset sun
     groundOp: [0, 0, 0, 0, 1], // meadow hidden until the final descent
     heroPkOp: [1, 1, 0, 0, 0],      // hero summit; scene 1 flies in close to it
@@ -262,7 +288,9 @@ import * as THREE from './three.module.min.js';
   }
   storm.position.set(0, 24, -220);
   // friendly puffs over the meadow
-  var sunny = cloudGroup(9, { x: [15, 115], y: [42, 78], z: [-330, -450] }, 26, 48);
+  // five, not nine, and spread wider: the sun needs clean sky around it and
+  // the composition needs large areas of empty blue to breathe
+  var sunny = cloudGroup(5, { x: [-10, 130], y: [46, 80], z: [-330, -460] }, 30, 54);
   sunny.position.z = -252;
 
   // ── hero fog-sea: huge fully-soft sprites that FUSE into one continuous
@@ -308,41 +336,46 @@ import * as THREE from './three.module.min.js';
 
   // ── meadow: grass, flowers, sun ─────────────────────────────────────────
   function grassTexture() {
-    // alpine-meadow look: saturated deep greens with sun-dried patches,
-    // curved blades, and daisy/buttercup specks
+    // Illustrated meadow, NOT a photographic lawn: a muted sage/olive base
+    // carrying broad soft tonal drifts. The blades exist only to break up the
+    // gradient at close range — at the old 7000 × 0.25–0.6 alpha they read as
+    // streaky brush strokes across the whole field, which is the single
+    // loudest "this is a textured plane" tell. Keep them faint.
     var c = document.createElement('canvas'); c.width = c.height = 1024;
     var g = c.getContext('2d');
     var bg = g.createLinearGradient(0, 0, 1024, 1024);
-    bg.addColorStop(0, '#6fbf4a');
-    bg.addColorStop(0.5, '#55a838');
-    bg.addColorStop(1, '#3e8c2b');
+    bg.addColorStop(0, '#8fb069');
+    bg.addColorStop(0.5, '#7ba055');
+    bg.addColorStop(1, '#688c47');
     g.fillStyle = bg; g.fillRect(0, 0, 1024, 1024);
-    var shades = ['#4c9a33', '#61b243', '#79c854', '#8ed766', '#3a842a', '#a2dc74', '#57a147'];
+    // narrow value spread — neighbouring tones, so patches read as light
+    // falling across the field rather than as different-coloured blotches
+    var shades = ['#7ea15a', '#88a962', '#94b46d', '#71964f', '#9dbb78', '#829e5b'];
     var i, x, y;
-    for (i = 0; i < 900; i++) { // broad tonal patches
+    for (i = 0; i < 260; i++) { // broad soft drifts (big + very low alpha)
       g.fillStyle = shades[Math.floor(Math.random() * shades.length)];
-      g.globalAlpha = 0.06 + Math.random() * 0.12;
+      g.globalAlpha = 0.05 + Math.random() * 0.07;
       g.beginPath();
       g.ellipse(Math.random() * 1024, Math.random() * 1024,
-        12 + Math.random() * 42, 9 + Math.random() * 30, Math.random() * Math.PI, 0, Math.PI * 2);
+        90 + Math.random() * 190, 70 + Math.random() * 150, Math.random() * Math.PI, 0, Math.PI * 2);
       g.fill();
     }
-    for (i = 0; i < 7000; i++) { // individual blades — curved, varied
+    for (i = 0; i < 2400; i++) { // faint blades, all leaning the same way
       x = Math.random() * 1024; y = Math.random() * 1024;
       g.strokeStyle = shades[Math.floor(Math.random() * shades.length)];
-      g.globalAlpha = 0.25 + Math.random() * 0.35;
-      g.lineWidth = 0.7 + Math.random() * 1.2;
+      g.globalAlpha = 0.07 + Math.random() * 0.11;
+      g.lineWidth = 0.6 + Math.random() * 0.8;
       g.beginPath(); g.moveTo(x, y);
       g.quadraticCurveTo(
-        x + (Math.random() - 0.5) * 3, y - 4 - Math.random() * 6,
-        x + (Math.random() - 0.5) * 8, y - 6 - Math.random() * 10);
+        x + 1.5 + (Math.random() - 0.5) * 2, y - 4 - Math.random() * 5,
+        x + 3 + (Math.random() - 0.5) * 4, y - 6 - Math.random() * 8);
       g.stroke();
     }
-    for (i = 0; i < 46; i++) { // sparse golden specks — distant sunflower heads
+    for (i = 0; i < 30; i++) { // sparse warm specks — distant flower heads
       x = Math.random() * 1024; y = Math.random() * 1024;
-      g.globalAlpha = 0.45 + Math.random() * 0.3;
-      g.fillStyle = ['#ffd75e', '#f2b32a', '#ffe98a'][Math.floor(Math.random() * 3)];
-      g.beginPath(); g.arc(x, y, 1 + Math.random() * 1.6, 0, Math.PI * 2); g.fill();
+      g.globalAlpha = 0.28 + Math.random() * 0.2;
+      g.fillStyle = ['#e8c66a', '#dcb44e', '#efd792'][Math.floor(Math.random() * 3)];
+      g.beginPath(); g.arc(x, y, 1 + Math.random() * 1.4, 0, Math.PI * 2); g.fill();
     }
     g.globalAlpha = 1;
     var t = new THREE.CanvasTexture(c);
@@ -351,23 +384,225 @@ import * as THREE from './three.module.min.js';
     t.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy());
     t.needsUpdate = true; return t;
   }
-  // gentle rolling hills; flat near the camera/flower patch so nothing clips
+  // ── GPU vegetation ──────────────────────────────────────────────────────
+  // One InstancedMesh per species: a single geometry, a single material, and
+  // ALL per-blade work (billboarding + wind) done in the vertex shader. The
+  // frame loop touches one time uniform and one opacity — it never iterates
+  // instances. This replaces a bank of individual sprites each carrying its
+  // own material, which is the pattern that doesn't scale past a few dozen.
+  var vegTime = { value: 0 };
+  function vegetation(tex, count, dbl) {
+    var geo = new THREE.PlaneGeometry(1, 1, 1, 4);
+    geo.translate(0, 0.5, 0); // pivot at the stem base, so sway bends from the ground
+    // Point every normal UP rather than at the camera. A billboarded quad's
+    // own normal faces the viewer, which here aims almost straight at the sun
+    // and blows the albedo out to white under the meadow's hot hemi+dir. Up
+    // normals make vegetation shade like the terrain it grows from — the
+    // tones then sit in the same family as the ground instead of glowing.
+    var nrm = geo.attributes.normal;
+    for (var ni = 0; ni < nrm.count; ni++) nrm.setXYZ(ni, 0, 1, 0);
+    nrm.needsUpdate = true;
+    var mat = new THREE.MeshStandardMaterial({
+      map: tex, transparent: true, alphaTest: 0.22, roughness: 1, metalness: 0,
+      side: dbl ? THREE.DoubleSide : THREE.FrontSide, opacity: 0
+    });
+    mat.onBeforeCompile = function (sh) {
+      sh.uniforms.uTime = vegTime;
+      sh.vertexShader = 'uniform float uTime;\n' + sh.vertexShader
+        .replace('#include <begin_vertex>', [
+          '#include <begin_vertex>',
+          'vec3 iOrigin = instanceMatrix[3].xyz;',
+          // two detuned frequencies + a phase from world position: the field
+          // never waves in unison, which is the tell of a single sine
+          'float ph = iOrigin.x * 0.11 + iOrigin.z * 0.07;',
+          'float sway = sin(uTime * 0.62 + ph) * 0.06 + sin(uTime * 1.13 + ph * 1.9) * 0.03;',
+          // quadratic in height → the blade BENDS from its base instead of sliding
+          'float vh = max(position.y, 0.0); vh *= vh;',
+          'transformed.x += sway * vh;',
+          'transformed.z += sway * 0.4 * vh;'
+        ].join('\n'))
+        // view-aligned billboard: build the quad in view space around the
+        // instance origin, so it faces the camera from any scroll position
+        .replace('#include <project_vertex>', [
+          'vec4 mvPosition = vec4( transformed, 1.0 );',
+          '#ifdef USE_INSTANCING',
+          '  float sX = length(instanceMatrix[0].xyz);',
+          '  float sY = length(instanceMatrix[1].xyz);',
+          '  vec4 cMV = modelViewMatrix * vec4(instanceMatrix[3].xyz, 1.0);',
+          '  mvPosition = cMV + vec4(transformed.x * sX, transformed.y * sY, 0.0, 0.0);',
+          '#else',
+          '  mvPosition = modelViewMatrix * mvPosition;',
+          '#endif',
+          'gl_Position = projectionMatrix * mvPosition;'
+        ].join('\n'));
+    };
+    var m = new THREE.InstancedMesh(geo, mat, count);
+    m.frustumCulled = false; // billboarding moves verts off the CPU-side bounds
+    m.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+    scene.add(m);
+    return m;
+  }
+  // A low, wide clump — ground COVER, not a plant. Tuned against a first pass
+  // that used dark saturated blades on a tall quad: each tuft then read as a
+  // separate spiky object sitting on the grass. What makes it read as field is
+  // (a) tones pulled close to the terrain's own palette, (b) a silhouette
+  // wider than it is tall, and (c) low contrast between blades.
+  function tuftTexture() {
+    var c = document.createElement('canvas'); c.width = c.height = 128;
+    var g = c.getContext('2d');
+    var n = 13 + Math.floor(Math.random() * 6);
+    for (var i = 0; i < n; i++) {
+      var bx = 64 + (Math.random() - 0.5) * 88;      // wider spread
+      var lean = (bx - 64) * 0.5 + (Math.random() - 0.5) * 22;
+      var top = 44 + Math.random() * 40;             // shorter blades
+      var w = 3.4 + Math.random() * 3.4;             // broader, softer
+      // Authored DARK on purpose. The meadow's hemi runs at 1.45 with a white
+      // sky colour and these quads have up-facing normals, so they receive the
+      // full hemisphere term — mid-green here renders near-white. These hexes
+      // are what land in the terrain's tonal range once lit.
+      var lg = g.createLinearGradient(0, 128, 0, top);
+      // Verified values — do not "correct" these toward the terrain's hexes.
+      // Up-facing normals + hemi 1.45 (white) + dir 1.55 give vegetation ~3×
+      // light, so anything authored at the terrain's own tone renders washed
+      // out. These land in range once lit.
+      lg.addColorStop(0, '#3d5a28');
+      lg.addColorStop(1, '#65834a');
+      // Blades are drawn OPAQUE. Filling them with globalAlpha onto a
+      // transparent canvas produced washed-out near-white marks once uploaded
+      // and lit — the silhouette has to come from the blade shapes, not from
+      // partial alpha. (The flower map, drawn opaque, never had this.)
+      g.fillStyle = lg;
+      g.beginPath();
+      g.moveTo(bx - w, 128);
+      g.quadraticCurveTo(bx - w * 0.3 + lean * 0.5, (128 + top) * 0.5, bx + lean, top);
+      g.quadraticCurveTo(bx + w * 0.3 + lean * 0.5, (128 + top) * 0.5, bx + w, 128);
+      g.closePath(); g.fill();
+    }
+    g.globalAlpha = 1;
+    var t = new THREE.CanvasTexture(c);
+    t.colorSpace = THREE.SRGBColorSpace; t.needsUpdate = true; return t;
+  }
+
+  // Terrain as COMPOSITION, not noise. Three hand-placed forms only:
+  // a broad valley whose sides rise (a funnel carrying the eye down the middle
+  // toward the windmill and the ranges), and two large asymmetric swells set
+  // by hand left and right. The final term is a very low-frequency roll purely
+  // to keep the horizon from reading as a ruled line — there is deliberately
+  // no high-frequency noise anywhere, because that is what made the old
+  // surface read as "procedural terrain" instead of a designed landscape.
+  // Local space: lx = worldX − 60, ly = −worldZ − 582 (ly grows into the scene;
+  // the camera sits at about ly = −72).
   function meadowH(lx, ly) {
-    var r = Math.sqrt(lx * lx + ly * ly);
-    var ramp = Math.min(1, Math.max(0, (r - 40) / 90));
-    return (Math.sin(lx * 0.045) + Math.cos(ly * 0.05) + Math.sin((lx + ly) * 0.021)) * ramp * 3.2;
+    // Relief DEVELOPS WITH DISTANCE. The camera stands at eye height 4.5 in
+    // this field, so any form built at its feet either clips the lens or rises
+    // above the horizon and swallows the scene — an earlier pass did exactly
+    // that and pushed the foreground flowers up onto the skyline. Ground is
+    // level where the viewer stands and gains shape as it recedes, which is
+    // also simply how a meadow reads from standing height. Foreground interest
+    // is the job of the flowers, not of terrain under the lens.
+    var d = Math.min(1, Math.max(0, (ly + 66) / 130));
+    // valley walls: the eye is carried down the low middle toward the windmill
+    // held down deliberately: taller walls swallowed the mountain layers, and
+    // the ranges are what carry the depth — terrain must frame them, not hide them
+    var valley = Math.pow(Math.min(Math.abs(lx), 200) / 200, 2) * 17;
+    var hillA = Math.exp(-(Math.pow((lx + 132) / 100, 2) + Math.pow((ly - 78) / 125, 2))) * 13;
+    var hillB = Math.exp(-(Math.pow((lx - 150) / 115, 2) + Math.pow((ly - 26) / 105, 2))) * 9.5;
+    var roll = Math.sin(lx * 0.015 + 1.2) * 2.4 + Math.cos(ly * 0.012 - 0.4) * 2.0;
+    return (valley + hillA + hillB + roll) * d;
   }
-  var groundGeo = new THREE.PlaneGeometry(520, 520, 44, 44);
+  // more segments: the broad curves need them to stay smooth in silhouette
+  var groundGeo = new THREE.PlaneGeometry(520, 520, 96, 96);
   var gPos = groundGeo.attributes.position;
+  // Depth by COLOUR, not by geometry: the field runs from a richer, more
+  // saturated green underfoot to a muted olive as it recedes, so the terrain
+  // itself carries the foreground→midground→distance ladder. One uniform green
+  // over the whole plane is what made it read as a painted sheet.
+  var gCol = new Float32Array(gPos.count * 3);
+  var cNear = new THREE.Color(0.84, 0.97, 0.70);
+  var cFar = new THREE.Color(1.0, 0.99, 0.88);
+  var gTmp = new THREE.Color();
   for (var gi = 0; gi < gPos.count; gi++) {
-    gPos.setZ(gi, meadowH(gPos.getX(gi), gPos.getY(gi)));
+    var gx = gPos.getX(gi), gy = gPos.getY(gi);
+    gPos.setZ(gi, meadowH(gx, gy));
+    gTmp.copy(cNear).lerp(cFar, Math.min(1, Math.max(0, (gy + 70) / 250)));
+    gCol[gi * 3] = gTmp.r; gCol[gi * 3 + 1] = gTmp.g; gCol[gi * 3 + 2] = gTmp.b;
   }
+  groundGeo.setAttribute('color', new THREE.BufferAttribute(gCol, 3));
   groundGeo.computeVertexNormals();
   var ground = new THREE.Mesh(
     groundGeo,
-    new THREE.MeshStandardMaterial({ map: grassTexture(), roughness: 1, transparent: true, opacity: 0 }));
+    new THREE.MeshStandardMaterial({
+      map: grassTexture(), vertexColors: true, roughness: 1, transparent: true, opacity: 0
+    }));
   ground.rotation.x = -Math.PI / 2; ground.position.set(60, 0, -582);
   scene.add(ground);
+
+  // Vegetation layer: grass tufts sitting ON the terrain rather than painted
+  // into it, so the field has real silhouette against the horizon. Density is
+  // biased hard toward the camera (cubic) — foreground reads as detail, the
+  // midground thins out, the distance stays clean texture.
+  var tufts = vegetation(tuftTexture(), Q.tufts, true);
+  var tuftRows = [];
+  (function () {
+    var mtx = new THREE.Matrix4(), q = new THREE.Quaternion();
+    var pos = new THREE.Vector3(), scl = new THREE.Vector3();
+    var col = new THREE.Color();
+    // Patchy, not evenly sown. A uniform scatter reads as a procedural fill;
+    // real ground cover grows in drifts with bare earth between them.
+    var patches = [];
+    for (var pc = 0; pc < 15; pc++) {
+      patches.push({
+        u: Math.random() * 2 - 1,
+        dz: 72 - Math.pow(Math.random(), 1.5) * 120,
+        w: 0.16 + Math.random() * 0.3
+      });
+    }
+    for (var t = 0; t < Q.tufts; t++) {
+      var pk = patches[(Math.random() * patches.length) | 0];
+      // heavy bias toward the camera: foreground reads as detail, the far
+      // field stays clean terrain (spreading these to the horizon just made
+      // the distance noisy and killed the aerial perspective)
+      var dz = pk.dz + (Math.random() + Math.random() - 1) * 26;
+      dz = Math.max(-50, Math.min(74, dz));
+      var spanU = pk.u + (Math.random() + Math.random() - 1) * pk.w;
+      // Small and low. At the previous size each clump was legible as its own
+      // object, and one legible repeated asset ruins the field no matter how
+      // few there are — these should register as texture, never as a stamp.
+      var s = 0.34 + Math.random() * 0.4;
+      var sxw = s * (1.7 + Math.random() * 0.9);
+      tuftRows.push({ u: spanU, dz: dz, sx: sxw, sy: s });
+      scl.set(sxw, s, 1);
+      pos.set(60 + spanU * 40, meadowH(spanU * 40, -dz) - 0.1, -582 + dz);
+      mtx.compose(pos, q, scl);
+      tufts.setMatrixAt(t, mtx);
+      // tonal drift so the field isn't one flat green
+      col.setRGB(0.86 + Math.random() * 0.18, 0.9 + Math.random() * 0.14, 0.82 + Math.random() * 0.16);
+      tufts.setColorAt(t, col);
+    }
+    tufts.instanceMatrix.needsUpdate = true;
+    if (tufts.instanceColor) tufts.instanceColor.needsUpdate = true;
+  })();
+  // tufts span the frustum like the flowers, so they re-resolve on resize
+  function placeTufts() {
+    var mtx = new THREE.Matrix4(), q = new THREE.Quaternion();
+    var pos = new THREE.Vector3(), scl = new THREE.Vector3();
+    // A narrow frustum squeezes the same tufts into a fraction of the width,
+    // so portrait reads far denser than landscape at identical counts. Thin
+    // deterministically (every Nth instance) rather than by count, so the
+    // clumping survives — dropping a random subset erodes the patches.
+    var keep = camera.aspect < 0.9 ? 3 : 1;
+    for (var t = 0; t < tuftRows.length; t++) {
+      var r = tuftRows[t];
+      var dx = r.u * frustumHalf(r.dz) * 1.15; // slight overscan past the edges
+      tufts.getMatrixAt(t, mtx); mtx.decompose(pos, q, scl);
+      if (keep > 1 && (t % keep)) { scl.set(0, 0, 0); }
+      else if (scl.x === 0) { scl.set(r.sx, r.sy, 1); }
+      pos.set(60 + dx, meadowH(dx, -r.dz) - 0.1, -582 + r.dz);
+      mtx.compose(pos, q, scl);
+      tufts.setMatrixAt(t, mtx);
+    }
+    tufts.instanceMatrix.needsUpdate = true;
+  }
 
   // small windmill on the meadow's left rise — lit 3D geometry, sails spin
   // slowly in the frame loop. Opacity rides groundOp via millMats.
@@ -380,10 +615,14 @@ import * as THREE from './three.module.min.js';
     millMats.push(m); return m;
   }
   var mill = new THREE.Group();
-  var towerM = millMat('#e2d6bd'), trimM = millMat('#5f422e'), sailM = millMat('#f4ecd8', true);
-  var tower = new THREE.Mesh(new THREE.CylinderGeometry(1.05, 1.75, 8.5, 10), towerM);
+  // deeper than the backdrop haze on purpose: as the midground anchor it has
+  // to hold a readable silhouette, and the old pale cream dissolved into the
+  // ranges behind it. More radial segments soften the shading without
+  // meaningfully costing anything at this size.
+  var towerM = millMat('#d3bf9b'), trimM = millMat('#543926'), sailM = millMat('#f6efdd', true);
+  var tower = new THREE.Mesh(new THREE.CylinderGeometry(1.05, 1.75, 8.5, 16), towerM);
   tower.position.y = 4.25; mill.add(tower);
-  var roof = new THREE.Mesh(new THREE.ConeGeometry(1.5, 2.2, 10), trimM);
+  var roof = new THREE.Mesh(new THREE.ConeGeometry(1.5, 2.2, 16), trimM);
   roof.position.y = 9.55; mill.add(roof);
   var millHub = new THREE.Group();
   millHub.position.set(0, 8.8, 1.4); // on the cap face toward the camera
@@ -400,75 +639,261 @@ import * as THREE from './three.module.min.js';
   }
   mill.add(millHub);
   // base y from meadowH at the mill's ground-local coords (see ground mapping)
+  // Soft contact shadow, painted rather than shadow-mapped. The scene's single
+  // DirectionalLight is shared by all five states and travels almost parallel
+  // to the meadow floor (dot with the ground normal ≈ 0.16), so a real shadow
+  // map here would cost a pass per frame for a shadow you could barely see —
+  // and re-aiming the light to fix that would re-light the other four scenes.
+  // A grounded gradient gives the read the brief actually wants: contact.
+  (function () {
+    var sc = document.createElement('canvas'); sc.width = sc.height = 128;
+    var sg = sc.getContext('2d');
+    var sr = sg.createRadialGradient(64, 64, 4, 64, 64, 62);
+    sr.addColorStop(0, 'rgba(48,62,38,0.44)');
+    sr.addColorStop(0.55, 'rgba(48,62,38,0.2)');
+    sr.addColorStop(1, 'rgba(48,62,38,0)');
+    sg.fillStyle = sr; sg.fillRect(0, 0, 128, 128);
+    var st = new THREE.CanvasTexture(sc);
+    st.colorSpace = THREE.SRGBColorSpace; st.needsUpdate = true;
+    var shadowM = millMat('#ffffff');           // rides groundOp with the mill
+    shadowM.map = st; shadowM.transparent = true;
+    shadowM.depthWrite = false; shadowM.roughness = 1;
+    var shadowPlane = new THREE.Mesh(new THREE.PlaneGeometry(9, 6.4), shadowM);
+    shadowPlane.rotation.x = -Math.PI / 2;
+    shadowPlane.position.set(0.4, 0.08, 0.6);  // offset along the light, local to the mill
+    mill.add(shadowPlane);
+  })();
   mill.position.set(10, meadowH(10 - 60, -(-622) - 582) - 0.3, -622);
   mill.scale.set(1.18, 1.18, 1.18);
   mill.rotation.y = 0.5; // three-quarter view — reads as a mill, not a cross
   scene.add(mill);
 
+  // Sunflower, rebuilt at 256px. The old 128px map was softening badly now
+  // that foreground heads render 200px+ tall, and its structure was the giveaway:
+  // perfect ellipses on a perfect ring around a flat radial gradient reads as
+  // clip art. Real structure — tapered pointed petals with per-petal jitter,
+  // a phyllotaxis seed disc, a tapered stem and veined leaves — costs nothing
+  // extra at runtime because it is baked once into one texture.
   function sunflowerTexture() {
-    var c = document.createElement('canvas'); c.width = c.height = 128;
+    var c = document.createElement('canvas'); c.width = c.height = 256;
     var g = c.getContext('2d');
-    // stem with two leaves; head sits at (64,48)
-    g.strokeStyle = '#3f7028'; g.lineWidth = 4; g.lineCap = 'round';
-    g.beginPath(); g.moveTo(64, 60); g.quadraticCurveTo(61, 96, 64, 126); g.stroke();
-    g.fillStyle = '#4c8430';
-    g.beginPath(); g.ellipse(52, 94, 10, 4.5, -0.5, 0, Math.PI * 2); g.fill();
-    g.beginPath(); g.ellipse(76, 106, 10, 4.5, 0.45, 0, Math.PI * 2); g.fill();
-    // two offset petal rings, back ring darker
-    for (var i = 0; i < 26; i++) {
-      var a = (i % 13) / 13 * Math.PI * 2;
-      var ring = i < 13 ? 0.82 : 1;
-      g.save(); g.translate(64, 48); g.rotate(a + (i < 13 ? 0.24 : 0));
-      g.fillStyle = i < 13 ? '#f0a81c' : '#ffc531';
-      g.beginPath();
-      g.ellipse(0, -19 * ring, 5, 13 * ring, 0, 0, Math.PI * 2); g.fill();
+    var R = Math.random;
+    var cx = 128, cy = 96;                 // head centre, same proportion as before
+    var headR = 25 + R() * 5;
+    var petalN = 16 + Math.floor(R() * 5);
+    var tilt = (R() - 0.5) * 0.35;         // the whole head leans a little
+
+    // ── stem: tapered, curved, lit down one edge ──
+    var stemTop = cy + headR * 0.55;
+    g.lineCap = 'round';
+    g.strokeStyle = '#2c5a1c'; g.lineWidth = 9;
+    g.beginPath(); g.moveTo(cx + 2, stemTop); g.quadraticCurveTo(cx - 7, 180, cx + 1, 255); g.stroke();
+    g.strokeStyle = '#3f7527'; g.lineWidth = 5.5;
+    g.beginPath(); g.moveTo(cx + 2, stemTop); g.quadraticCurveTo(cx - 7, 180, cx + 1, 255); g.stroke();
+    g.strokeStyle = 'rgba(120,170,80,0.5)'; g.lineWidth = 1.6;
+    g.beginPath(); g.moveTo(cx - 1, stemTop + 6); g.quadraticCurveTo(cx - 9, 180, cx - 2, 250); g.stroke();
+
+    // ── leaves: pointed, with a midrib ──
+    function leaf(bx, by, len, ang, flip) {
+      g.save(); g.translate(bx, by); g.rotate(ang);
+      var lg = g.createLinearGradient(0, 0, len * flip, 0);
+      lg.addColorStop(0, '#2c5a1c'); lg.addColorStop(1, '#4a842e');
+      g.fillStyle = lg;
+      g.beginPath(); g.moveTo(0, 0);
+      g.bezierCurveTo(len * 0.3 * flip, -len * 0.44, len * 0.8 * flip, -len * 0.28, len * flip, 0);
+      g.bezierCurveTo(len * 0.8 * flip, len * 0.28, len * 0.3 * flip, len * 0.44, 0, 0);
+      g.fill();
+      g.strokeStyle = 'rgba(26,56,16,0.5)'; g.lineWidth = 1.3;
+      g.beginPath(); g.moveTo(0, 0); g.lineTo(len * 0.9 * flip, 0); g.stroke();
       g.restore();
     }
-    var rad = g.createRadialGradient(64, 48, 2, 64, 48, 12);
-    rad.addColorStop(0, '#7a4a20');
-    rad.addColorStop(0.7, '#5e3a17');
-    rad.addColorStop(1, '#46280f');
-    g.fillStyle = rad; g.beginPath(); g.arc(64, 48, 12, 0, Math.PI * 2); g.fill();
-    var t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.needsUpdate = true; return t;
+    leaf(cx - 1, 170 + R() * 10, 38 + R() * 10, -0.36, -1);
+    leaf(cx + 2, 202 + R() * 10, 32 + R() * 9, 0.32, 1);
+
+    // ── petals: two offset rings, tapered to a point, jittered per petal ──
+    function ring(rot, lenMul, colA, colB) {
+      for (var i = 0; i < petalN; i++) {
+        var a = i / petalN * Math.PI * 2 + rot + (R() - 0.5) * 0.09;
+        var len = headR * lenMul * (0.84 + R() * 0.3);
+        var wid = headR * 0.34 * (0.78 + R() * 0.44);
+        g.save(); g.translate(cx, cy); g.rotate(a + tilt);
+        var pg = g.createLinearGradient(0, -headR * 0.5, 0, -headR - len);
+        pg.addColorStop(0, colA); pg.addColorStop(1, colB);
+        g.fillStyle = pg;
+        g.beginPath();
+        g.moveTo(0, -headR * 0.5);
+        g.quadraticCurveTo(-wid, -headR - len * 0.5, 0, -headR - len);
+        g.quadraticCurveTo(wid, -headR - len * 0.5, 0, -headR * 0.5);
+        g.fill();
+        g.restore();
+      }
+    }
+    ring(Math.PI / petalN, 1.16, '#b8690b', '#e9a723');  // back ring, darker + longer
+    ring(0, 1.0, '#d8890f', '#ffcb45');                  // front ring
+
+    // ── seed disc: phyllotaxis, not a flat gradient ──
+    // Both stops CONCENTRIC. An offset inner circle makes canvas render the
+    // cone outside its start radius as a hard pale crescent across the disc —
+    // the highlight has to be a separate clipped pass, not a shifted gradient.
+    var dg = g.createRadialGradient(cx, cy, headR * 0.05, cx, cy, headR);
+    dg.addColorStop(0, '#5e4019');
+    dg.addColorStop(0.6, '#452d12');
+    dg.addColorStop(1, '#2c1c0a');
+    g.fillStyle = dg; g.beginPath(); g.arc(cx, cy, headR, 0, Math.PI * 2); g.fill();
+    g.save();
+    g.beginPath(); g.arc(cx, cy, headR, 0, Math.PI * 2); g.clip();
+    var hl = g.createRadialGradient(cx - headR * 0.32, cy - headR * 0.34, 0,
+                                    cx - headR * 0.32, cy - headR * 0.34, headR * 1.1);
+    hl.addColorStop(0, 'rgba(150,112,52,0.5)');
+    hl.addColorStop(1, 'rgba(150,112,52,0)');
+    g.fillStyle = hl; g.fillRect(cx - headR, cy - headR, headR * 2, headR * 2);
+    g.restore();
+    var golden = Math.PI * (3 - Math.sqrt(5));
+    for (var s2 = 0; s2 < 150; s2++) {
+      var sr = Math.sqrt(s2 / 150) * headR * 0.9;
+      var sa = s2 * golden;
+      g.fillStyle = (s2 % 3) ? 'rgba(22,14,5,0.45)' : 'rgba(126,94,44,0.4)';
+      g.beginPath();
+      g.arc(cx + Math.cos(sa) * sr, cy + Math.sin(sa) * sr, 1.0 + (1 - sr / headR) * 0.8, 0, Math.PI * 2);
+      g.fill();
+    }
+    for (var fl = 0; fl < 34; fl++) { // ring of tiny florets at the disc edge
+      var fa = fl / 34 * Math.PI * 2 + tilt;
+      g.fillStyle = 'rgba(206,150,38,0.7)';
+      g.beginPath();
+      g.arc(cx + Math.cos(fa) * headR * 0.88, cy + Math.sin(fa) * headR * 0.88, 1.5, 0, Math.PI * 2);
+      g.fill();
+    }
+    var t = new THREE.CanvasTexture(c);
+    t.colorSpace = THREE.SRGBColorSpace;
+    t.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy());
+    t.needsUpdate = true; return t;
   }
-  var flowers = new THREE.Group();
   var fTex = [sunflowerTexture(), sunflowerTexture()];
-  for (var i = 0; i < 44; i++) {
-    var fm = new THREE.SpriteMaterial({ map: fTex[i % 2], transparent: true, depthWrite: false, opacity: 0.95 });
-    var f = new THREE.Sprite(fm);
-    // anchor at the stem base: sway pivots at the ground, not mid-air
-    f.center.set(0.5, 0.04);
-    var ang = Math.random() * Math.PI * 2, r = 8 + Math.pow(Math.random(), 0.6) * 92;
-    var fdx = Math.cos(ang) * r, fdz = Math.sin(ang) * r * 0.8;
-    f.position.set(60 + fdx, meadowH(fdx, -fdz) - 0.15, -330 + fdz);
-    var fs = 1.5 + Math.random() * 1.3;
-    f.scale.set(fs, fs, 1);
-    f.userData = { ph: Math.random() * Math.PI * 2 };
-    flowers.add(f);
+  // Composed, not scattered. An even spread is the giveaway that something was
+  // placed by a loop, so these are hand-set clusters of deliberately uneven
+  // density — some tight groups of 7–8, some pairs, and real empty ground
+  // between them. Local space is (dx, dz) about the patch centre; +dz runs
+  // toward the camera, so depth also drives scale.
+  // Staged to FRAME the copy, not fill the frame. The centre corridor is left
+  // deliberately empty — the headline and CTAs project there, and flowers
+  // drifting behind a button is the one thing that reads as accident. Weight
+  // runs left-foreground (heaviest, leading in under the windmill) to a
+  // lighter right group, so the eye travels flowers → windmill → sun.
+  // Clusters are authored in NORMALISED frustum space: u = −1..1 across the
+  // visible width at that depth, not world units. The frustum here is only
+  // tan(fov/2)·aspect·distance wide and distance is 72 − dz, so it narrows
+  // hard toward the camera AND collapses on portrait mobile (aspect 0.5 is a
+  // third of desktop's width). Authoring in world dx meant the composition
+  // that framed the copy on desktop fell entirely outside the phone frame.
+  // In u-space the same staging holds at every aspect; placeFlowers() below
+  // resolves it to world units on init and on resize.
+  // Six zones, eighteen flowers — down from twelve clusters and fifty-seven.
+  // Flowers are FRAMING, not decoration: two foreground groups holding the
+  // left and right edges, two small midground groups, two tiny far accents,
+  // and nothing at all through the middle where the headline and CTAs sit.
+  var CLUSTERS = [ // [u, dz, count, uSpread]
+    [-0.78,  58, 4, 0.14], [ 0.80,  55, 4, 0.14], // foreground — the hero flowers
+    [-0.72,  10, 3, 0.14], [ 0.74,   4, 3, 0.14], // midground — small
+    [-0.66, -40, 2, 0.10], [ 0.62, -48, 2, 0.10]  // background — tiny accents
+  ];
+  // half the visible width at a given flower depth, for the current aspect
+  function frustumHalf(fdz) {
+    return Math.tan(27.5 * Math.PI / 180) * camera.aspect * Math.max(6, 72 - fdz);
   }
-  flowers.position.z = -252; // rides with the ground, shifted down the flight path
-  scene.add(flowers);
+  // Composition is stored as plain data; the GPU gets it as instance matrices.
+  // This replaced one Sprite + one SpriteMaterial PER FLOWER — 57 materials
+  // and 57 per-frame CPU writes — with two draw calls and two opacity writes.
+  var FDATA = [];
+  function addFlower(u, fdz) {
+    // graded by depth: foreground heads read as detail, far ones as accents
+    // steeper grade than before: foreground heads read as real objects you
+    // could reach, far ones as specks. Scale is what sells distance here.
+    var near = Math.min(1, Math.max(0, (fdz + 80) / 140));
+    FDATA.push({
+      u: u, dz: fdz,
+      s: 0.7 + Math.pow(near, 1.5) * 2.9 + Math.random() * 0.35,
+      // near-white tint drift — no two heads read exactly alike, but the
+      // sunflower stays a sunflower (a saturated tint would recolour the map)
+      r: 0.93 + Math.random() * 0.07,
+      g: 0.93 + Math.random() * 0.07,
+      b: 0.87 + Math.random() * 0.13
+    });
+  }
+  for (var ci = 0; ci < CLUSTERS.length; ci++) {
+    var cl = CLUSTERS[ci];
+    for (var cj = 0; cj < cl[2]; cj++) {
+      // gaussian-ish falloff from the cluster centre, so groups have a dense
+      // core and a few outliers rather than a hard disc edge
+      var ca = Math.random() * Math.PI * 2;
+      var cr = (Math.random() + Math.random()) * 0.5 * cl[3];
+      addFlower(cl[0] + Math.cos(ca) * cr, cl[1] + Math.sin(ca) * cr * 44);
+    }
+  }
+  // (no stray scatter — strays were what made the zones read as a distribution
+  // rather than as placed groups)
+  // split across two meshes so two flower variants survive instancing
+  var fGroups = [[], []];
+  for (var fd = 0; fd < FDATA.length; fd++) fGroups[fd % 2].push(FDATA[fd]);
+  var flowerMeshes = [
+    vegetation(fTex[0], fGroups[0].length, true),
+    vegetation(fTex[1], fGroups[1].length, true)
+  ];
+  // scratch objects reused across every call — no allocation per instance
+  var fMtx = new THREE.Matrix4(), fQuat = new THREE.Quaternion();
+  var fPos = new THREE.Vector3(), fScl = new THREE.Vector3(), fCol = new THREE.Color();
+  // resolve u-space → world for the current aspect, and simplify on portrait:
+  // the same world-size head eats far more of a narrow frame, so the nearest
+  // rank is dropped (scale 0 — no per-instance branch) and the rest scaled back
+  function placeFlowers() {
+    // Portrait scales the whole set back rather than culling the near rank.
+    // That cull dated from the 57-flower version; with only eight foreground
+    // flowers it deleted the entire foreground on phones.
+    var sMul = Math.min(1, 0.58 + camera.aspect * 0.26);
+    for (var fm2 = 0; fm2 < 2; fm2++) {
+      var mesh = flowerMeshes[fm2], grp = fGroups[fm2];
+      for (var gi2 = 0; gi2 < grp.length; gi2++) {
+        var d = grp[gi2];
+        var s = d.s * sMul;
+        var fdx = d.u * frustumHalf(d.dz);
+        fPos.set(60 + fdx, meadowH(fdx, -d.dz) - 0.15, -582 + d.dz);
+        fScl.set(s, s, 1);
+        fMtx.compose(fPos, fQuat, fScl);
+        mesh.setMatrixAt(gi2, fMtx);
+        fCol.setRGB(d.r, d.g, d.b);
+        mesh.setColorAt(gi2, fCol);
+      }
+      mesh.instanceMatrix.needsUpdate = true;
+      if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
+    }
+  }
+  placeFlowers();
 
   function sunTexture() {
     var c = document.createElement('canvas'); c.width = c.height = 256;
     var g = c.getContext('2d');
-    // starburst rays under the halo, like a lens catching direct sun
+    // faint rays — enough to suggest direct light, not a photographic lens
+    // flare. At 0.6 alpha these read as a game-engine glint.
     g.save(); g.translate(128, 128);
     for (var ri = 0; ri < 12; ri++) {
       var ra = ri / 12 * Math.PI * 2 + 0.26;
-      var len = ri % 2 ? 74 : 120;
+      var len = ri % 2 ? 70 : 112;
       var lg = g.createLinearGradient(0, 0, Math.cos(ra) * len, Math.sin(ra) * len);
-      lg.addColorStop(0, 'rgba(255,250,235,0.6)');
-      lg.addColorStop(1, 'rgba(255,250,235,0)');
+      lg.addColorStop(0, 'rgba(255,243,214,0.3)');
+      lg.addColorStop(1, 'rgba(255,243,214,0)');
       g.strokeStyle = lg; g.lineWidth = 3.5; g.lineCap = 'round';
       g.beginPath(); g.moveTo(0, 0); g.lineTo(Math.cos(ra) * len, Math.sin(ra) * len); g.stroke();
     }
     g.restore();
+    // warm core with a long, soft falloff: a source of light rather than a
+    // white disc. The extra mid stops are what make the halo read as bloom.
     var rad = g.createRadialGradient(128, 128, 6, 128, 128, 128);
-    rad.addColorStop(0, 'rgba(255,255,248,1)');
-    rad.addColorStop(0.18, 'rgba(255,244,214,0.95)');
-    rad.addColorStop(0.42, 'rgba(255,226,160,0.38)');
-    rad.addColorStop(1, 'rgba(255,214,130,0)');
+    rad.addColorStop(0, 'rgba(255,251,238,1)');
+    rad.addColorStop(0.13, 'rgba(255,244,213,0.9)');
+    rad.addColorStop(0.3, 'rgba(255,231,177,0.48)');
+    rad.addColorStop(0.55, 'rgba(255,219,150,0.2)');
+    rad.addColorStop(0.78, 'rgba(255,211,138,0.07)');
+    rad.addColorStop(1, 'rgba(255,206,130,0)');
     g.fillStyle = rad; g.fillRect(0, 0, 256, 256);
     var t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.needsUpdate = true; return t;
   }
@@ -478,7 +903,9 @@ import * as THREE from './three.module.min.js';
   }));
   // off-centre so it never sits behind the contact copy; high enough to
   // peek over the mountain ridges in the finale
-  sun.position.set(125, 66, -722); sun.scale.set(36, 36, 1);
+  // smaller and dimmer: the sun is a light source, not the loudest graphic on
+  // screen — it must not compete with the headline for first read
+  sun.position.set(125, 66, -722); sun.scale.set(26, 26, 1);
   scene.add(sun);
 
   // the work scene's own sun: a small red-orange sunset glint low over the
@@ -573,13 +1000,19 @@ import * as THREE from './three.module.min.js';
   // more exposed rock than the work ranges (reference peak is warm rock + snow)
   var heroPeak = mountainMesh(235, 128, 82, 230, 7, '#766653', '#fff8ee', false, 0.08, 0.25);
   heroPeak.position.set(28, 4, -225); // lifted so the crown reads clearly over the fog-sea
-  // the grassland backdrop ranges (opacity follows groundOp in the loop)
-  // earthy-brown mountains, pushed deep so fog haze sells the distance —
-  // keep the amplitude up though: it's the peaked silhouette that makes
-  // them mountains, distance alone reads as a flat dirt strip
-  var ridgeNear = mountainMesh(980, 190, 40, 190, 5, '#75655a', '#a99a84', true);
+  // The grassland backdrop: THREE layers staged for aerial perspective, the
+  // thing that makes the world read as large. Each step back loses saturation
+  // and contrast and gains the sky's blue, so the ranges recede instead of
+  // advancing. (The previous warm-brown pair sat at the same value as the
+  // foreground and popped forward as one flat dirt band.)
+  // Amplitude stays high on every layer — the peaked silhouette is what reads
+  // as "mountain"; distance alone flattens them into a strip.
+  // opacity follows groundOp in the loop, scaled per layer.
+  var ridgeNear = mountainMesh(980, 190, 40, 190, 5, '#69785e', '#909c78', true);
   ridgeNear.position.set(20, 0, -832);
-  var ridgeFar = mountainMesh(1150, 220, 58, 200, 6, '#8d8175', '#d9d2c4', true);
+  var ridgeMid = mountainMesh(1060, 200, 50, 195, 8, '#7d8d8b', '#a6b2ad', true);
+  ridgeMid.position.set(-40, 0, -868);
+  var ridgeFar = mountainMesh(1150, 220, 58, 200, 6, '#95a9bd', '#c6d6e3', true);
   ridgeFar.position.set(60, 0, -902);
 
   // Cartier-style red dirigible: 3D ellipsoid envelope with cream gores,
@@ -1200,17 +1633,21 @@ import * as THREE from './three.module.min.js';
     for (m2 = 0; m2 < balloonFar.userData.mats.length; m2++) balloonFar.userData.mats[m2].opacity = gOp * 0.95;
     if (!REDUCED) balloonFar.position.y = 42 + Math.sin(T * 0.3) * 1.4;
     ground.material.opacity = gOp;
-    ridgeFar.material.opacity = gOp * 0.7;
+    // whole vegetation layer: two writes, no per-instance iteration
+    tufts.material.opacity = gOp;
+    tufts.visible = gOp > 0.01;
+    if (!REDUCED) vegTime.value = T;
+    // per-layer opacity completes the aerial recession the vertex colours start
+    ridgeFar.material.opacity = gOp * 0.62;
+    ridgeMid.material.opacity = gOp * 0.82;
     ridgeNear.material.opacity = gOp;
     for (m2 = 0; m2 < millMats.length; m2++) millMats[m2].opacity = gOp;
     mill.visible = gOp > 0.01;
     if (!REDUCED && mill.visible) millHub.rotation.z -= dt * 0.55;
-    for (c = 0; c < flowers.children.length; c++) {
-      sp = flowers.children[c];
-      sp.material.opacity = 0.95 * gOp;
-      // slow breeze: a wave travels across the field (phase keyed to x)
-      if (!REDUCED) sp.material.rotation = Math.sin(T * 0.8 - sp.position.x * 0.12 + sp.userData.ph * 0.6) * 0.1;
-    }
+    // the breeze now lives in the vegetation vertex shader (vegTime above), so
+    // the whole field costs two writes instead of a loop over every flower
+    flowerMeshes[0].material.opacity = flowerMeshes[1].material.opacity = 0.95 * gOp;
+    flowerMeshes[0].visible = flowerMeshes[1].visible = gOp > 0.01;
 
     // lightning inside the storm leg — held back until the flight has mostly
     // settled into the night so flashes never strobe the day→night transition
@@ -1244,6 +1681,10 @@ import * as THREE from './three.module.min.js';
     var w = innerWidth, h = innerHeight;
     renderer.setSize(w, h, false);
     camera.aspect = w / h; camera.updateProjectionMatrix();
+    // the meadow's flower/tuft staging is authored per-frustum, so it has to
+    // be re-resolved whenever the aspect changes (camera starts at aspect 1)
+    placeFlowers();
+    placeTufts();
     measure();
   }
   addEventListener('resize', resize, { passive: true });
