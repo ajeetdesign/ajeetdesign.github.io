@@ -294,6 +294,64 @@
   }
   #case iframe { width: 100%; height: 100%; border: 0; display: block; background: #f7f9fc; }
 
+  /* ── AI experiment detail: full-screen in-page layer, never scrolls ────── */
+  .ai-open, .ai-open body { overflow: hidden; }
+  .ai-open main, .ai-open .sky-nav { visibility: hidden; pointer-events: none; }
+  /* Full-screen layer, same shape as the case-study one: fixed inset 0, the
+     panel fills it edge to edge. Solid background rather than a blurred
+     backdrop — a full-frame backdrop-filter over the live WebGL canvas is the
+     exact combination that smeared the scene elsewhere on this site. */
+  #ai-modal {
+    position: fixed; inset: 0; z-index: 42;
+    overflow: hidden;                       /* the brief: this one does not scroll */
+    background: #0a1020;
+    opacity: 0; visibility: hidden;
+    transform: translateY(22px) scale(0.985);
+    transition: opacity .45s ease, transform .6s cubic-bezier(.2,.9,.25,1), visibility 0s linear .45s;
+  }
+  #ai-modal.on {
+    opacity: 1; visibility: visible; transform: none;
+    transition: opacity .45s ease, transform .6s cubic-bezier(.2,.9,.25,1), visibility 0s;
+  }
+  .aim-panel {
+    position: relative; width: 100%; height: 100%; min-width: 0;
+    display: grid; grid-template-columns: 1.05fr 1fr; align-items: center;
+    gap: clamp(28px, 4vw, 72px); padding: clamp(28px, 5vw, 88px);
+    overflow: hidden;
+  }
+  .aim-shot {
+    border-radius: 22px; min-height: 0; height: 100%; align-self: stretch;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    display: grid; place-items: center;
+  }
+  .aim-shot::after {
+    content: 'Image'; font-size: 11px; font-weight: 700;
+    letter-spacing: 0.18em; text-transform: uppercase; color: rgba(255, 255, 255, 0.85);
+  }
+  /* capped measure — at full-screen width the copy column is wide enough to
+     run headlines and body text past a comfortable line length */
+  .aim-copy { display: flex; flex-direction: column; justify-content: center; gap: 16px; min-height: 0; min-width: 0; max-width: 54ch; }
+  .aim-copy h3 {
+    font-size: clamp(22px, 2.8vw, 34px); font-weight: 800; letter-spacing: -0.03em;
+    line-height: 1.15; margin: 0; color: #eef4ff;
+  }
+  .aim-copy p { font-size: clamp(14px, 1.4vw, 16px); line-height: 1.65; color: rgba(214, 226, 248, 0.74); margin: 0; }
+  .aim-close {
+    position: absolute; top: clamp(16px, 2.4vw, 30px); right: clamp(16px, 2.4vw, 30px); z-index: 2;
+    width: 46px; height: 46px; border: 0; border-radius: 999px; cursor: pointer;
+    display: grid; place-items: center; color: #eef4ff;
+    background: rgba(255, 255, 255, 0.1);
+    transition: transform .35s cubic-bezier(.2,.9,.25,1), background .25s ease;
+  }
+  .aim-close:hover { background: rgba(255, 255, 255, 0.22); transform: rotate(90deg); }
+  .aim-close:focus:not(:focus-visible) { outline: none; } /* opening focuses it */
+  .aim-close svg { width: 17px; height: 17px; }
+  @media (max-width: 760px) {
+    .aim-panel { grid-template-columns: 1fr; grid-template-rows: 42vh auto; align-content: center; gap: 26px; }
+    .aim-shot { min-height: 0; height: 100%; }
+    .aim-copy { justify-content: flex-start; }
+  }
+
   /* ── quick bites: full-screen story player ─────────────────────────────── */
   .bites-open, .bites-open body { overflow: hidden; }
   .bites-open main, .bites-open .sky-nav { visibility: hidden; pointer-events: none; }
@@ -602,7 +660,16 @@
   /* 4-card bento: one wide + one tall on row 1, two halves filling row 2.
      big(4) + tall(2) = 6; then sm(2) + sm(2) + tall's second row = 6. */
   .bento { display: grid; grid-template-columns: repeat(6, 1fr); gap: 16px; }
-  .tile { padding: 20px; display: flex; flex-direction: column; gap: 16px; overflow: hidden; }
+  /* tiles are <button>s so they are focusable and keyboard-operable for free.
+     No `border` here — .glass-dark sets it and .tile wins on source order. */
+  .tile {
+    padding: 20px; display: flex; flex-direction: column; gap: 16px; overflow: hidden;
+    font: inherit; color: inherit; text-align: left; width: 100%; cursor: pointer;
+    -webkit-appearance: none; appearance: none;
+    transition: transform .35s cubic-bezier(.2,.9,.25,1), box-shadow .35s ease;
+  }
+  .tile:hover { transform: translateY(-4px); box-shadow: 0 26px 60px -24px rgba(0, 6, 20, 0.7); }
+  .tile:active { transform: translateY(-1px); }
   .t-copy { display: flex; flex-direction: column; gap: 8px; }
   .tile h3 { font-size: clamp(17px, 1.7vw, 21px); font-weight: 700; letter-spacing: -0.02em; line-height: 1.25; margin: 0; color: #eef4ff; }
   .tile p { font-size: 13.5px; line-height: 1.55; color: rgba(214, 226, 248, 0.66); margin: 0; }
@@ -742,7 +809,8 @@
   /* instant mode (reduced motion / capture probes): the overlay snaps open */
   .sky-instant #about, .sky-instant .a-reveal { transition: none !important; }
   .sky-instant #bites, .sky-instant .bslide, .sky-instant #case,
-  .sky-instant .bites-wrap { transition: none !important; }
+  .sky-instant .bites-wrap, .sky-instant #ai-modal,
+  .sky-instant .aim-panel { transition: none !important; }
   @media (prefers-reduced-motion: reduce) {
     #about, .a-reveal { transition: none !important; }
     .a-reveal { opacity: 1; transform: none; }
@@ -943,34 +1011,34 @@
       <h2 class="reveal d1">Building with AI</h2>
       <p class="sub reveal d2">Where design instinct meets machine leverage — experiments, workflows and shipped things.</p>
       <div class="bento">
-        <div class="tile glass-dark big reveal">
+        <button type="button" class="tile glass-dark big reveal">
           <div class="t-copy">
             <h3>Prompt → prototype in hours, not weeks</h3>
             <p>Design intent expressed in words, iterated in code, validated on real users the same day.</p>
           </div>
           <div class="t-shot art-a"></div>
-        </div>
-        <div class="tile glass-dark tall reveal d1">
+        </button>
+        <button type="button" class="tile glass-dark tall reveal d1">
           <div class="t-shot art-b"></div>
           <div class="t-copy">
             <h3>This site’s 3D mascot</h3>
             <p>A voxel horse modeled, lit and animated in Three.js — pair-programmed with an AI agent, from first cube to final turntable.</p>
           </div>
-        </div>
-        <div class="tile glass-dark sm reveal d2">
+        </button>
+        <button type="button" class="tile glass-dark sm reveal d2">
           <div class="t-shot art-c"></div>
           <div class="t-copy">
             <h3>Agentic research synthesis</h3>
             <p>Interview transcripts → clustered insights → testable hypotheses, overnight.</p>
           </div>
-        </div>
-        <div class="tile glass-dark sm reveal d3">
+        </button>
+        <button type="button" class="tile glass-dark sm reveal d3">
           <div class="t-shot art-d"></div>
           <div class="t-copy">
             <h3>Design tokens that write themselves</h3>
             <p>Tokens generated from real usage, documented and shipped without hand-kept tables.</p>
           </div>
-        </div>
+        </button>
       </div>
     </div>
   </section>
@@ -998,6 +1066,74 @@
 </main>
 
 <!-- Case study: same page, full-screen layer (case.html renders inside) -->
+<!-- AI experiment detail. Content is read off the clicked tile rather than
+     duplicated here, so the card and the modal can never drift apart; add a
+     data-detail attribute to a tile to give it a longer body in the modal. -->
+<div id="ai-modal" role="dialog" aria-modal="true" aria-labelledby="aim-title" aria-hidden="true">
+  <div class="aim-panel">
+    <button class="aim-close" type="button" aria-label="Close">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    </button>
+    <div class="aim-shot" id="aim-shot"></div>
+    <div class="aim-copy">
+      <h3 id="aim-title"></h3>
+      <p id="aim-body"></p>
+    </div>
+  </div>
+</div>
+<script>
+  (function () {
+    var layer = document.getElementById('ai-modal');
+    var panel = layer && layer.querySelector('.aim-panel');
+    var tiles = document.querySelectorAll('#s-ai .tile');
+    if (!layer || !tiles.length) return;
+
+    var shot = document.getElementById('aim-shot');
+    var title = document.getElementById('aim-title');
+    var body = document.getElementById('aim-body');
+    var closeBtn = layer.querySelector('.aim-close');
+    var lastY = 0, opener = null;
+    var ART = ['art-a', 'art-b', 'art-c', 'art-d'];
+
+    function open(tile) {
+      lastY = scrollY; opener = tile;
+      var art = tile.querySelector('.t-shot');
+      // carry the tile's own gradient across so the modal reads as that card
+      shot.className = 'aim-shot';
+      for (var a = 0; a < ART.length; a++) {
+        if (art && art.classList.contains(ART[a])) shot.classList.add(ART[a]);
+      }
+      var h = tile.querySelector('h3'), p = tile.querySelector('p');
+      title.textContent = h ? h.textContent : '';
+      body.textContent = tile.getAttribute('data-detail') || (p ? p.textContent : '');
+      document.documentElement.classList.add('ai-open');
+      layer.classList.add('on');
+      layer.setAttribute('aria-hidden', 'false');
+      closeBtn.focus();
+    }
+    function close() {
+      layer.classList.remove('on');
+      layer.setAttribute('aria-hidden', 'true');
+      document.documentElement.classList.remove('ai-open');
+      scrollTo({ top: lastY, behavior: 'instant' }); // land back on the card
+      if (opener) opener.focus();
+      opener = null;
+    }
+
+    for (var t = 0; t < tiles.length; t++) {
+      tiles[t].addEventListener('click', (function (el) {
+        return function () { open(el); };
+      })(tiles[t]));
+    }
+    closeBtn.addEventListener('click', close);
+    // backdrop click, but not clicks that started inside the panel
+    layer.addEventListener('click', function (e) { if (!panel.contains(e.target)) close(); });
+    addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && layer.classList.contains('on')) close();
+    });
+  })();
+</script>
+
 <div id="case" role="dialog" aria-modal="true" aria-label="Case study" aria-hidden="true">
   <iframe id="case-frame" title="Case study" src="about:blank"></iframe>
 </div>
