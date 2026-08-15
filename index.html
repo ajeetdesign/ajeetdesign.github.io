@@ -284,12 +284,12 @@
   .case-open main, .case-open .sky-nav { visibility: hidden; pointer-events: none; }
   #case {
     position: fixed; inset: 0; z-index: 40;
-    opacity: 0; visibility: hidden;
+    opacity: 0; visibility: hidden; pointer-events: none;   /* see #bites */
     transform: translateY(22px) scale(0.985);
     transition: opacity .45s ease, transform .6s cubic-bezier(.2,.9,.25,1), visibility 0s linear .45s;
   }
   #case.on {
-    opacity: 1; visibility: visible; transform: none;
+    opacity: 1; visibility: visible; transform: none; pointer-events: auto;
     transition: opacity .45s ease, transform .6s cubic-bezier(.2,.9,.25,1), visibility 0s;
   }
   #case iframe { width: 100%; height: 100%; border: 0; display: block; background: #f7f9fc; }
@@ -305,12 +305,12 @@
     position: fixed; inset: 0; z-index: 42;
     overflow: hidden;                       /* the brief: this one does not scroll */
     background: #0a1020;
-    opacity: 0; visibility: hidden;
+    opacity: 0; visibility: hidden; pointer-events: none;   /* see #bites */
     transform: translateY(22px) scale(0.985);
     transition: opacity .45s ease, transform .6s cubic-bezier(.2,.9,.25,1), visibility 0s linear .45s;
   }
   #ai-modal.on {
-    opacity: 1; visibility: visible; transform: none;
+    opacity: 1; visibility: visible; transform: none; pointer-events: auto;
     transition: opacity .45s ease, transform .6s cubic-bezier(.2,.9,.25,1), visibility 0s;
   }
   .aim-panel {
@@ -360,9 +360,17 @@
     background: #07080c;
     display: grid; place-items: center;
     opacity: 0; visibility: hidden;
+    /* pointer-events is the belt to visibility's braces. These overlays are
+       fixed inset 0 over the whole viewport, and closing them only stops them
+       swallowing clicks once `visibility: hidden` lands — which the transition
+       defers by 0.4s and, if it is ever interrupted or never fires, may not
+       land at all. That leaves a transparent sheet eating every CTA on the
+       page. While hidden the element cannot be hit anyway, so this costs
+       nothing when the transition behaves and rescues the page when it does not. */
+    pointer-events: none;
     transition: opacity .4s ease, visibility 0s linear .4s;
   }
-  #bites.on { opacity: 1; visibility: visible; transition: opacity .4s ease, visibility 0s; }
+  #bites.on { opacity: 1; visibility: visible; pointer-events: auto; transition: opacity .4s ease, visibility 0s; }
   /* edge to edge — the bite fills the viewport, no phone-shaped frame */
   .bstage {
     position: relative; overflow: hidden;
@@ -496,12 +504,12 @@
     overflow-y: auto; overscroll-behavior: contain;
     -webkit-overflow-scrolling: touch;
     padding: 12vh 5vw 14vh;
-    opacity: 0; visibility: hidden;
+    opacity: 0; visibility: hidden; pointer-events: none;   /* see #bites */
     transform: translateY(18px);
     transition: opacity .5s ease, transform .6s cubic-bezier(.2,.9,.25,1), visibility 0s linear .5s;
   }
   #about.on {
-    opacity: 1; visibility: visible; transform: none;
+    opacity: 1; visibility: visible; transform: none; pointer-events: auto;
     transition: opacity .5s ease, transform .6s cubic-bezier(.2,.9,.25,1), visibility 0s;
   }
   .about-close {
