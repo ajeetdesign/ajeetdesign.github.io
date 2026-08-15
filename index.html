@@ -390,27 +390,44 @@
   .bslide { position: absolute; inset: 0; opacity: 0; visibility: hidden; transition: opacity .35s ease; }
   .bslide.on { opacity: 1; visibility: visible; }
   /* placeholder art — swap .bimg for an <img class="bimg"> when shots land */
-  .bimg { position: absolute; inset: 0; display: grid; place-items: center; object-fit: cover; }
+  /* width/height 100% are required, not redundant with inset:0 — an
+     absolutely positioned REPLACED element (<img>) takes its intrinsic
+     size when width is auto, so inset alone will not stretch it. Without
+     these the swap from placeholder div to real <img> silently breaks. */
+  /* contain, not cover: these shots are wide desktop UI composed with their own
+     generous margins, and cover both cropped the panels mid-word and upscaled a
+     2400px source past native on retina (~1.27x at 1512 CSS px, DPR 2). The
+     grounds are flat, so a matching per-slide background hides the letterbox. */
+  .bimg {
+    position: absolute; inset: 0; width: 100%; height: 100%;
+    display: grid; place-items: center; object-fit: contain; object-position: center;
+  }
   .bimg::after {
     content: 'Image'; font-size: 12px; font-weight: 700;
     letter-spacing: 0.18em; text-transform: uppercase; color: rgba(255, 255, 255, 0.8);
   }
+  /* short enough to seat the progress bar and close button, nothing more */
   .bslide::before {
-    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 140px; z-index: 1;
-    background: linear-gradient(to bottom, rgba(4, 6, 12, 0.5), transparent);
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 96px; z-index: 1;
+    background: linear-gradient(to bottom, rgba(4, 6, 12, 0.42), transparent);
     pointer-events: none;
   }
-  .g1 { background: linear-gradient(150deg, #ffd8a6, #ff9d6c 55%, #f76b8a); }
-  .g2 { background: linear-gradient(150deg, #a6d8ff, #6c9dff 55%, #7b6bf7); }
-  .g3 { background: linear-gradient(150deg, #c3f0c8, #6cc9a4 55%, #3f9d8a); }
+  /* g1–g3 are sampled from each shot's own flat ground so the contain letterbox
+     reads as part of the image; they also back the img while the file loads */
+  .g1 { background: #e5ecf4; }
+  .g2 { background: #86897e; }
+  .g3 { background: #eaf4fe; }
   .g4 { background: linear-gradient(150deg, #e8d5ff, #b98cf5 55%, #8a6bf7); }
   .g5 { background: linear-gradient(150deg, #ffe6a6, #f7a56b 55%, #e0625f); }
   /* copy sits above the tap zones but stays click-through */
   .btext {
     position: absolute; left: 0; right: 0; bottom: 0; z-index: 3;
-    padding: clamp(70px, 16vh, 190px) clamp(22px, 5vw, 84px) clamp(34px, 7vh, 74px);
+    padding: clamp(44px, 9vh, 104px) clamp(22px, 5vw, 84px) clamp(34px, 7vh, 74px);
     color: #fff; pointer-events: none;
-    background: linear-gradient(to top, rgba(4, 6, 12, 0.9), rgba(4, 6, 12, 0.42) 52%, transparent);
+    /* a band that hugs the copy, not a wash over the frame — but it stays near
+       opaque at the foot because two of the three grounds are near white and
+       the white type has nothing else to sit against */
+    background: linear-gradient(to top, rgba(4, 6, 12, 0.94), rgba(4, 6, 12, 0.72) 46%, transparent);
   }
   /* measure stays readable even when the slide is 1440px wide */
   .btext > * { max-width: 46ch; }
@@ -438,11 +455,29 @@
   .b-next-o:hover { transform: translateX(2px); }
   .b-prev-o:hover { transform: translateX(-2px); }
   @media (prefers-reduced-motion: no-preference) {
-    /* slow drift so a held frame still feels alive */
-    .bslide.on .bimg { animation: bzoom 7s linear both; }
+    /* slow drift so a held frame still feels alive — placeholder gradients only.
+       On a real screenshot the 1.06 resample smears the 11px UI labels, which is
+       the whole subject, so photographed slides hold still. */
+    .bslide.on div.bimg { animation: bzoom 7s linear both; }
     @keyframes bzoom { from { transform: scale(1); } to { transform: scale(1.06); } }
   }
   @media (max-width: 760px) {
+    /* Stopgap until portrait-framed exports exist. contain would fit a 16:9
+       desktop shot into a ~390x219 strip adrift in the ground colour, so crop
+       back to cover here and aim each shot at the part that still reads: at
+       390px only ~26% of the source width survives, and centre is rarely it. */
+    img.bimg { object-fit: cover; }
+    img.g1 { object-position: 48% center; }   /* the middle phone, amber state */
+    img.g2 { object-position: 58% center; }   /* 2nd window: sidebar + run table */
+    img.g3 { object-position: 7% center; }    /* volume config + connector list */
+    /* cover means copy lands on live UI here, not on the empty ground it falls
+       on at desktop width, so the band needs its runway back — and its foot has
+       to go effectively solid, since 0.94 over a white ledger row still ghosts
+       through behind the headline */
+    .btext {
+      padding-top: clamp(90px, 21vh, 200px);
+      background: linear-gradient(to top, rgba(4, 6, 12, 0.99), rgba(4, 6, 12, 0.96) 44%, rgba(4, 6, 12, 0.5) 72%, transparent);
+    }
     .barrow { display: none; }   /* tap zones and swipe carry navigation here */
     .btext { padding-bottom: calc(34px + env(safe-area-inset-bottom)); }
     .bprog { padding-top: calc(16px + env(safe-area-inset-top)); }
@@ -1191,19 +1226,22 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
     </button>
 
-    <div class="bslide"><div class="bimg g1"></div><div class="btext">
+    <!-- g1 stays on the img: its gradient shows as the backdrop while the
+         file loads, and fills the letterbox if a viewport ever out-runs cover.
+         src is held in data-src and swapped in on open — see hydrate() below. -->
+    <div class="bslide"><img class="bimg g1" data-src="images/bite-cash-ledger.jpg" alt="Three phone screens showing a driver cash-balance ledger in green, amber and red states, each with a deposit prompt" decoding="async"><div class="btext">
       <span class="bk">Quick bite 01</span>
       <h3>Project name</h3>
       <p>One line of context — what it was and what changed.</p>
     </div></div>
 
-    <div class="bslide"><div class="bimg g2"></div><div class="btext">
+    <div class="bslide"><img class="bimg g2" data-src="images/bite-prompt-logs.jpg" alt="Two views of a prompt-ops console for an airline support agent — a filtered run log with success, failure and pending states, and a trace timeline opened to one span's input, output and metadata" decoding="async"><div class="btext">
       <span class="bk">Quick bite 02</span>
       <h3>Project name</h3>
       <p>One line of context — what it was and what changed.</p>
     </div></div>
 
-    <div class="bslide"><div class="bimg g3"></div><div class="btext">
+    <div class="bslide"><img class="bimg g3" data-src="images/bite-routing-config.jpg" alt="Two payment routing setup screens — a volume-based configuration splitting traffic across Adyen, Stripe and Authorize.net by percentage, and a rule-based builder with conditions and fallback routing" decoding="async"><div class="btext">
       <span class="bk">Quick bite 03</span>
       <h3>Project name</h3>
       <p>One line of context — what it was and what changed.</p>
@@ -1244,11 +1282,27 @@
     var i = -1, elapsed = 0, last = 0, raf = 0;
     var live = false, paused = false, lastY = 0;
 
+    /* The layer is fixed + inset 0 and merely visibility:hidden, so the browser
+       counts it as in-viewport and would fetch every bite image on first paint —
+       ~700 KB for a deck behind a click, and loading="lazy" won't defer it for
+       the same reason. Each img holds its URL in data-src until its slide comes
+       up; the neighbour is pulled in behind it, so the 6 s dwell covers the next
+       load and only the first bite is ever waited on. */
+    function hydrate(n) {
+      var slide = slides[n];
+      if (!slide) return;
+      var img = slide.querySelector('img[data-src]');
+      if (!img) return;                              // hydrated already, or still a placeholder
+      img.src = img.getAttribute('data-src');
+      img.removeAttribute('data-src');
+    }
+
     function show(n) {
       if (n < 0) n = 0;
       if (n >= slides.length) { close(); return; }   // past the last bite → out
       if (i >= 0 && slides[i]) slides[i].classList.remove('on');
       i = n;
+      hydrate(i); hydrate(i + 1);
       slides[i].classList.add('on');
       bars.forEach(function (b, k) { b.style.width = k < i || REDUCED && k === i ? '100%' : '0%'; });
       elapsed = 0; last = performance.now();
