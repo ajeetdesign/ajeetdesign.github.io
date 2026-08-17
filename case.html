@@ -187,6 +187,21 @@
 
   /* ── solution blocks: copy, image rows, insight + result callouts ───────── */
   .wide-copy p { max-width: 720px; }
+  /* three columns of copy, one per image in the row above — sits at the full
+     .wrap width so each column lines up under what it describes */
+  .col3 {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: clamp(18px, 2.6vw, 36px);
+    margin: clamp(18px, 2.2vw, 26px) 0 clamp(22px, 2.8vw, 32px);
+  }
+  .col3 p { max-width: none; margin: 0; }
+  .col3 strong { color: var(--ink-dark); font-weight: 700; }
+  /* tertiary heading: inside a problem the h3 slots are already taken by the
+     problem title and .sub-h, so this is an h4 and must read below both */
+  .sub-h4 {
+    font-size: clamp(15px, 1.6vw, 17px); font-weight: 700; letter-spacing: -0.01em;
+    color: var(--ink-dark); margin: clamp(26px, 3.2vw, 38px) 0 10px;
+  }
   .shot-row { display: grid; gap: clamp(12px, 1.6vw, 18px); margin-bottom: clamp(22px, 2.8vw, 32px); }
   .shot-row.n2 { grid-template-columns: repeat(2, 1fr); }
   .shot-row.n3 { grid-template-columns: repeat(3, 1fr); }
@@ -350,7 +365,7 @@
     .callouts, .outcomes, .hmw { grid-template-columns: 1fr; }
     .secnav a span { display: none; }
     .secnav a { padding-bottom: 10px; }
-    .shot-row.n2, .shot-row.n3 { grid-template-columns: 1fr; }
+    .shot-row.n2, .shot-row.n3, .col3 { grid-template-columns: 1fr; }
     .flow { grid-template-columns: repeat(2, 1fr); row-gap: 20px; }
     .ch-split { grid-template-columns: 1fr; }
     .ch-split .shot { min-height: 0; aspect-ratio: 4 / 3; }
@@ -478,14 +493,18 @@ var COVERS = { porter: 'images/porter-cover.jpg' };
 /* real body images keyed by case id → placeholder label */
 var FIGURES = { porter: {
   'Porter-branded trucks and two-wheelers on the road': 'images/porter-context.jpg',
-  'Partner motivations & research insights': 'images/porter-personas.jpg'
+  'Partner motivations & research insights': 'images/porter-personas.jpg',
+  'Iteration — narrative, visuals & onboarding concepts': 'images/porter-iterations.jpg'
 } };
 
 /* wide sections: place the figure after paragraph index N, keyed by case id → section nav */
 var FIG_AFTER = { porter: { 'Why it couldn\'t scale': 0 } };
 
 /* collapse a multi-image row into one placeholder, keyed by case id → joined labels */
-var MERGE_SHOTS = { porter: { 'Partner motivations|Research insights': 'Partner motivations & research insights' } };
+var MERGE_SHOTS = { porter: {
+  'Partner motivations|Research insights': 'Partner motivations & research insights',
+  'Iteration — narrative|Iteration — visuals|Onboarding concepts': 'Iteration — narrative, visuals & onboarding concepts'
+} };
 
 document.title = c.title + ' — Ajeet';
 document.querySelector('.cs-bar .who').style.visibility = '';
@@ -571,6 +590,10 @@ function blocksHtml(blocks) {
       return '<div class="outcome"><p class="stat">' + m[0] + '</p><h3>' + m[1] + '</h3>' + (m[2] ? '<p>' + m[2] + '</p>' : '') + '</div>';
     }).join('') + '</div>';
     else if (b.sub) bh += '<h3 class="sub-h rv">' + b.sub + '</h3>';
+    else if (b.sub4) bh += '<h4 class="sub-h4 rv">' + b.sub4 + '</h4>';
+    else if (b.cols) bh += '<div class="col3 rv">' + b.cols.map(function (col) {
+      return '<p>' + col + '</p>';
+    }).join('') + '</div>';
     else if (b.shots) {
       var shots = b.shots;
       var mkey = shots.map(function (s) { return s[0]; }).join('|');
