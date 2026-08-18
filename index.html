@@ -644,6 +644,11 @@
     display: grid; place-items: center; overflow: hidden;
     transition: transform .6s cubic-bezier(.2,.9,.25,1);
   }
+  /* Same trap as .bimg: .art is a stretched grid item, but `align-self: stretch`
+     does not stretch a REPLACED element that has its own intrinsic size, so an
+     <img class="art"> would collapse to its natural box. width/height 100% are
+     doing real work here, not duplicating the stretch. */
+  img.art { width: 100%; height: 100%; object-fit: cover; object-position: center; }
   .pcard .art::after {
     content: 'Image'; font-size: 12px; font-weight: 700;
     letter-spacing: 0.18em; text-transform: uppercase;
@@ -998,7 +1003,11 @@
           <p>Rebuilt the rewards journey for driver-partners — clearer earning states, faster redemption, measurable lift in conversion.</p>
           <a class="cta" href="case.html?id=porter">Read case study <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M12 5l7 7-7 7"/></svg></a>
         </div>
-        <div class="art art-a"></div>
+        <!-- art-a stays on the img: its gradient backs the frame while the file
+             loads, and the ::after "IMAGE" label does not render on a replaced
+             element, so it drops away on its own -->
+        <img class="art art-a" src="images/porter-card.jpg" decoding="async"
+             alt="The Porter partner app showing the Put Porter Posters, Earn Extra ₹15,000 offer above a video explaining the branding programme">
       </article>
       <article class="pcard glass" style="--peek: 14px">
         <div class="copy">
