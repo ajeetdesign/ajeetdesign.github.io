@@ -22,6 +22,9 @@
     --storm-accent: #8fb7ff;
     --meadow-ink: #17301f;
     --meadow-soft: rgba(23, 48, 31, 0.74);
+    /* one size for the three pillar glyphs, in the hero and on the card alike.
+       The flight interpolates between those two ends, so they must not drift. */
+    --glyph: clamp(38px, 3.4vw, 48px);
   }
   * { box-sizing: border-box; }
   html { scroll-behavior: smooth; }
@@ -116,6 +119,7 @@
   }
   #s-hero .reveal.d1 { transition-delay: .22s; }
   #s-hero .reveal.d2 { transition-delay: .46s; }
+  #s-hero .reveal.d3 { transition-delay: .70s; }   /* the glyph row closes the cadence */
   .sky-booting #s-hero .scroll-cue { opacity: 0; transform: translate(-50%, 10px); }
   #s-hero .scroll-cue { transition: opacity 1.2s ease, transform 1.2s ease; }
 
@@ -235,12 +239,47 @@
   }
   /* icon rides slightly up under the baseline of the word */
   .pillar .glyph {
-    width: clamp(28px, 2.3vw, 32px); height: auto;
+    width: var(--glyph); height: auto;
     margin-top: -4px;
     display: block;
     transition: transform .5s cubic-bezier(.2,.7,.2,1);
   }
   .pillar:hover .glyph { transform: translateY(-3px) rotate(-4deg); }
+
+  /* ── glyph flight: the three pillar icons start in the hero and fly here ──
+     The row in #s-hero is anchors only — invisible <i> boxes that give the
+     flight its start rect. The visible things in transit are three copies in
+     a body-level fixed layer (#gflight); the real .pillar .glyph stays in the
+     card as the settle target. Nothing here paints without JS: no .gf-on on
+     <html> means the layer is display:none and the card glyphs are just
+     visible where they always were. */
+  .gf-row {
+    display: flex; justify-content: center; align-items: center;
+    column-gap: clamp(26px, 4vw, 52px);
+    margin-top: clamp(26px, 3.4vw, 42px);
+  }
+  .gf-slot { display: block; width: var(--glyph); height: var(--glyph); }
+  #gflight { position: fixed; inset: 0; z-index: 6; pointer-events: none; }
+  html:not(.gf-on) #gflight { display: none; }
+  .gf {
+    position: absolute; top: 0; left: 0; height: auto;
+    transform-origin: 50% 50%; will-change: transform;
+    /* placed by rect maths every frame — never by layout */
+  }
+  /* while a glyph is in transit its card slot holds the space but stays blank;
+     on landing the overlay hides and the real one takes over, so :hover works */
+  .gf-on .pillar .glyph { visibility: hidden; }
+  .gf-on .pillar .glyph.landed { visibility: visible; }
+  @keyframes gf-settle {
+    0%   { transform: translateY(-9px) rotate(-7deg) scale(1.07); }
+    58%  { transform: translateY(3px) rotate(2.5deg) scale(0.985); }
+    100% { transform: none; }
+  }
+  .pillar .glyph.landed { animation: gf-settle .58s cubic-bezier(.2,.8,.3,1) both; }
+  .pillar:nth-child(2) .glyph.landed { animation-delay: .07s; }
+  .pillar:nth-child(3) .glyph.landed { animation-delay: .14s; }
+  /* reduced motion / capture probes never fly: the icons simply live in the card */
+  .sky-instant .gf-row { display: none; }
   #s-intro .pillars-note {
     grid-column: 1 / -1;
     margin: clamp(14px, 1.6vw, 20px) 0 0;
@@ -916,6 +955,10 @@
       </div>
       <h1 class="reveal d1">Hey, I’m Ajeet<br><span class="h1-role">Senior Product Designer</span></h1>
       <p class="role reveal d2">Designing products for <strong>millions across borders</strong><br>and shipping ideas with <strong>Claude</strong></p>
+      <!-- anchors only: the glyphs you see here live in #gflight -->
+      <div class="gf-row reveal d3" aria-hidden="true">
+        <i class="gf-slot"></i><i class="gf-slot"></i><i class="gf-slot"></i>
+      </div>
     </div>
     <div class="scroll-cue"><span class="dot"></span>Ascend</div>
   </section>
@@ -1789,5 +1832,122 @@
 </defs>
 </svg>
 </div>
+
+<!-- glyph flight layer — the three pillar icons while they are in transit.
+     Body level on purpose: the same constraint as the horse diorama, an
+     overlay inserted into the section tree does not survive. -->
+<div id="gflight" aria-hidden="true">
+  <svg class="gf" viewBox="-3 0 38.44 39.44"><use href="#svg-902929890_11043"/></svg>
+  <svg class="gf" viewBox="287.875 0 38.44 39.44"><use href="#svg-902929890_11043"/></svg>
+  <svg class="gf" viewBox="142.436 0 38.44 39.44"><use href="#svg-902929890_11043"/></svg>
+</div>
+<script>
+  (function () {
+    var row = document.querySelector('#s-hero .gf-row');
+    var flight = document.getElementById('gflight');
+    if (!row || !flight) return;
+    /* Reduced motion / capture probes: no flight at all, the icons just sit in
+       the card where they have always been. Test the CONDITION, not sky.js's
+       .sky-instant class — sky.js is deferred, so it stamps that class after
+       this inline script has already run, and trusting it here left the card
+       glyphs hidden with nothing ever flying to them. */
+    var STILL = matchMedia('(prefers-reduced-motion: reduce)').matches ||
+                location.hash === '#instant' ||
+                document.documentElement.classList.contains('sky-instant') ||
+                // desktop only, as in the classic build — below this the pillar
+                // row wraps tight and the flight has nowhere to read
+                !matchMedia('(min-width: 768px)').matches;
+    if (STILL) return;
+
+    var slots = row.querySelectorAll('.gf-slot');
+    var cards = document.querySelectorAll('.pillar .glyph');
+    var gs = flight.querySelectorAll('.gf');
+    if (slots.length !== 3 || cards.length !== 3 || gs.length !== 3) return;
+
+    document.documentElement.classList.add('gf-on');
+    window.__gfT = 0;                       // debug/verification hook, mirrors sky.js
+    var landed = false;
+    var p = 0;                              // scrubbed progress, lags pTarget
+    var lastT = performance.now();
+
+    function clamp(v) { return v < 0 ? 0 : v > 1 ? 1 : v; }
+
+    function frame() {
+      // sky.js can raise .sky-instant later than us (deferred, or a runtime
+      // reduced-motion change): stand down and hand the icons back to the card
+      if (document.documentElement.classList.contains('sky-instant')) {
+        document.documentElement.classList.remove('gf-on');
+        flight.style.display = 'none';
+        return;
+      }
+      var vh = innerHeight;
+
+      /* Shape lifted from the classic build's icon-flight (GSAP ScrollTrigger,
+         see classic.html): ONE linear scrubbed move, not a staged one. Progress
+         is linear in scroll from the top of the page to the moment the pillar
+         row's centre reaches 62% of the viewport — `ease: 'none'`, with the
+         glide coming entirely from scrub lag rather than an easing curve.
+         Both endpoints are read live and scroll together, so a straight lerp
+         between them stays on screen the whole way; the earlier staged version
+         held the glyphs back while the hero climbed away, which is what made
+         them look like they were dropping. */
+      var mid = cards[1].getBoundingClientRect();
+      var endY = (mid.top + scrollY + mid.height / 2) - vh * 0.62;
+      var pTarget = endY > 1 ? clamp(scrollY / endY) : (scrollY > 0 ? 1 : 0);
+
+      // scrub: catch up to the scroll position rather than tracking it exactly.
+      // GSAP's scrub:0.4 in the original; same smoothing constant sky.js uses.
+      var now = performance.now();
+      var dt = Math.min(0.05, (now - lastT) / 1000) || 0.016;
+      lastT = now;
+      p += (pTarget - p) * Math.min(1, dt * 3.4);
+      if (Math.abs(pTarget - p) < 0.0005) p = pTarget;
+      window.__gfT = p;
+
+      var op = parseFloat(getComputedStyle(row).opacity) || 0;
+
+      for (var i = 0; i < 3; i++) {
+        var a = slots[i].getBoundingClientRect();
+        var b = cards[i].getBoundingClientRect();
+        var ax = a.left + a.width / 2, ay = a.top + a.height / 2;
+        var bx = b.left + b.width / 2, by = b.top + b.height / 2;
+
+        var cx = ax + (bx - ax) * p;
+        var cy = ay + (by - ay) * p;
+
+        // idle bob, which the original pauses the moment the flight owns the
+        // transforms — faded out by p here so there is no visible hand-over
+        var drift = Math.sin(now / 1600 + i * 2.1);
+        cy += (1 - p) * drift * 4;
+
+        var w = a.width + (b.width - a.width) * p;
+        var g = gs[i];
+        g.style.width = w.toFixed(1) + 'px';
+        g.style.opacity = op;
+        g.style.transform =
+          'translate3d(' + (cx - w / 2).toFixed(1) + 'px,' + (cy - w / 2).toFixed(1) + 'px,0)' +
+          ' rotate(' + ((1 - p) * ((i - 1) * 5 + drift * 3)).toFixed(2) + 'deg)';
+      }
+
+      // hand off once settled: the overlay goes away and the real card glyph
+      // appears in exactly the spot it was already tracking, so the swap is
+      // invisible — and :hover works again once it owns the slot
+      var done = p > 0.999;
+      if (done !== landed) {
+        landed = done;
+        flight.style.display = landed ? 'none' : '';
+        for (var k = 0; k < 3; k++) cards[k].classList.toggle('landed', landed);
+      }
+    }
+
+    // rAF carries the motion, but it is starved under headless virtual time and
+    // in some embedded contexts — the same reason sky.js keeps a timer fallback
+    // beside its scroll listener. Belt and braces, and frame() is idempotent.
+    (function tick() { frame(); requestAnimationFrame(tick); })();
+    addEventListener('scroll', frame, { passive: true });
+    addEventListener('resize', frame);
+    setInterval(frame, 600);
+  })();
+</script>
 </body>
 </html>
