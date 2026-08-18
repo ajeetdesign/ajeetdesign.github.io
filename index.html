@@ -253,9 +253,11 @@
      card as the settle target. Nothing here paints without JS: no .gf-on on
      <html> means the layer is display:none and the card glyphs are just
      visible where they always were. */
+  /* the three sit almost shoulder to shoulder at rest, then fan apart on the
+     way to the card — a tight cluster reads as one object to pick up */
   .gf-row {
     display: flex; justify-content: center; align-items: center;
-    column-gap: clamp(26px, 4vw, 52px);
+    column-gap: clamp(6px, 0.8vw, 10px);
     margin-top: clamp(26px, 3.4vw, 42px);
   }
   .gf-slot { display: block; width: var(--glyph); height: var(--glyph); }
@@ -1891,8 +1893,13 @@
          between them stays on screen the whole way; the earlier staged version
          held the glyphs back while the hero climbed away, which is what made
          them look like they were dropping. */
+      /* Land as the card ARRIVES, not as it leaves. The pillars sit at the foot
+         of a tall panel, so waiting for them to reach 62% of the viewport meant
+         the card had already been on screen a while and was starting to climb
+         out from under them. 0.9 puts the finish just as the row clears the
+         bottom edge, which is the moment the card reads as "here". */
       var mid = cards[1].getBoundingClientRect();
-      var endY = (mid.top + scrollY + mid.height / 2) - vh * 0.62;
+      var endY = (mid.top + scrollY + mid.height / 2) - vh * 0.90;
       var pTarget = endY > 1 ? clamp(scrollY / endY) : (scrollY > 0 ? 1 : 0);
 
       // scrub: catch up to the scroll position rather than tracking it exactly.
@@ -1912,21 +1919,49 @@
         var ax = a.left + a.width / 2, ay = a.top + a.height / 2;
         var bx = b.left + b.width / 2, by = b.top + b.height / 2;
 
-        var cx = ax + (bx - ax) * p;
-        var cy = ay + (by - ay) * p;
+        /* Stagger: each glyph runs slightly behind the last, so they stop
+           moving as one rigid row. Re-normalised so every one still reaches
+           exactly 1 by the end and lands on its slot. */
+        var q = clamp((p - i * 0.05) / (1 - 0.10));
+
+        /* The path curves instead of running straight. A straight lerp between
+           two points is a straight line however it is eased, so the arc has to
+           come from a perpendicular offset: a sine bell, zero at both ends and
+           widest mid-flight. Outer glyphs bow outward and the whole row lifts,
+           so they swing up and out before dropping onto the words. */
+        var arc = Math.sin(Math.PI * q);
+        var cx = ax + (bx - ax) * q + arc * (i - 1) * 96;
+        var cy = ay + (by - ay) * q - arc * 74;
 
         // idle bob, which the original pauses the moment the flight owns the
-        // transforms — faded out by p here so there is no visible hand-over
+        // transforms — faded out by q here so there is no visible hand-over
         var drift = Math.sin(now / 1600 + i * 2.1);
-        cy += (1 - p) * drift * 4;
+        cy += (1 - q) * drift * 4;
 
-        var w = a.width + (b.width - a.width) * p;
+        /* Airborne cues, all keyed off the same arc bell so they exist only in
+           flight and are exactly zero at both ends — the row sits flat in the
+           hero and lands flat on the card, no state to hand over:
+             scale    they rise toward the viewer at the apex
+             shadow   the tile lifts off the page and casts further
+             flutter  a fast, small wobble, the thing that reads as "in the air"
+           rather than "being tweened". */
+        var scale = 1 + arc * 0.16;
+        var flutter = Math.sin(now / 210 + i * 1.7) * arc * 3.5;
+
+        var w = a.width + (b.width - a.width) * q;
         var g = gs[i];
         g.style.width = w.toFixed(1) + 'px';
         g.style.opacity = op;
+        // cleared at rest so three filters are not left running on a static row
+        g.style.filter = arc > 0.002
+          ? 'drop-shadow(0 ' + (4 + arc * 18).toFixed(1) + 'px ' +
+            (6 + arc * 20).toFixed(1) + 'px rgba(16, 30, 52, ' + (0.10 + arc * 0.20).toFixed(3) + '))'
+          : '';
         g.style.transform =
           'translate3d(' + (cx - w / 2).toFixed(1) + 'px,' + (cy - w / 2).toFixed(1) + 'px,0)' +
-          ' rotate(' + ((1 - p) * ((i - 1) * 5 + drift * 3)).toFixed(2) + 'deg)';
+          // bank into the curve, then straighten as it lands
+          ' rotate(' + ((1 - q) * ((i - 1) * 5 + drift * 3) + arc * (i - 1) * -7 + flutter).toFixed(2) + 'deg)' +
+          ' scale(' + scale.toFixed(3) + ')';
       }
 
       // hand off once settled: the overlay goes away and the real card glyph
