@@ -211,13 +211,13 @@
   .xp-logo {
     width: clamp(38px, 3.4vw, 46px); height: clamp(38px, 3.4vw, 46px);
     border-radius: 12px; display: grid; place-items: center;
-    font-size: clamp(17px, 1.6vw, 20px); font-weight: 800; letter-spacing: -0.02em;
-    color: #fff; box-shadow: 0 6px 16px -8px rgba(15, 30, 50, 0.6);
+    background: #fff; border: 1px solid rgba(28, 43, 58, 0.1);
+    box-shadow: 0 6px 16px -8px rgba(15, 30, 50, 0.6);
   }
-  .xp-logo.porter { background: #2f6bff; }
-  .xp-logo.juspay { background: #111827; }
-  .xp-logo.convin { background: #111827; }
-  .xp-logo svg { width: 52%; height: 52%; }
+  /* real brand marks — sized optically, not to the box */
+  .xp-logo img { display: block; width: auto; height: auto; max-width: 60%; max-height: 60%; }
+  .xp-logo.porter img { max-height: 64%; }
+  .xp-logo.convin img { max-width: 66%; }
   .xp-co { display: block; font-size: clamp(16px, 1.6vw, 19px); font-weight: 700; letter-spacing: -0.02em; line-height: 1.25; }
   .xp-role { display: block; font-size: clamp(13px, 1.25vw, 15px); font-weight: 400; color: var(--ink-soft); line-height: 1.4; }
   .xp-yr { font-size: clamp(12px, 1.15vw, 14px); font-weight: 500; color: var(--ink-soft); white-space: nowrap; }
@@ -979,7 +979,7 @@
           <li class="xp-item now">
             <p class="xp-stage">Current</p>
             <div class="xp-row">
-              <span class="xp-logo porter">P</span>
+              <span class="xp-logo porter"><img src="images/logo-porter.svg" alt="Porter" width="46" height="46" loading="lazy" decoding="async"></span>
               <span>
                 <span class="xp-co">Porter</span>
                 <span class="xp-role">Senior Product Designer</span>
@@ -990,11 +990,7 @@
           <li class="xp-item">
             <p class="xp-stage">Previously</p>
             <div class="xp-row">
-              <span class="xp-logo juspay">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round">
-                  <path d="M12 5v14M5 12h14"/>
-                </svg>
-              </span>
+              <span class="xp-logo juspay"><img src="images/logo-juspay.svg" alt="Juspay" width="46" height="46" loading="lazy" decoding="async"></span>
               <span>
                 <span class="xp-co">Juspay</span>
                 <span class="xp-role">Product Designer</span>
@@ -1004,7 +1000,7 @@
           </li>
           <li class="xp-item">
             <div class="xp-row">
-              <span class="xp-logo convin">C</span>
+              <span class="xp-logo convin"><img src="images/logo-convin.png" alt="Convin.ai" width="46" height="46" loading="lazy" decoding="async"></span>
               <span>
                 <span class="xp-co">Convin.ai</span>
                 <span class="xp-role">Product Designer</span>
