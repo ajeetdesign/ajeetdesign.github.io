@@ -68,6 +68,50 @@
   .head .lede { font-size: clamp(16px, 1.8vw, 21px); color: var(--ink-soft); line-height: 1.6; margin: 0 auto; max-width: 46ch; }
   .head .lede strong { font-weight: 600; color: var(--ink-dark); }
 
+  /* ── deck: lands as a stack, holds, then fans open ─────────────────────
+     Geometry all derives from --cw. The fan itself is painted frame-by-frame
+     in JS; CSS only owns the settle once the reveal has handed over. */
+  .deck {
+    --cw: clamp(118px, 17.1vw, 268px);
+    --ch: calc(var(--cw) / 0.546);
+    --card-r: calc(var(--cw) * 0.105);
+    --deck-ease: cubic-bezier(.16, 1, .3, 1);
+    --deck-dur: 640ms;
+    position: relative;
+    width: min(100%, 1180px);
+    height: calc(var(--ch) * 1.6);
+    margin: clamp(2px, 1vw, 14px) 0 clamp(6px, 1.4vw, 20px);
+    overflow: hidden;              /* outer cards bleed off on narrow screens */
+    touch-action: pan-y;           /* horizontal drag, vertical scroll */
+    -webkit-user-select: none; user-select: none;
+  }
+  .deck.live { cursor: grab; }
+  .deck.grabbing { cursor: grabbing; }
+  .deck:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; border-radius: 20px; }
+  .card {
+    position: absolute; left: 50%; top: 42%;
+    width: var(--cw); height: var(--ch);
+    margin-left: calc(var(--cw) / -2);
+    margin-top: calc(var(--ch) / -2);
+    border-radius: var(--card-r);
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    box-shadow: 0 calc(var(--cw) * .04) calc(var(--cw) * .1) calc(var(--cw) * -.02) rgba(15, 30, 50, 0.34);
+    will-change: transform;
+    opacity: 0;
+  }
+  .deck.live .card { transition: transform var(--deck-dur) var(--deck-ease), opacity .32s linear; }
+  .deck.grabbing .card { transition: opacity .32s linear; }
+  .card img { width: 100%; height: 100%; object-fit: cover; display: block; pointer-events: none; }
+  /* Label for an unfilled card. Overlaid, not a grid item — as a sibling of
+     the artwork it would take a row of its own and shorten it. */
+  .card[data-n]::after {
+    content: attr(data-n); position: absolute; inset: 0;
+    display: grid; place-items: center;
+    font-size: 10px; font-weight: 700;
+    letter-spacing: 0.18em; text-transform: uppercase; color: rgba(255, 255, 255, 0.85);
+  }
+
   /* ── panels ────────────────────────────────────────────────────────────── */
   .panel {
     width: min(94vw, 900px); padding: clamp(30px, 4.2vw, 56px);
@@ -246,6 +290,7 @@
     html { scroll-behavior: auto; }
     .rv, .quote.rv { opacity: 1; transform: none; filter: none; transition: none; }
     .photo, .tag, .mail { transition: none; }
+    .deck.live .card { transition-duration: 1ms !important; }
   }
 </style>
 </head>
@@ -268,6 +313,9 @@
     <h1>Hi there — I'm Ajeet.</h1>
     <p class="lede">A product designer who has spent the past four-plus years building for both <strong>B2B and B2C</strong>, at Juspay and Porter. Right now I'm solving <strong>retention and enterprise products</strong> at Porter.</p>
   </header>
+
+  <div class="deck" id="deck" role="img" tabindex="0"
+       aria-label="A few frames from my camera roll. Drag sideways to shuffle, or use the left and right arrow keys."></div>
 
   <section class="panel rv">
     <h2>I got into design by accident.</h2>
@@ -419,6 +467,224 @@
   addEventListener('resize', tick);
   tick();
   setInterval(tick, 600);
+})();
+</script>
+
+<script>
+/* ═══════════════════════════════════════════════════════════════════════
+   DECK — a stack of cards that fans open, then takes hover and drag.
+
+   REVEAL is a *triggered* timeline, not a scroll scrub: the stack lands,
+   holds for ~0.5s, then fans open over ~0.9s with the centre card leading
+   and the outer cards trailing. Scrubbing it to scroll would skip the
+   stack entirely whenever you scroll fast.
+
+   FAN (settled): rotation linear in seat, x linear (~51% overlap),
+   y quadratic, z-index peaking in the middle.
+   HOVER: the pointed-at card lifts, grows, part-straightens and comes to
+   front; every other card is pushed away from it.
+   DRAG: cycles the deck through the seats, enabled once the fan is open.
+   ══════════════════════════════════════════════════════════════════════ */
+(function () {
+  var deck = document.getElementById('deck');
+  if (!deck) return;
+
+  /* STAND-IN ARTWORK — borrowed from the reference build, hotlinked from its
+     CDN. Third-party images of a real person: fine while designing, must be
+     swapped for Ajeet's own frames before this ships. Drop the `cdn` prefix
+     and point `src` at images/… ; an entry with no `src` falls back to the
+     gradient placeholder and its `label`. */
+  var cdn = 'https://cdn.prod.website-files.com/67b5a02dc5d338960b17a7e9/';
+  var CARDS = [
+    { cls: 'ph-a', label: 'Photo 01', src: cdn + '68d3ba846e593e52541fb7a8_Lando-6-on-track.webp',  alt: 'Trackside, cameras up' },
+    { cls: 'ph-c', label: 'Photo 02', src: cdn + '6830302d42237886d0c4b24c_ln-social-img-2.webp',   alt: 'Mirror-ball helmet' },
+    { cls: 'ph-e', label: 'Photo 03', src: cdn + '68d3ba8463e72a95c2d8a0ba_Lando-4-off-track.webp', alt: 'Off-track portrait' },
+    { cls: 'ph-b', label: 'Photo 04', src: cdn + '68d3ba848fb98d1ca68eb6c8_Lando-5-off-track.webp', alt: 'Off-track, garage light' },
+    { cls: 'ph-h', label: 'Photo 05', src: cdn + '68d3ba8449f0506fbaad037b_Lano-5-on-track.webp',   alt: 'On the grid' },
+    { cls: 'ph-d', label: 'Photo 06', src: cdn + '6830302dadd0727e6ac034dd_ln-social-img-6.webp',   alt: 'Sprint weekend backdrop' },
+    { cls: 'ph-i', label: 'Photo 07', src: cdn + '68d3ba83f162f4d2f4e78442_Lando-6-off-track.webp', alt: 'Off duty' }
+  ];
+
+  var CFG = {
+    /* settled fan */
+    rotStep: 6,           // deg per seat from centre
+    xFactor: .494,        // x = seat * cardW * this
+    yFactor: .0324,       // y = seat^2 * cardH * this
+
+    /* the stack it starts as — a few px of slop across the seven cards */
+    stackRot: [-2.4, 1.7, -1.1, .5, 2.1, -1.5, 2.6],
+    stackX:   [-3, 2, -1, 0, 2, -2, 3],
+    stackRise: .13,       // x cardH, how far below it enters from
+
+    /* reveal timeline, as fractions of TOTAL */
+    TOTAL: 1650,          // ms
+    riseEnd: .16,         // stack has landed
+    openAt: .30,          // hold is over, fan starts
+    openLag: .18,         // outermost card trails the centre by this much
+    liveAt: .86,          // hand interaction over to CSS
+
+    /* hover */
+    hoverLift: .073,      // x cardH, upward
+    hoverScale: 1.075,
+    hoverStraighten: .55, // eases toward upright, not all the way to 0
+    push: [0, .205, .102, .047, .024]  // x cardW, by seat-distance from hovered
+  };
+
+  var N = CARDS.length, HALF = N / 2;
+  var clamp = function (v, a, b) { return v < a ? a : v > b ? b : v; };
+  var lerp = function (a, b, t) { return a + (b - a) * t; };
+  var outQuart = function (t) { return 1 - Math.pow(1 - t, 4); };
+  var outCubic = function (t) { return 1 - Math.pow(1 - t, 3); };
+  /* fold into [-HALF, HALF) so the deck cycles endlessly */
+  var seat = function (v) { return ((v + HALF) % N + N) % N - HALF; };
+
+  var reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var hover = null, pos = 0, open = 0;
+
+  var els = CARDS.map(function (c, i) {
+    var el = document.createElement('div');
+    el.className = 'card ' + (c.src ? '' : c.cls);
+    if (c.src) {
+      var img = document.createElement('img');
+      img.src = c.src; img.alt = c.alt || '';
+      img.draggable = false; img.decoding = 'async';
+      el.appendChild(img);
+    } else {
+      el.setAttribute('data-n', c.label);
+    }
+    el.addEventListener('pointerenter', function () {
+      if (open >= CFG.liveAt && !drag.on) { hover = i; paint(); }
+    });
+    el.addEventListener('pointerleave', function () {
+      if (hover === i) { hover = null; paint(); }
+    });
+    deck.appendChild(el);
+    return el;
+  });
+
+  function paint() {
+    var cw = els[0].offsetWidth || 1;
+    var ch = els[0].offsetHeight || 1;
+    var rise = outCubic(clamp(open / CFG.riseEnd, 0, 1));
+    var live = open >= CFG.liveAt;
+    var hSeat = (live && hover !== null) ? seat(hover - pos) : null;
+
+    for (var i = 0; i < N; i++) {
+      var s = seat(i - pos), d = Math.abs(s);
+
+      /* the fan opens outward: centre card first, outermost last */
+      var lag = (d / HALF) * CFG.openLag;
+      var span = 1 - CFG.openAt - CFG.openLag;
+      var e = outQuart(clamp((open - CFG.openAt - lag) / span, 0, 1));
+
+      var x = lerp(CFG.stackX[i % N], s * cw * CFG.xFactor, e);
+      var y = lerp(0, s * s * ch * CFG.yFactor, e);
+      var rot = lerp(CFG.stackRot[i % N], s * CFG.rotStep, e);
+      var sc = 1;
+      var z = 60 - Math.round(d * 10);
+
+      y += (1 - rise) * ch * CFG.stackRise;          // entrance from below
+
+      if (hover === i) {
+        y -= ch * CFG.hoverLift;
+        sc *= CFG.hoverScale;
+        rot *= CFG.hoverStraighten;
+        z = 200;
+      } else if (hSeat !== null) {
+        var k = Math.min(Math.round(Math.abs(s - hSeat)), 4);
+        x += Math.sign(s - hSeat) * cw * CFG.push[k];
+        y += Math.min(k, 3) * 3;
+      }
+
+      /* fade the seat that is mid-wrap so cycling never pops */
+      var wrapOp = d > 3.02 ? clamp((HALF + .04 - d) / .5, 0, 1) : 1;
+      var enterOp = clamp(open / (CFG.riseEnd * .8), 0, 1);
+
+      var el = els[i];
+      el.style.transform = 'translate3d(' + x.toFixed(2) + 'px,' + y.toFixed(2) + 'px,0) rotate(' + rot.toFixed(3) + 'deg) scale(' + sc.toFixed(4) + ')';
+      el.style.zIndex = z;
+      el.style.opacity = Math.min(wrapOp, enterOp);
+      el.style.pointerEvents = wrapOp < .6 ? 'none' : '';
+    }
+  }
+
+  var started = false;
+  function run() {
+    if (started) return;
+    started = true;
+    if (reduced) { open = 1; deck.classList.add('live'); paint(); return; }
+    var t0 = performance.now();
+    (function frame() {
+      open = clamp((performance.now() - t0) / CFG.TOTAL, 0, 1);
+      paint();
+      if (open >= CFG.liveAt) deck.classList.add('live');  // CSS takes the hover
+      if (open < 1) requestAnimationFrame(frame);
+    })();
+  }
+
+  new IntersectionObserver(function (es) {
+    es.forEach(function (en) {
+      if (!en.isIntersecting) return;
+      setTimeout(run, 260);            // let the intro settle, then the deck
+    });
+  }, { threshold: .1, rootMargin: '0px 0px -12% 0px' }).observe(deck);
+
+  addEventListener('resize', paint);
+
+  /* ── drag to shuffle ─────────────────────────────────────────────────── */
+  var drag = { on: false, id: null, x0: 0, pos0: 0, lastX: 0, lastT: 0, v: 0 };
+  var step = function () { return (els[0].offsetWidth || 200) * CFG.xFactor; };
+  var snapRAF = 0;
+
+  deck.addEventListener('pointerdown', function (e) {
+    if (e.button || open < CFG.liveAt) return;
+    drag.on = true; drag.id = e.pointerId;
+    drag.x0 = drag.lastX = e.clientX;
+    drag.pos0 = pos; drag.v = 0; drag.lastT = performance.now();
+    hover = null;
+    deck.classList.add('grabbing');
+    deck.setPointerCapture(e.pointerId);
+    cancelAnimationFrame(snapRAF);
+    paint();
+  });
+
+  deck.addEventListener('pointermove', function (e) {
+    if (!drag.on || e.pointerId !== drag.id) return;
+    var now = performance.now();
+    drag.v = (e.clientX - drag.lastX) / Math.max(now - drag.lastT, 1);   // px/ms
+    drag.lastX = e.clientX; drag.lastT = now;
+    pos = drag.pos0 - (e.clientX - drag.x0) / step();
+    paint();
+  });
+
+  function release(e) {
+    if (!drag.on || (e && e.pointerId !== drag.id)) return;
+    drag.on = false;
+    deck.classList.remove('grabbing');
+    snap(Math.round(pos + clamp(-drag.v * 190 / step(), -2.4, 2.4)));  // flick carries
+  }
+  deck.addEventListener('pointerup', release);
+  deck.addEventListener('pointercancel', release);
+
+  function snap(target) {
+    var from = pos, t0 = performance.now(), dur = reduced ? 1 : 760;
+    cancelAnimationFrame(snapRAF);
+    (function frame() {
+      var t = clamp((performance.now() - t0) / dur, 0, 1);
+      pos = lerp(from, target, outQuart(t));
+      paint();
+      if (t < 1) snapRAF = requestAnimationFrame(frame);
+      else pos = ((target % N) + N) % N;
+    })();
+  }
+
+  deck.addEventListener('keydown', function (e) {
+    if (open < CFG.liveAt) return;
+    if (e.key === 'ArrowRight') { snap(Math.round(pos) + 1); e.preventDefault(); }
+    if (e.key === 'ArrowLeft') { snap(Math.round(pos) - 1); e.preventDefault(); }
+  });
+
+  paint();
 })();
 </script>
 

@@ -493,6 +493,10 @@ var COVERS = { porter: 'images/porter-cover.jpg' };
 /* real body images keyed by case id → placeholder label */
 var FIGURES = { porter: {
   'Porter-branded trucks and two-wheelers on the road': 'images/porter-context.jpg',
+  'The manual ops behind the program': {
+    src: 'images/porter-manual-ops.png?v=3',
+    srcset: 'images/porter-manual-ops-1080.png?v=3 1080w, images/porter-manual-ops.png?v=3 2160w'
+  },
   'Partner motivations & research insights': 'images/porter-personas.jpg',
   'Iteration — narrative, visuals & onboarding concepts': 'images/porter-iterations.jpg',
   'Final onboarding flow': 'images/porter-onboarding-flow.jpg',
@@ -516,9 +520,19 @@ mark.textContent = c.mark; mark.style.background = c.markBg;
 document.getElementById('bar-org').textContent = c.org;
 document.getElementById('bar-proj').textContent = c.proj;
 
+/* A FIGURES entry is either a plain src, or {src, srcset} to hand the browser
+   an exact pixel match per display density. A fixed 2x asset has to be
+   resampled on a 1x screen, and that resample is what reads as soft on
+   flat artwork with fine type. `sizes` mirrors .wrap: min(92vw, 1080px). */
 function shot(s, grad, extra) {
-  var src = (FIGURES[id] || {})[s[0]];
-  if (src) return '<img class="shot ' + (s[1] || '') + ' ' + (extra || '') + '" src="' + src + '" alt="' + s[0] + '">';
+  var f = (FIGURES[id] || {})[s[0]];
+  if (f) {
+    var src = typeof f === 'string' ? f : f.src;
+    var srcset = (typeof f === 'object' && f.srcset)
+      ? ' srcset="' + f.srcset + '" sizes="(max-width: 1173px) 92vw, 1080px"' : '';
+    return '<img class="shot ' + (s[1] || '') + ' ' + (extra || '') + '" src="' + src + '"' +
+      srcset + ' alt="' + s[0] + '">';
+  }
   return '<div class="shot ' + grad + ' ' + (s[1] || '') + ' ' + (extra || '') + '" data-n="' + s[0] + '"></div>';
 }
 
