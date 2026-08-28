@@ -196,6 +196,36 @@
   }
   .col3 p { max-width: none; margin: 0; }
   .col3 strong { color: var(--ink-dark); font-weight: 700; }
+  /* image + the copy describing it, kept as one unit so they travel together
+     when the row collapses to a single column */
+  .pairs {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: clamp(18px, 2.6vw, 36px);
+    margin: clamp(18px, 2.2vw, 26px) 0 clamp(22px, 2.8vw, 32px);
+  }
+  .pairs .figure { margin: 0 0 clamp(12px, 1.4vw, 16px); }
+  /* The iteration frames are cut-out mockups on transparency, so they carry no
+     plate of their own — the panel chrome every other .shot gets would draw a
+     bordered box around empty space, and the shared hover would lift and shadow
+     a rectangle that isn't there. A portrait box lets the single-phone shots
+     fill their column instead of being held back by the two-phone one. */
+  .pairs .shot {
+    aspect-ratio: 4 / 5; object-fit: contain;
+    border: 0; border-radius: 0; box-shadow: none; background: none;
+    transition: none;
+  }
+  /* A two-screen frame is as wide as it is tall, so in an equal column it hits
+     the width first and renders short while its siblings fill the height. Give
+     it 1.6x the column and the matching box ratio, and every frame lands at the
+     same height — which is what makes the phones read as one size. The three
+     ratios are coupled: 1.6 x 5/8 = 1/1, so the taller 5/8 box is restored here
+     rather than inherited. */
+  .pairs--wide-last { grid-template-columns: 1fr 1fr 1.6fr; }
+  .pairs--wide-last .shot { aspect-ratio: 5 / 8; }
+  .pairs--wide-last .pair:last-child .shot { aspect-ratio: 1 / 1; }
+  .pairs .figure:hover .shot { transform: none; box-shadow: none; }
+  .pairs p { max-width: none; margin: 0; }
+  .pairs strong { color: var(--ink-dark); font-weight: 700; }
   /* tertiary heading: inside a problem the h3 slots are already taken by the
      problem title and .sub-h, so this is an h4 and must read below both */
   .sub-h4 {
@@ -365,7 +395,8 @@
     .callouts, .outcomes, .hmw { grid-template-columns: 1fr; }
     .secnav a span { display: none; }
     .secnav a { padding-bottom: 10px; }
-    .shot-row.n2, .shot-row.n3, .col3 { grid-template-columns: 1fr; }
+    .shot-row.n2, .shot-row.n3, .col3, .pairs,
+    .pairs--wide-last { grid-template-columns: 1fr; }
     .flow { grid-template-columns: repeat(2, 1fr); row-gap: 20px; }
     .ch-split { grid-template-columns: 1fr; }
     .ch-split .shot { min-height: 0; aspect-ratio: 4 / 3; }
@@ -497,11 +528,25 @@ var FIGURES = { porter: {
     src: 'images/porter-manual-ops.png?v=3',
     srcset: 'images/porter-manual-ops-1080.png?v=3 1080w, images/porter-manual-ops.png?v=3 2160w'
   },
-  'Partner motivations & research insights': 'images/porter-personas.jpg',
-  'Iteration — narrative, visuals & onboarding concepts': 'images/porter-iterations.jpg',
+  'Partner motivations & research insights': {
+    src: 'images/porter-personas.png?v=2',
+    srcset: 'images/porter-personas-1080.png?v=2 1080w, images/porter-personas.png?v=2 2160w'
+  },
+  'Iteration — narrative': 'images/porter-iteration-1.webp',
+  'Iteration — visuals': 'images/porter-iteration-2.webp',
+  'Onboarding concepts': 'images/porter-iteration-3.webp',
+  'Verification — the ask': 'images/porter-verification-1.webp',
+  'Verification — the selfie': 'images/porter-verification-2.webp',
+  'Verification — the result': 'images/porter-verification-3.webp',
   'Final onboarding flow': 'images/porter-onboarding-flow.jpg',
-  'Entry point exploration': 'images/porter-entry-points.jpg',
-  'Existing verification flow': 'images/porter-verification-existing.jpg'
+  'Entry point exploration': 'images/porter-entry-points.jpg'
+} };
+
+/* Rows whose last frame holds two screens. That frame is width-constrained
+   while its single-screen siblings are height-constrained, so without a wider
+   column its phones render smaller than everything beside them. */
+var PAIRS_WIDE_LAST = { porter: {
+  'Iteration — narrative|Iteration — visuals|Onboarding concepts': true
 } };
 
 /* wide sections: place the figure after paragraph index N, keyed by case id → section nav */
@@ -509,8 +554,7 @@ var FIG_AFTER = { porter: { 'Why it couldn\'t scale': 0 } };
 
 /* collapse a multi-image row into one placeholder, keyed by case id → joined labels */
 var MERGE_SHOTS = { porter: {
-  'Partner motivations|Research insights': 'Partner motivations & research insights',
-  'Iteration — narrative|Iteration — visuals|Onboarding concepts': 'Iteration — narrative, visuals & onboarding concepts'
+  'Partner motivations|Research insights': 'Partner motivations & research insights'
 } };
 
 document.title = c.title + ' — Ajeet';
@@ -597,7 +641,26 @@ function textSection(sec, fallbackK) {
 /* content blocks: paragraphs, image rows, insight + result callouts */
 function blocksHtml(blocks) {
   var bh = '';
-  blocks.forEach(function (b) {
+  for (var bi = 0; bi < blocks.length; bi++) {
+    var b = blocks[bi], next = blocks[bi + 1];
+
+    /* A shots row followed by a cols block of the same length is one idea per
+       column: image, then the copy describing it. Render them as paired units
+       rather than two sibling grids — aligning two grids only works while both
+       are three columns wide, and on a phone they collapse to every image
+       first, then every caption. */
+    if (b.shots && b.shots.length > 1 && next && next.cols &&
+        next.cols.length === b.shots.length &&
+        !(MERGE_SHOTS[id] || {})[b.shots.map(function (s) { return s[0]; }).join('|')]) {
+      var wide = (PAIRS_WIDE_LAST[id] || {})[b.shots.map(function (s) { return s[0]; }).join('|')];
+      bh += '<div class="pairs' + (wide ? ' pairs--wide-last' : '') + '">' + b.shots.map(function (s, k) {
+        return '<div class="pair rv"><figure class="figure">' + shot(s, c.grad, 'bleed') +
+          '</figure><p>' + next.cols[k] + '</p></div>';
+      }).join('') + '</div>';
+      bi++;                       /* the cols block has been consumed */
+      continue;
+    }
+
     if (b.p) bh += '<div class="wide-copy"><p class="rv">' + b.p + '</p></div>';
     else if (b.quote) bh += '<blockquote class="bq rv">&ldquo;' + b.quote + '&rdquo;' +
       (b.cite ? '<cite>' + b.cite + '</cite>' : '') + '</blockquote>';
@@ -627,7 +690,7 @@ function blocksHtml(blocks) {
       else inner = '<p>' + b.result + '</p>';
       bh += '<div class="result-card rv"><span class="rk">Result</span>' + inner + '</div>';
     }
-  });
+  }
   return bh;
 }
 
