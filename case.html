@@ -157,8 +157,7 @@
   .wide-copy { max-width: 760px; }
   .wide-copy--rest { margin-top: clamp(18px, 2.4vw, 28px); }
   .figure figcaption { font-size: 13px; color: var(--ink-faint); margin-top: 12px; text-align: center; }
-  .figure .shot { transition: transform .6s cubic-bezier(.2,.7,.2,1), box-shadow .6s ease; }
-  .figure:hover .shot { transform: scale(1.015) translateY(-2px); box-shadow: 0 3px 10px rgba(15, 30, 50, 0.06), 0 24px 54px -30px rgba(15, 30, 50, 0.32); }
+  /* figures do not react to hover — they are artwork, not controls */
 
   /* how-might-we cards */
   .hmw { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(12px, 1.6vw, 18px); margin-top: clamp(22px, 2.8vw, 32px); }
@@ -212,7 +211,6 @@
   .pairs .shot {
     aspect-ratio: 4 / 5; object-fit: contain;
     border: 0; border-radius: 0; box-shadow: none; background: none;
-    transition: none;
   }
   /* A two-screen frame is as wide as it is tall, so in an equal column it hits
      the width first and renders short while its siblings fill the height. Give
@@ -223,7 +221,6 @@
   .pairs--wide-last { grid-template-columns: 1fr 1fr 1.6fr; }
   .pairs--wide-last .shot { aspect-ratio: 5 / 8; }
   .pairs--wide-last .pair:last-child .shot { aspect-ratio: 1 / 1; }
-  .pairs .figure:hover .shot { transform: none; box-shadow: none; }
   .pairs p { max-width: none; margin: 0; }
   .pairs strong { color: var(--ink-dark); font-weight: 700; }
   /* tertiary heading: inside a problem the h3 slots are already taken by the
@@ -406,7 +403,7 @@
     html { scroll-behavior: auto; }
     .rv { opacity: 1; transform: none; transition: none; }
     .hero-banner .shot { transform: none !important; }
-    .figure:hover .shot, .hmw-card:hover { transform: none; }
+    .hmw-card:hover { transform: none; }
   }
 </style>
 </head>
@@ -538,6 +535,10 @@ var FIGURES = { porter: {
   'Verification — the ask': 'images/porter-verification-1.webp',
   'Verification — the selfie': 'images/porter-verification-2.webp',
   'Verification — the result': 'images/porter-verification-3.webp',
+  'Partner questions & business impact': {
+    src: 'images/porter-partner-questions.webp',
+    ratio: '36 / 17'          /* the artwork is 4320x2040, not the row's 2:1 */
+  },
   'Final onboarding flow': 'images/porter-onboarding-flow.jpg',
   'Entry point exploration': 'images/porter-entry-points.jpg'
 } };
@@ -564,18 +565,24 @@ mark.textContent = c.mark; mark.style.background = c.markBg;
 document.getElementById('bar-org').textContent = c.org;
 document.getElementById('bar-proj').textContent = c.proj;
 
-/* A FIGURES entry is either a plain src, or {src, srcset} to hand the browser
-   an exact pixel match per display density. A fixed 2x asset has to be
-   resampled on a 1x screen, and that resample is what reads as soft on
-   flat artwork with fine type. `sizes` mirrors .wrap: min(92vw, 1080px). */
+/* A FIGURES entry is either a plain src, or an object carrying any of:
+     srcset — hands the browser an exact pixel match per display density. A
+              fixed 2x asset has to be resampled on a 1x screen, and that
+              resample is what reads as soft on flat artwork with fine type.
+              `sizes` mirrors .wrap: min(92vw, 1080px).
+     ratio  — the artwork's own aspect, so the frame fits it rather than the
+              row's default. Every .shot is object-fit: cover, so a frame that
+              disagrees with the artwork crops it silently. */
 function shot(s, grad, extra) {
   var f = (FIGURES[id] || {})[s[0]];
   if (f) {
     var src = typeof f === 'string' ? f : f.src;
     var srcset = (typeof f === 'object' && f.srcset)
       ? ' srcset="' + f.srcset + '" sizes="(max-width: 1173px) 92vw, 1080px"' : '';
+    var ratio = (typeof f === 'object' && f.ratio)
+      ? ' style="aspect-ratio:' + f.ratio + '"' : '';
     return '<img class="shot ' + (s[1] || '') + ' ' + (extra || '') + '" src="' + src + '"' +
-      srcset + ' alt="' + s[0] + '">';
+      srcset + ratio + ' alt="' + s[0] + '">';
   }
   return '<div class="shot ' + grad + ' ' + (s[1] || '') + ' ' + (extra || '') + '" data-n="' + s[0] + '"></div>';
 }
