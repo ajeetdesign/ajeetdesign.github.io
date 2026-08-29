@@ -228,9 +228,77 @@
   .shot-bento .figure { margin: 0; min-height: 0; }
   .shot-bento .figure:first-child { grid-row: 1 / span 2; }
   .shot-bento .shot { width: 100%; height: 100%; aspect-ratio: auto; min-height: 0; }
+
+  /* ── prototype demo: the clip on a soft ground, then the steps ──────────────
+     The clip is a phone capture (1:2), so it can never fill a 1080px column on
+     its own. Sizing it by HEIGHT instead of width keeps the phone a believable
+     size at every viewport, and the panel behind it does the job of filling the
+     measure — the same move the gradient .shot placeholders make. */
+  .proto {
+    display: grid; place-items: center; overflow: hidden;
+    border-radius: 24px; padding: clamp(22px, 3.2vw, 44px) 0;
+    background: linear-gradient(160deg, #eaf1fa, #dce7f5 58%, #cedcee);
+    margin-bottom: clamp(22px, 2.8vw, 32px);
+  }
+  .proto video {
+    display: block; width: auto; height: clamp(340px, 46vw, 540px);
+    aspect-ratio: 1 / 2; border-radius: clamp(16px, 1.9vw, 26px);
+    background: #fff;
+    box-shadow: 0 2px 8px rgba(15, 30, 50, 0.10), 0 30px 60px -32px rgba(15, 30, 50, 0.5);
+  }
+  /* reduced motion gets the controls back, because a paused video with no way
+     to start it is just a screenshot that lies about being one */
+  .proto video[controls] { height: auto; width: clamp(220px, 26vw, 320px); }
+
+  /* the four mockups in one line, each step named underneath its own pair.
+     The shots are cut out to transparency, so there is no plate behind them —
+     they sit on the page like the iteration frames do. Equal HEIGHT is what
+     makes them read as one set; the widths differ because the devices do. */
+  .vgrid {
+    display: grid; grid-template-columns: repeat(4, 1fr); align-items: end;
+    gap: clamp(14px, 1.8vw, 24px) clamp(10px, 1.4vw, 20px);
+    margin-bottom: clamp(22px, 2.8vw, 32px);
+  }
+  /* Every shot is cropped to its screen and normalised to one aspect, because
+     the source mockups were drawn at four different proportions and no amount
+     of scaling makes those read as one set. The device frame is drawn here
+     instead — one ring for all four, so they are identical by construction.
+     A spread shadow costs no layout width, so the sizes stay equal. */
+  .vgrid img {
+    display: block; justify-self: center; width: auto;
+    height: clamp(240px, 27vw, 400px); aspect-ratio: 391 / 860;
+    border-radius: clamp(10px, 1.1vw, 15px);
+    box-shadow: 0 0 0 5px #1b1f26, 0 0 0 6px #454b55,
+                0 16px 30px -20px rgba(15, 30, 50, 0.45);
+  }
+  .vgrid .lbl {
+    grid-column: span 2; margin: 0;
+    padding-top: 12px; border-top: 1px solid var(--rule);
+  }
+  .vgrid .lbl .t {
+    display: flex; align-items: baseline; gap: 9px; margin: 0 0 6px;
+    font-size: clamp(13px, 1.45vw, 15px); font-weight: 700;
+    letter-spacing: -0.01em; color: var(--ink-dark);
+  }
+  .vgrid .lbl .n { font-size: 10px; letter-spacing: 0.18em; color: var(--accent); flex: none; }
+  .vgrid .lbl .d { margin: 0; font-size: clamp(13px, 1.35vw, 14px); line-height: 1.6; max-width: 48ch; }
+  /* the lead-in between the clip and the four screens */
+  .proto-note { max-width: 760px; margin: 0 0 clamp(18px, 2.4vw, 26px); }
+  /* four across gets too small on a phone — two per row, each step's label
+     still directly under its own pair rather than both sinking to the end */
+  @media (max-width: 700px) {
+    .vgrid { grid-template-columns: repeat(2, 1fr); }
+    .vgrid > :nth-child(1) { grid-area: 1 / 1; }
+    .vgrid > :nth-child(2) { grid-area: 1 / 2; }
+    .vgrid > :nth-child(5) { grid-area: 2 / 1 / auto / span 2; }
+    .vgrid > :nth-child(3) { grid-area: 3 / 1; }
+    .vgrid > :nth-child(4) { grid-area: 3 / 2; }
+    .vgrid > :nth-child(6) { grid-area: 4 / 1 / auto / span 2; }
+  }
+
   .insight {
     max-width: 720px; margin: clamp(20px, 2.6vw, 28px) 0;
-    border-left: 3px solid var(--accent); background: #fff;
+    border-left: 3px solid var(--rule); background: #fff;
     border-radius: 0 16px 16px 0;
     padding: clamp(16px, 2vw, 22px) clamp(18px, 2.4vw, 26px);
     font-size: clamp(15px, 1.7vw, 18px); line-height: 1.55; color: var(--ink-soft);
@@ -519,6 +587,15 @@ var FIGURES = { porter: {
   'Motivation — how am I doing and how much can I earn':  { src: 'images/porter-priority-1.webp?v=2', ratio: '1068 / 1367', caption: false },
   'Transparency — how are my rewards calculated':         { src: 'images/porter-priority-2.webp?v=2', ratio: '1068 / 1367', caption: false },
   'Help & guidance — what should I do next':              { src: 'images/porter-priority-3.webp?v=2', ratio: '1068 / 1367', caption: false },
+  /* The fleet shot closing the results section. Cropped to a 5:2 band rather
+     than left at the camera's 3:2 — full height it ran 720px tall in the
+     column, which is more room than a closing photo needs. The crop sits low
+     enough to keep both vehicles' wheels and the ground line. */
+  'Program impact overview': {
+    src: 'images/porter-program-impact.jpg',
+    srcset: 'images/porter-program-impact-1080.jpg 1080w, images/porter-program-impact.jpg 2160w',
+    ratio: '5 / 2'
+  },
   'Final onboarding flow': 'images/porter-onboarding-flow.jpg',
   'Entry point exploration': 'images/porter-entry-points.jpg'
 } };
@@ -536,6 +613,40 @@ var FIG_AFTER = { porter: { 'Why it couldn\'t scale': 0 } };
 /* collapse a multi-image row into one placeholder, keyed by case id → joined labels */
 var MERGE_SHOTS = { porter: {
   'Partner motivations|Research insights': 'Partner motivations & research insights'
+} };
+
+/* Expand a single placeholder into a prototype demo: one autoplaying screen
+   recording, then the steps it breaks down into. Keyed by case id → the label
+   the content already uses, so the encrypted copy needs no reshaping.
+   Each step's shots resolve through FIGURES like any other — until artwork
+   lands they render as the usual gradient placeholders. */
+var DEMOS = { porter: {
+  'Redesigned verification flow': {
+    video: {
+      src: 'images/porter-verification-nudge.mp4',
+      poster: 'images/porter-verification-nudge-poster.jpg',
+      alt: 'The redesigned verification prompt, showing a partner what a valid selfie looks like before they take it'
+    },
+    note: 'The prompt does the teaching before the camera opens. What follows is the flow a partner actually moves through — two screens to take the photo, two to answer it.',
+    steps: [
+      { label: 'Guided capture',
+        text: 'The countdown and the requirement stay on screen while the photo is being taken, and the capture comes back for review before it is sent.',
+        shots: [
+          { src: 'images/porter-verify-01-capture.jpg',
+            alt: 'The capture screen, counting down and showing what has to be in frame' },
+          { src: 'images/porter-verify-02-review.jpg',
+            alt: 'The captured selfie with retake and submit, before anything is sent' }
+        ] },
+      { label: 'Instant result',
+        text: 'The model answers at the point of capture rather than the next day — a pass, or a failure that names what was wrong with the photo.',
+        shots: [
+          { src: 'images/porter-verify-03-pass.jpg',
+            alt: 'Audit passed, confirmed at the point of capture' },
+          { src: 'images/porter-verify-04-fail.jpg',
+            alt: 'Audit failed, naming the reason — the Porter logo was not visible' }
+        ] }
+    ]
+  }
 } };
 
 document.title = c.title + ' — Ajeet';
@@ -568,6 +679,28 @@ function caption(label) {
   var f = (FIGURES[id] || {})[label];
   if (f && typeof f === 'object' && f.caption === false) return '';
   return '<figcaption>' + label + '</figcaption>';
+}
+
+/* The demo block: an autoplaying, chromeless screen recording, then the steps
+   it decomposes into. muted is what makes autoplay legal in every browser;
+   playsinline stops iOS from throwing it into the fullscreen player. */
+function demo(d) {
+  var h = '<div class="proto rv">' +
+    '<video src="' + d.video.src + '" poster="' + d.video.poster + '"' +
+    ' autoplay muted loop playsinline preload="metadata" disablepictureinpicture' +
+    ' aria-label="' + d.video.alt + '"></video></div>';
+  /* every mockup first, then the labels — the grid puts each label back under
+     its own pair, and this order is what the phone breakpoint reshuffles */
+  if (d.note) h += '<p class="proto-note rv">' + d.note + '</p>';
+  var shots = '', labels = '';
+  (d.steps || []).forEach(function (st, i) {
+    shots += st.shots.map(function (s) {
+      return '<img src="' + s.src + '" alt="' + s.alt + '" loading="lazy" decoding="async">';
+    }).join('');
+    labels += '<div class="lbl"><p class="t"><span class="n">0' + (i + 1) + '</span>' +
+      st.label + '</p>' + (st.text ? '<p class="d">' + st.text + '</p>' : '') + '</div>';
+  });
+  return h + '<div class="vgrid rv">' + shots + labels + '</div>';
 }
 
 /* sections number themselves — cases can skip any of them */
@@ -664,6 +797,9 @@ function blocksHtml(blocks) {
     else if (b.cols) bh += '<div class="col3 rv">' + b.cols.map(function (col) {
       return '<p>' + col + '</p>';
     }).join('') + '</div>';
+    else if (b.shots && b.shots.length === 1 && (DEMOS[id] || {})[b.shots[0][0]]) {
+      bh += demo((DEMOS[id] || {})[b.shots[0][0]]);
+    }
     else if (b.shots) {
       var shots = b.shots;
       var mkey = shots.map(function (s) { return s[0]; }).join('|');
@@ -796,6 +932,17 @@ if (navSecs.length > 1) {
    parallax on the hero banner */
 var rv = [].slice.call(document.querySelectorAll('.rv'));
 var heroShot = document.querySelector('.hero-banner .shot');
+
+/* A clip that loops forever with no way to stop it is exactly what "reduce
+   motion" is asking us not to do. There it holds on its poster frame and gets
+   its controls back, so the content is still reachable — everywhere else it
+   plays silently with no chrome, as designed. */
+var QUIET = matchMedia('(prefers-reduced-motion: reduce)').matches;
+var protos = [].slice.call(document.querySelectorAll('.proto video'));
+if (QUIET) protos.forEach(function (v) {
+  v.removeAttribute('autoplay'); v.removeAttribute('loop');
+  v.controls = true; v.pause();
+});
 function tick() {
   var vh = innerHeight, batch = 0;
   for (var i = 0; i < rv.length; i++) {
@@ -811,6 +958,13 @@ function tick() {
     var hr = heroShot.parentElement.getBoundingClientRect();
     if (hr.bottom > 0 && hr.top < vh) heroShot.style.transform = 'scale(1.08) translateY(' + (-hr.top * 0.08).toFixed(1) + 'px)';
   }
+  /* a looping clip decoding off-screen is pure battery burn — only run the
+     ones actually on screen. Left alone entirely when motion is reduced. */
+  if (!QUIET) protos.forEach(function (v) {
+    var r = v.getBoundingClientRect();
+    if (r.bottom > 0 && r.top < vh) { if (v.paused) v.play().catch(function () {}); }
+    else if (!v.paused) v.pause();
+  });
 }
 addEventListener('scroll', tick, { passive: true });
 tick();
