@@ -65,22 +65,34 @@ import * as THREE from './three.module.min.js';
   // hero = Cartier-journey sunset: soft teal zenith → cream → golden haze,
   // warm-tinted cloud sea, low sun glow near the horizon
   var P = {
-    top: ['#aacfd1', '#a8c4cd', '#1156c9', '#0d1220', '#1f72d8'].map(c => new THREE.Color(c)),
-    mid: ['#f0e2ba', '#f0dcb4', '#4d9fe8', '#1c2434', '#66b5ef'].map(c => new THREE.Color(c)),
-    bot: ['#eec092', '#f0c493', '#cfe9fb', '#39445a', '#d9edfb'].map(c => new THREE.Color(c)),
-    fogC: ['#edd2a9', '#eed6ab', '#a9cdf0', '#232c3c', '#d9eaf7'].map(c => new THREE.Color(c)),
+    top: ['#aacfd1', '#a8c4cd', '#1156c9', '#0d1220', '#3d7cb2'].map(c => new THREE.Color(c)),
+    mid: ['#f0e2ba', '#f0dcb4', '#4d9fe8', '#1c2434', '#f4cf95'].map(c => new THREE.Color(c)),
+    bot: ['#eec092', '#f0c493', '#cfe9fb', '#39445a', '#f8bd7d'].map(c => new THREE.Color(c)),
+    fogC: ['#edd2a9', '#eed6ab', '#a9cdf0', '#232c3c', '#f2d3a4'].map(c => new THREE.Color(c)),
     // row 4 carries real haze now: exp2 fog is negligible on the near grass
     // (<1% at 50 units) but ~40% on the backdrop ranges at ~380, which is what
     // dissolves them into the sky and sells the distance
     fogD: [0.0015, 0.0026, 0.0012, 0.0045, 0.0018],
-    glowC: ['#ffc998', '#ffce9c', '#ffbe92', '#28324a', '#ffeec4'].map(c => new THREE.Color(c)),
-    glowI: [1.0, 0.75, 0.62, 0.08, 0.45],
+    glowC: ['#ffc998', '#ffce9c', '#ffbe92', '#28324a', '#ffb469'].map(c => new THREE.Color(c)),
+    glowI: [1.0, 0.75, 0.62, 0.08, 1.05],
     starsOp: [0, 0, 0, 0.85, 0],
     // hemi/dir only reach LIT meshes (mountains, airships, meadow) — clouds
     // are unlit sprites, so these can run hot to keep the snow white
-    hemiI: [1.25, 1.2, 1.5, 0.38, 1.45],
-    dirI: [1.5, 1.45, 1.8, 0.22, 1.55],
-    dirC: ['#ffcf9c', '#ffd2a0', '#ffddb6', '#9fb2d8', '#fff3da'].map(c => new THREE.Color(c)),
+    // row 4 trades hemi for dir: golden hour is a LOW, directional, warm key
+    // with little ambient fill, which is what separates it from a flat noon
+    hemiI: [1.25, 1.2, 1.5, 0.38, 1.02],
+    dirI: [1.5, 1.45, 1.8, 0.22, 1.9],
+    dirC: ['#ffcf9c', '#ffd2a0', '#ffddb6', '#9fb2d8', '#ffc27e'].map(c => new THREE.Color(c)),
+    // hemisphere GROUND colour — the bounce coming back up off the terrain.
+    // Cool grey everywhere the sky is cool; warm earth under the golden hour,
+    // so the grass is lit warm from below as well as from the sun.
+    hemiG: ['#b9c4cf', '#b9c4cf', '#b9c4cf', '#b9c4cf', '#c88b4c'].map(c => new THREE.Color(c)),
+    // hemisphere SKY colour, and the reason the meadow reads warm at all: the
+    // one DirectionalLight is shared by all five states and runs nearly
+    // parallel to the meadow floor (dot with the ground normal ≈0.16), so an
+    // up-facing surface takes almost its whole value from this term. Warming
+    // dirC alone left the grass noon-green — this is the lever that works.
+    hemiS: ['#ffffff', '#ffffff', '#ffffff', '#ffffff', '#ffd2a0'].map(c => new THREE.Color(c)),
     deckOp: [0.38, 0.45, 0, 0, 0.12], // hero shows only a few crisp tops through the soft sea
     deck2Op: [0, 0, 0.5, 0.35, 0],    // forward cloud band under the work/storm legs
     deckC: ['#f6e2c4', '#f7e0bd', '#ffffff', '#8e99ac', '#ffffff'].map(c => new THREE.Color(c)),
@@ -788,14 +800,21 @@ import * as THREE from './three.module.min.js';
   // that framed the copy on desktop fell entirely outside the phone frame.
   // In u-space the same staging holds at every aspect; placeFlowers() below
   // resolves it to world units on init and on resize.
-  // Six zones, eighteen flowers — down from twelve clusters and fifty-seven.
-  // Flowers are FRAMING, not decoration: two foreground groups holding the
-  // left and right edges, two small midground groups, two tiny far accents,
-  // and nothing at all through the middle where the headline and CTAs sit.
+  // Twelve zones, forty-eight flowers — a denser field than the eighteen this
+  // replaced, but built the same way: still FRAMING, not decoration.
+  // The empty middle is the hard constraint, not the count. u maps essentially
+  // 1:1 to screen NDC x (the camera looks straight down −z from x=60), and the
+  // headline spans roughly u −0.44..+0.42, so every cluster centre is placed
+  // such that centre ± uSpread never crosses |u| = 0.50. Density was added by
+  // pushing OUTWARD and adding depth ranks — an inner rank toward the copy is
+  // what would break it.
   var CLUSTERS = [ // [u, dz, count, uSpread]
-    [-0.78,  58, 4, 0.14], [ 0.80,  55, 4, 0.14], // foreground — the hero flowers
-    [-0.72,  10, 3, 0.14], [ 0.74,   4, 3, 0.14], // midground — small
-    [-0.66, -40, 2, 0.10], [ 0.62, -48, 2, 0.10]  // background — tiny accents
+    [-0.86,  60, 6, 0.15], [ 0.88,  57, 6, 0.15], // foreground — the hero flowers
+    [-0.66,  46, 4, 0.12], [ 0.70,  43, 4, 0.12], // foreground, second rank
+    [-0.80,  14, 5, 0.14], [ 0.82,   9, 5, 0.14], // midground
+    [-0.64,  -8, 3, 0.11], [ 0.66, -14, 3, 0.11], // midground, inner edge
+    [-0.72, -42, 4, 0.11], [ 0.68, -50, 4, 0.11], // background accents
+    [-0.58, -66, 2, 0.08], [ 0.60, -72, 2, 0.08]  // furthest specks
   ];
   // half the visible width at a given flower depth, for the current aspect
   function frustumHalf(fdz) {
@@ -842,20 +861,35 @@ import * as THREE from './three.module.min.js';
   // scratch objects reused across every call — no allocation per instance
   var fMtx = new THREE.Matrix4(), fQuat = new THREE.Quaternion();
   var fPos = new THREE.Vector3(), fScl = new THREE.Vector3(), fCol = new THREE.Color();
-  // resolve u-space → world for the current aspect, and simplify on portrait:
-  // the same world-size head eats far more of a narrow frame, so the nearest
-  // rank is dropped (scale 0 — no per-instance branch) and the rest scaled back
+  // resolve u-space → world for the current aspect, and thin on portrait
   function placeFlowers() {
-    // Portrait scales the whole set back rather than culling the near rank.
-    // That cull dated from the 57-flower version; with only eight foreground
-    // flowers it deleted the entire foreground on phones.
     var sMul = Math.min(1, 0.58 + camera.aspect * 0.26);
+    // Which flowers can sit beside the copy is an ASPECT question, because the
+    // copy is a DOM overlay in screen space while the flowers are in the scene.
+    // On desktop the headline clears |u|≈0.44 and every cluster sits outside it.
+    // On a phone the same headline wraps and runs nearly edge to edge, so no
+    // horizontal corridor exists at all — and it is the FAR ranks that break,
+    // because small distant flowers project up onto the horizon line, exactly
+    // where the headline and buttons are. The foreground ranks are safe there:
+    // they are big and low in frame, below the CTAs.
+    // So portrait keeps the near ranks and drops the rest, and pushes what is
+    // left out to the frame edges. (An earlier cull did the opposite — it
+    // dropped the NEAR rank — and deleted the whole foreground on phones.)
+    var portrait = camera.aspect < 0.95;
     for (var fm2 = 0; fm2 < 2; fm2++) {
       var mesh = flowerMeshes[fm2], grp = fGroups[fm2];
       for (var gi2 = 0; gi2 < grp.length; gi2++) {
         var d = grp[gi2];
         var s = d.s * sMul;
-        var fdx = d.u * frustumHalf(d.dz);
+        var u = d.u;
+        if (portrait) {
+          // dz > 30 is the two foreground ranks; everything behind that lands
+          // on the copy on a narrow frame. Scale 0 keeps the instance count
+          // fixed — no rebuild, no per-instance branch in the shader.
+          if (d.dz < 30) s = 0;
+          else u = (u < 0 ? -1 : 1) * Math.max(Math.abs(u), 0.84);
+        }
+        var fdx = u * frustumHalf(d.dz);
         fPos.set(60 + fdx, meadowH(fdx, -d.dz) - 0.15, -582 + d.dz);
         fScl.set(s, s, 1);
         fMtx.compose(fPos, fQuat, fScl);
@@ -905,7 +939,12 @@ import * as THREE from './three.module.min.js';
   // peek over the mountain ridges in the finale
   // smaller and dimmer: the sun is a light source, not the loudest graphic on
   // screen — it must not compete with the headline for first read
-  sun.position.set(125, 66, -722); sun.scale.set(26, 26, 1);
+  // dropped toward the ridgeline for the golden hour: a low sun is the whole
+  // reason the light is warm and raking. Scale is left alone — the smaller sun
+  // was a deliberate call, and a low sun that is also big reads as a sunset
+  // poster rather than late afternoon. uSunDir tracks this, so the dome's glow
+  // sinks with it and the warm band lands on the horizon instead of mid-sky.
+  sun.position.set(125, 45, -722); sun.scale.set(26, 26, 1);
   scene.add(sun);
 
   // the work scene's own sun: a small red-orange sunset glint low over the
@@ -1465,6 +1504,8 @@ import * as THREE from './three.module.min.js';
     scene.fog.color.copy(colAt(P.fogC, i, f, tmpA));
     scene.fog.density = numAt(P.fogD, i, f);
     hemi.intensity = numAt(P.hemiI, i, f);
+    hemi.color.copy(colAt(P.hemiS, i, f, tmpA));
+    hemi.groundColor.copy(colAt(P.hemiG, i, f, tmpA));
     dir.intensity = numAt(P.dirI, i, f);
     dir.color.copy(colAt(P.dirC, i, f, tmpA));
     skyUni.uGlowC.value.copy(colAt(P.glowC, i, f, tmpA));
