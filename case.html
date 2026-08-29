@@ -250,6 +250,38 @@
      to start it is just a screenshot that lies about being one */
   .proto video[controls] { height: auto; width: clamp(220px, 26vw, 320px); }
 
+  /* ── splash clips: one panel per asset type ────────────────────────────────
+     The screen is deliberately cut off by its panel rather than floating inside
+     one. The clip is 1:2, so a well of 1:1.5 shows the top three quarters and
+     the panel's bottom edge takes the rest — which is also where the artwork
+     runs out of content, so nothing of consequence is lost. The crop is done
+     by the container, not baked into the file, so the framing stays adjustable. */
+  .splash-row {
+    display: grid; grid-template-columns: repeat(2, 1fr);
+    gap: clamp(14px, 2vw, 26px);
+    margin-bottom: clamp(22px, 2.8vw, 32px);
+  }
+  .splash { margin: 0; }
+  .splash-panel {
+    display: grid; justify-items: center; overflow: hidden;
+    border-radius: clamp(18px, 2.2vw, 24px);
+    padding: clamp(18px, 3vw, 38px) clamp(16px, 2.6vw, 34px) 0;
+    background: linear-gradient(160deg, #eaf1fa, #dce7f5 58%, #cedcee);
+  }
+  .splash-media {
+    width: min(100%, 300px); aspect-ratio: 1 / 1.5; overflow: hidden;
+    border-radius: clamp(12px, 1.6vw, 18px) clamp(12px, 1.6vw, 18px) 0 0;
+    box-shadow: 0 2px 8px rgba(15, 30, 50, 0.10), 0 24px 50px -30px rgba(15, 30, 50, 0.5);
+  }
+  /* height is left to the aspect ratio; the overflow past the well is the crop */
+  .splash-media video { display: block; width: 100%; aspect-ratio: 1 / 2; }
+  .splash figcaption {
+    font-size: 13px; color: var(--ink-faint); margin-top: 12px; text-align: center;
+  }
+  /* paused for reduced motion, the controls sit in the cropped-off quarter —
+     let the well show the whole clip so they stay reachable */
+  .splash-media:has(video[controls]) { aspect-ratio: auto; }
+
   /* the four mockups in one line, each step named underneath its own pair.
      The shots are cut out to transparency, so there is no plate behind them —
      they sit on the page like the iteration frames do. Equal HEIGHT is what
@@ -649,6 +681,25 @@ var DEMOS = { porter: {
   }
 } };
 
+/* Splash clips: the screens partners actually land on, one per asset type.
+   Keyed by case id → the label the encrypted copy uses, same as DEMOS, so the
+   content file carries no paths. webm first — it is the smaller of the two and
+   the browser takes the first source it can play. */
+var CLIPS = { porter: {
+  'Truck splash': {
+    webm: 'images/porter-splash-truck.webm',
+    mp4: 'images/porter-splash-truck.mp4',
+    poster: 'images/porter-splash-truck-poster.jpg',
+    alt: 'The splash screen for truck partners — a Porter-branded truck above the words Get Branded'
+  },
+  '2W splash': {
+    webm: 'images/porter-splash-2w.webm',
+    mp4: 'images/porter-splash-2w.mp4',
+    poster: 'images/porter-splash-2w-poster.jpg',
+    alt: 'The splash screen for two-wheeler partners — a partner in a Porter T-shirt beside their bike, above the words Get Branded'
+  }
+} };
+
 document.title = c.title + ' — Ajeet';
 
 /* A FIGURES entry is either a plain src, or an object carrying any of:
@@ -797,6 +848,21 @@ function blocksHtml(blocks) {
     else if (b.cols) bh += '<div class="col3 rv">' + b.cols.map(function (col) {
       return '<p>' + col + '</p>';
     }).join('') + '</div>';
+    else if (b.clips) {
+      bh += '<div class="splash-row">' + b.clips.map(function (cl) {
+        var v = (CLIPS[id] || {})[cl[0]];
+        if (!v) return '';
+        return '<figure class="splash rv"><div class="splash-panel">' +
+          '<div class="splash-media"><video poster="' + v.poster + '"' +
+          ' autoplay muted loop playsinline preload="metadata" disablepictureinpicture' +
+          ' aria-label="' + v.alt + '">' +
+          '<source src="' + v.webm + '" type="video/webm">' +
+          '<source src="' + v.mp4 + '" type="video/mp4">' +
+          '</video></div></div>' +
+          (cl[1] ? '<figcaption>' + cl[1] + '</figcaption>' : '') +
+          '</figure>';
+      }).join('') + '</div>';
+    }
     else if (b.shots && b.shots.length === 1 && (DEMOS[id] || {})[b.shots[0][0]]) {
       bh += demo((DEMOS[id] || {})[b.shots[0][0]]);
     }
@@ -938,7 +1004,7 @@ var heroShot = document.querySelector('.hero-banner .shot');
    its controls back, so the content is still reachable — everywhere else it
    plays silently with no chrome, as designed. */
 var QUIET = matchMedia('(prefers-reduced-motion: reduce)').matches;
-var protos = [].slice.call(document.querySelectorAll('.proto video'));
+var protos = [].slice.call(document.querySelectorAll('.proto video, .splash-media video'));
 if (QUIET) protos.forEach(function (v) {
   v.removeAttribute('autoplay'); v.removeAttribute('loop');
   v.controls = true; v.pause();
