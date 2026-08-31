@@ -16,9 +16,39 @@
     --font: 'Sora', -apple-system, sans-serif;
     --ink-dark: #1c2b3a;
     --ink-soft: rgba(28, 43, 58, 0.72);
-    --ink-faint: rgba(28, 43, 58, 0.5);
     --accent: #2f7fd4;
+    /* #2f7fd4 is 3.05:1 on the sand end of the background — fine as an outline
+       or a rule, too light to be read as text. This is the same blue taken down
+       to 4.79:1 so a label can use it. */
+    --accent-text: #1f5fa8;
     --sand: #eddcbc;
+
+    /* ── type scale ──────────────────────────────────────────────────────────
+       Every size on the page came from its own clamp() before this, so curves
+       crossed and landed on 17 distinct sizes — eight of them inside a 4px band
+       at tablet width, plus 54/52, 22/21 and 18/17 pairs that no reader could
+       tell apart. Nine steps now, each at least ~1.15x its neighbour where the
+       roles sit next to each other.
+
+       The bottom three converge on small screens on purpose: below ~15px there
+       is no room left for size to carry meaning, so meta and label separate
+       from body by weight, case and tracking instead. */
+    --t-display: clamp(40px, 5.4vw, 68px);   /* h1                            */
+    --t-xxl:     clamp(30px, 4.2vw, 52px);   /* pull quote, closing h2        */
+    --t-xl:      clamp(24px, 3.3vw, 40px);   /* section h2, the big stat      */
+    --t-lg:      clamp(20px, 2.5vw, 30px);   /* principle headings            */
+    --t-md:      clamp(17px, 1.9vw, 23px);   /* h3, company name, mail CTA    */
+    --t-lead:    clamp(16px, 1.7vw, 20px);   /* ledes and interest tags       */
+    --t-body:    clamp(14.5px, 1.45vw, 17px);/* paragraphs                    */
+    --t-meta:    clamp(13px, 1.1vw, 13.5px); /* dates, roles, captions        */
+    --t-label:   12px;                       /* uppercase tracked labels      */
+  }
+
+  /* The page draws its own focus ring everywhere, not just on the deck: a
+     keyboard user landing on the close button or the mail link was getting the
+     browser's default outline, which belongs to no design system on the page. */
+  a:focus-visible, button:focus-visible, [tabindex]:focus-visible {
+    outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 6px;
   }
   * { box-sizing: border-box; }
   html { scroll-behavior: smooth; }
@@ -50,22 +80,26 @@
   .x-close:hover { background: #fff; transform: rotate(90deg); }
   .x-close svg { width: 18px; height: 18px; }
 
-  .page { display: flex; flex-direction: column; align-items: center; padding: 11vh 5vw 12vh; gap: clamp(20px, 2.6vw, 32px); }
+  /* This gap is now the only thing separating one section from the next, so it
+     has to do the work the 56px of panel padding plus the plate edge used to do
+     between them — hence the jump from 32 to ~104. */
+  .page { display: flex; flex-direction: column; align-items: center; padding: 11vh 5vw 12vh; gap: clamp(60px, 7.5vw, 104px); }
 
   /* ── hero ──────────────────────────────────────────────────────────────── */
   .head { text-align: center; padding: 3vh 0 3vh; max-width: 900px; }
-  .chips { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin: 0 0 26px; }
-  .chip {
-    font-size: 12px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase;
-    color: var(--ink-dark); padding: 8px 16px; border-radius: 999px;
-    background: rgba(255, 255, 255, 0.42); border: 1px solid rgba(255, 255, 255, 0.6);
-    backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
-  }
   .head h1 {
-    font-size: clamp(36px, 6vw, 68px); font-weight: 800; letter-spacing: -0.04em;
+    font-size: var(--t-display); font-weight: 800; letter-spacing: -0.04em;
     line-height: 1.04; margin: 0 0 18px;
   }
-  .head .lede { font-size: clamp(16px, 1.8vw, 21px); color: var(--ink-soft); line-height: 1.6; margin: 0 auto; max-width: 46ch; }
+  .head .lede { font-size: var(--t-lead); color: var(--ink-soft); line-height: 1.6; margin: 0 auto; max-width: 46ch; }
+  /* Credentials, demoted. The readers this page is for have already seen the
+     work; leading with years and employers answers a question neither of them
+     asked. It stays on the page because it is useful, one size down and after
+     the sentence that actually says something. */
+  .head .creds {
+    margin: 18px auto 0; font-size: var(--t-meta); font-weight: 600;
+    letter-spacing: 0.02em; color: var(--ink-soft);
+  }
   .head .lede strong { font-weight: 600; color: var(--ink-dark); }
 
   /* ── deck: lands as a stack, holds, then fans open ─────────────────────
@@ -112,26 +146,33 @@
     letter-spacing: 0.18em; text-transform: uppercase; color: rgba(255, 255, 255, 0.85);
   }
 
-  /* ── panels ────────────────────────────────────────────────────────────── */
-  .panel {
-    width: min(94vw, 900px); padding: clamp(30px, 4.2vw, 56px);
-    border-radius: 32px;
-    background: rgba(255, 255, 255, 0.58);
-    backdrop-filter: blur(14px) saturate(1.3);
-    -webkit-backdrop-filter: blur(14px) saturate(1.3);
-    border: 1px solid rgba(255, 255, 255, 0.7);
-    box-shadow: 0 2px 4px rgba(15, 30, 50, 0.03), 0 30px 70px -40px rgba(15, 30, 50, 0.4);
-  }
-  .panel.wide { width: min(96vw, 1180px); }
+  /* ── sections: on the surface, not on plates ───────────────────────────────
+     The quote and the passage after it were always staged straight onto the
+     gradient — the notes below them call the alternative a "headless box" — and
+     they read as the best-composed part of the page. Six frosted plates were
+     hiding that same background behind them and turning the page into a stack
+     of containers, one of which held another container.
+
+     What separated the sections was the plate edge; what separates them now is
+     the gap in .page and the hairline rules .tl and .princ were already built
+     on. Nothing else changes: no copy, no order, no internal layout.
+
+     Width drops 900 → 720 because the padding went with the plate. The panel's
+     inner measure was ~788px, which ran body copy past the 75ch ceiling once
+     the box stopped visually holding it; 720 lands it back inside the band. */
+  /* One measure for every section now. The .wide variant went with the
+     restructure: the photo wall was the only thing that wanted more room, and
+     it takes the whole viewport instead — see .bleed. */
+  .panel { width: min(94vw, 720px); }
   h2 {
-    font-size: clamp(26px, 3.4vw, 40px); font-weight: 800; letter-spacing: -0.038em;
+    font-size: var(--t-xl); font-weight: 800; letter-spacing: -0.038em;
     line-height: 1.14; margin: 0 0 18px;
   }
-  h3 { font-size: clamp(18px, 1.9vw, 22px); font-weight: 700; letter-spacing: -0.025em; margin: 0 0 10px; }
-  p { font-size: clamp(14.5px, 1.45vw, 17px); line-height: 1.72; color: var(--ink-soft); margin: 0 0 16px; }
+  h3 { font-size: var(--t-md); font-weight: 700; letter-spacing: -0.025em; margin: 0 0 10px; }
+  p { font-size: var(--t-body); line-height: 1.72; color: var(--ink-soft); margin: 0 0 16px; }
   p:last-child { margin-bottom: 0; }
   p strong { font-weight: 600; color: var(--ink-dark); }
-  .lede { font-size: clamp(15px, 1.6vw, 18px); }
+  .lede { font-size: var(--t-lead); }
 
   /* ── the quote: no panel, straight onto the sky — the page's first peak ── */
   .quote {
@@ -139,14 +180,17 @@
     padding: clamp(20px, 4vw, 48px) clamp(16px, 4vw, 60px);
   }
   .quote p {
-    font-size: clamp(27px, 4.6vw, 54px); font-weight: 800; letter-spacing: -0.042em;
+    font-size: var(--t-xxl); font-weight: 800; letter-spacing: -0.042em;
     line-height: 1.1; color: var(--ink-dark); margin: 0;
     text-wrap: balance;
   }
+  /* was --ink-faint at 2.81:1 on the sand. There is no lighter ink that clears
+     4.5:1 down here, so the attribution steps up to --ink-soft and stays
+     subordinate on size, weight and tracking instead of on colour. */
   .quote .attrib {
     display: block; margin-top: clamp(16px, 2vw, 22px);
-    font-size: 12px; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase;
-    color: var(--ink-faint);
+    font-size: var(--t-label); font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--ink-soft);
   }
   /* the page's one authored entrance — the quote resolves out of the sky
      instead of sliding up like everything else */
@@ -156,21 +200,44 @@
   /* the story resolving in the open air after the quote — deliberately not a
      panel, so the origin beat ends outside the stack rather than in a headless box */
   .after { width: min(94vw, 640px); text-align: center; padding: 0 0 clamp(10px, 2vw, 22px); }
-  .after p { font-size: clamp(15px, 1.6vw, 18px); line-height: 1.7; }
+  .after p { font-size: var(--t-lead); line-height: 1.7; }
+
+  /* ── the refrain ───────────────────────────────────────────────────────────
+     The page's one sentence, coming back at the close of each movement after it
+     lands at display weight. It sits at the END of a section rather than above
+     its heading on purpose: above, it is a kicker, and a label over a heading
+     makes the heading share billing with it. Below, it is a beat — the reader
+     finishes a passage and the same thought arrives again, quieter each time.
+
+     It is never introduced or explained anywhere in the markup. The device only
+     works if the reader notices it themselves, and captioning it kills it. */
+  .refrain {
+    margin: clamp(30px, 4vw, 46px) 0 0; text-align: center;
+    font-size: var(--t-body); font-weight: 500; color: var(--ink-soft);
+    letter-spacing: -0.01em;
+  }
+  /* the fourth appearance, where the sentence stops being about work */
+  .refrain .turn { color: var(--ink-dark); font-weight: 600; }
 
   /* ── asymmetric split ──────────────────────────────────────────────────── */
   .split { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: clamp(24px, 3.4vw, 48px); align-items: start; }
+  /* The aside was a box inside a box — the one nesting that is always wrong.
+     Its list already parts its own rows with hairlines, so all it needed to
+     stay a distinct column was a rule down the inside edge. Kept to 1px and
+     to ink rather than an accent, so it reads as a margin, not a callout. */
   .now {
-    padding: clamp(20px, 2.2vw, 26px); border-radius: 22px;
-    background: rgba(255, 255, 255, 0.7); border: 1px solid rgba(255, 255, 255, 0.85);
+    padding: 4px 0 4px clamp(18px, 2.2vw, 26px);
+    border-left: 1px solid rgba(28, 43, 58, 0.14);
   }
-  .now h3 { font-size: 10px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: var(--accent); margin: 0 0 14px; }
+  /* was 10px in --accent: the smallest text on the page at 3.05:1, failing on
+     both counts at once. Up to the label step and onto the darkened blue. */
+  .now h3 { font-size: var(--t-label); font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: var(--accent-text); margin: 0 0 14px; }
   .now ul { list-style: none; margin: 0; padding: 0; }
   .now li { padding: 12px 0; border-top: 1px solid rgba(28, 43, 58, 0.12); }
   .now li:first-child { border-top: 0; padding-top: 0; }
   .now li:last-child { padding-bottom: 0; }
-  .now b { display: block; font-size: 15.5px; font-weight: 700; letter-spacing: -0.015em; margin-bottom: 3px; }
-  .now span { font-size: 13.5px; line-height: 1.55; color: var(--ink-soft); }
+  .now b { display: block; font-size: var(--t-body); font-weight: 700; letter-spacing: -0.015em; margin-bottom: 3px; }
+  .now span { font-size: var(--t-meta); line-height: 1.55; color: var(--ink-soft); }
 
   /* ── journey ───────────────────────────────────────────────────────────── */
   .tl { list-style: none; margin: clamp(14px, 2vw, 22px) 0 0; padding: 0; }
@@ -181,44 +248,87 @@
   }
   .tl li:first-child { border-top: 0; padding-top: 0; }
   .tl li:last-child { padding-bottom: 0; }
-  .tl-when { font-size: 13px; font-weight: 600; color: var(--ink-soft); line-height: 1.5; padding-top: 12px; font-variant-numeric: tabular-nums; }
+  .tl-when { font-size: var(--t-meta); font-weight: 600; color: var(--ink-soft); line-height: 1.5; padding-top: 12px; font-variant-numeric: tabular-nums; }
+  /* The white plate stays — three logos drawn for light backgrounds need a
+     consistent ground, and the sand is not it. The shadow goes: it was lifting
+     the mark off a panel that no longer exists, and depth with nothing beneath
+     it to cast onto is just decoration. */
   .tl-mark {
     width: 48px; height: 48px; border-radius: 14px; display: grid; place-items: center;
     background: #fff; border: 1px solid rgba(28, 43, 58, 0.1);
-    box-shadow: 0 8px 20px -12px rgba(15, 30, 50, 0.6);
   }
   .tl-mark img { display: block; width: auto; height: auto; max-width: 60%; max-height: 60%; }
   .tl-mark.porter img { max-height: 64%; }
   .tl-mark.convin img { max-width: 66%; }
   /* these must out-specify the bare `p` rule, which would add its bottom margin */
-  .tl .tl-co { font-size: clamp(18px, 2vw, 22px); font-weight: 700; letter-spacing: -0.028em; line-height: 1.3; margin: 0; color: var(--ink-dark); }
-  .tl .tl-role { font-size: 13.5px; font-weight: 500; color: var(--ink-soft); margin: 3px 0 10px; }
-  .tl .tl-what { font-size: clamp(14px, 1.4vw, 16px); line-height: 1.7; color: var(--ink-soft); margin: 0; }
+  .tl .tl-co { font-size: var(--t-md); font-weight: 700; letter-spacing: -0.028em; line-height: 1.3; margin: 0; color: var(--ink-dark); }
+  .tl .tl-role { font-size: var(--t-meta); font-weight: 500; color: var(--ink-soft); margin: 3px 0 10px; }
+  .tl .tl-what { font-size: var(--t-body); line-height: 1.7; color: var(--ink-soft); margin: 0; }
 
-  /* ── principles: three beats, each at display strength ─────────────────── */
-  .princ { margin: clamp(16px, 2.4vw, 26px) 0 0; }
-  .princ > div { padding: clamp(22px, 2.8vw, 32px) 0; border-top: 1px solid rgba(28, 43, 58, 0.12); }
+  /* ── the method ────────────────────────────────────────────────────────────
+     These three were a section of their own, each heading at display strength,
+     which made "how I work" compete with the story it belongs inside. They are
+     supporting detail for the prototyping passage now: same three beats, one
+     step down the scale, sitting under the passage they explain. */
+  .princ { margin: clamp(18px, 2.6vw, 28px) 0 0; }
+  .princ > div { padding: clamp(18px, 2.2vw, 24px) 0; border-top: 1px solid rgba(28, 43, 58, 0.12); }
   .princ > div:first-child { border-top: 0; padding-top: 0; }
   .princ > div:last-child { padding-bottom: 0; }
-  .princ h3 {
-    font-size: clamp(21px, 2.6vw, 30px); font-weight: 800; letter-spacing: -0.035em;
-    line-height: 1.2; margin: 0 0 10px; max-width: 26ch;
+  .princ h4 {
+    font-size: var(--t-md); font-weight: 700; letter-spacing: -0.028em;
+    line-height: 1.25; margin: 0 0 8px; max-width: 30ch;
   }
   .princ p { max-width: 66ch; margin: 0; }
 
-  /* ── interests ─────────────────────────────────────────────────────────── */
-  .tags { display: flex; flex-wrap: wrap; gap: 12px; margin-top: clamp(22px, 2.6vw, 30px); }
-  .tag {
-    font-size: clamp(15px, 1.6vw, 18px); font-weight: 700; letter-spacing: -0.02em; color: var(--ink-dark);
-    padding: 12px 22px; border-radius: 999px;
-    background: rgba(255, 255, 255, 0.72); border: 1px solid rgba(255, 255, 255, 0.9);
-    transition: transform .35s cubic-bezier(.2,.9,.25,1);
+  /* ── sub-beat heading inside a movement ────────────────────────────────────
+     A movement can carry a second passage without becoming a second section:
+     this sits below h2 in the scale and above the body, and takes its air from
+     the rule above it rather than from a plate. */
+  .beat {
+    margin: clamp(46px, 6vw, 78px) 0 clamp(14px, 1.8vw, 20px);
+    padding-top: clamp(26px, 3.2vw, 36px); border-top: 1px solid rgba(28, 43, 58, 0.12);
+    font-size: var(--t-lg); font-weight: 800; letter-spacing: -0.035em; line-height: 1.2;
   }
-  .tag:hover { transform: translateY(-3px) rotate(-1.5deg); }
+
+  /* ── interests ─────────────────────────────────────────────────────────────
+     Six one-word pills promised "get to know me" and delivered a word cloud.
+     Each one carries a sentence now, which is the only thing that turns a label
+     into a person. Two columns so six items read as a set rather than a list
+     the reader has to scroll; the hairline is what separates them, in keeping
+     with the timeline and the method above. */
+  .interests {
+    display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0 clamp(28px, 4vw, 52px); margin-top: clamp(22px, 2.6vw, 30px);
+  }
+  .interests > div { padding: clamp(16px, 2vw, 22px) 0; border-top: 1px solid rgba(28, 43, 58, 0.12); }
+  /* the first item of each column, not just the first of the list */
+  .interests > div:nth-child(-n + 2) { border-top: 0; padding-top: 0; }
+  .interests h3 { font-size: var(--t-md); font-weight: 700; margin: 0 0 4px; }
+  .interests p { margin: 0; max-width: 40ch; }
+  @media (max-width: 620px) {
+    .interests { grid-template-columns: 1fr; }
+    .interests > div:nth-child(2) { border-top: 1px solid rgba(28, 43, 58, 0.12); padding-top: clamp(16px, 2vw, 22px); }
+  }
+
+  /* ── the photo wall, edge to edge ──────────────────────────────────────────
+     The one place the page leaves its measure. Everything above holds 720px, so
+     a full-bleed wall reads as a change of register rather than as a wider box
+     — and it is the only section whose material is photographs, which are the
+     one thing on this page that earns the whole screen.
+     The 50% resolves against .panel's 720px box, not the viewport, which is why
+     this has to live inside the section: 50% of 720 minus half the viewport is
+     exactly the distance from the panel's left edge back to the screen's.
+     body has overflow-x: hidden, which absorbs the scrollbar gutter. */
+  .bleed { width: 100vw; margin-left: calc(50% - 50vw); }
 
   /* ── photo wall — each .photo div becomes an img.photo once the shots land.
      Columns, not grid: nine frames of differing height tile with no holes. ── */
   .photo-grid { column-count: 3; column-gap: clamp(12px, 1.6vw, 18px); margin-top: clamp(26px, 3.2vw, 36px); }
+  /* Edge to edge it can carry more columns, so no single frame dominates and
+     the wall reads as a body of work rather than nine hero shots. The inset
+     keeps the outer frames off the viewport edge without re-boxing the wall. */
+  .bleed .photo-grid { column-count: 4; padding: 0 clamp(14px, 3vw, 40px); margin-top: clamp(22px, 2.6vw, 30px); }
+  @media (max-width: 1000px) { .bleed .photo-grid { column-count: 3; } }
   .photo {
     position: relative; width: 100%; aspect-ratio: 4 / 5; object-fit: cover;
     border-radius: 18px; border: 1px solid rgba(255, 255, 255, 0.6);
@@ -248,16 +358,16 @@
 
   /* the stat sits with the copy but carries display weight */
   .stat-line { display: flex; align-items: baseline; gap: clamp(10px, 1.4vw, 16px); flex-wrap: wrap; margin-top: clamp(18px, 2.2vw, 26px); }
-  .stat-line b { font-size: clamp(30px, 4vw, 46px); font-weight: 800; letter-spacing: -0.04em; line-height: 1; color: var(--ink-dark); }
-  .stat-line span { font-size: clamp(14px, 1.4vw, 16px); color: var(--ink-soft); }
+  .stat-line b { font-size: var(--t-xl); font-weight: 800; letter-spacing: -0.04em; line-height: 1; color: var(--ink-dark); }
+  .stat-line span { font-size: var(--t-body); color: var(--ink-soft); }
 
   /* ── foot ──────────────────────────────────────────────────────────────── */
   .foot { text-align: center; padding: 5vh 0 2vh; max-width: 900px; }
-  .foot h2 { font-size: clamp(28px, 4.4vw, 52px); letter-spacing: -0.04em; margin: 0 0 10px; }
+  .foot h2 { font-size: var(--t-xxl); letter-spacing: -0.04em; margin: 0 0 10px; }
   .foot p { margin: 0 0 30px; }
   .mail {
     display: inline-flex; align-items: center; gap: 12px;
-    font-size: clamp(17px, 2.2vw, 26px); font-weight: 700; letter-spacing: -0.03em;
+    font-size: var(--t-md); font-weight: 700; letter-spacing: -0.03em;
     text-decoration: none; color: #fff;
     padding: clamp(14px, 1.6vw, 20px) clamp(24px, 2.8vw, 34px); border-radius: 999px;
     background: var(--ink-dark);
@@ -267,7 +377,15 @@
   .mail:hover { transform: translateY(-3px); box-shadow: 0 28px 56px -24px rgba(15, 30, 50, 0.8); }
   .mail svg { width: 20px; height: 20px; flex: none; transition: transform .35s cubic-bezier(.2,.9,.25,1); }
   .mail:hover svg { transform: translateX(4px); }
-  .back { display: block; margin-top: clamp(24px, 3vh, 34px); font-size: 13px; font-weight: 600; color: var(--ink-faint); text-decoration: none; }
+  /* was a 17px-tall block link in --ink-faint: under the 24px target minimum and
+     at 2.81:1 on the sand. Now inline-block so the padding gives it a real hit
+     area, and on --ink-soft at 4.96:1 — it is a navigation control, so it is the
+     one piece of small text that could least afford to be the faintest. */
+  .back {
+    display: inline-block; margin-top: clamp(24px, 3vh, 34px);
+    padding: 14px 18px; font-size: var(--t-meta); font-weight: 600;
+    color: var(--ink-soft); text-decoration: none;
+  }
   .back:hover { color: var(--ink-dark); }
 
   /* reveals */
@@ -276,9 +394,16 @@
 
   @media (max-width: 860px) {
     .page { padding: 10vh 4vw 12vh; }
-    .x-close { top: 14px; right: 14px; width: 42px; height: 42px; }
-    .panel { padding: 28px 22px; border-radius: 26px; }
+    /* 44px, not 42: this is the only way off the page, and it is the one
+       control a thumb reaches for on a phone */
+    .x-close { top: 14px; right: 14px; width: 44px; height: 44px; }
     .split { grid-template-columns: 1fr; gap: 24px; }
+    /* stacked, the aside sits under the copy rather than beside it, so the rule
+       that marked the inside edge becomes the line between them */
+    .now {
+      padding: clamp(18px, 4vw, 22px) 0 4px;
+      border-left: 0; border-top: 1px solid rgba(28, 43, 58, 0.14);
+    }
     .photo-grid { column-count: 2; }
     /* the date rail can't hold its own column at this width — it becomes a
        caption above the row, with the mark and the copy side by side below */
@@ -289,7 +414,7 @@
   @media (prefers-reduced-motion: reduce) {
     html { scroll-behavior: auto; }
     .rv, .quote.rv { opacity: 1; transform: none; filter: none; transition: none; }
-    .photo, .tag, .mail { transition: none; }
+    .photo, .mail { transition: none; }
     .deck.live .card { transition-duration: 1ms !important; }
   }
 </style>
@@ -304,14 +429,15 @@
 
 <main class="page">
 
+  <!-- The three chips that sat above the h1 are gone. Two of them ("Product
+       Designer", "4+ years") were restated in the lede one line below, in a
+       different format each time, and a label row above a heading makes the
+       heading share billing with metadata it already contains. The one fact
+       that was only in the chips — the city — moved into the lede. -->
   <header class="head rv">
-    <div class="chips">
-      <span class="chip">Bangalore, India</span>
-      <span class="chip">Product Designer</span>
-      <span class="chip">4+ years</span>
-    </div>
     <h1>Hi there — I'm Ajeet.</h1>
-    <p class="lede">A product designer who has spent the past four-plus years building for both <strong>B2B and B2C</strong>, at Juspay and Porter. Right now I'm solving <strong>retention and enterprise products</strong> at Porter.</p>
+    <p class="lede">I design products for a living. Mostly I'm a person who cannot leave a bad workflow alone, which turns out to be the same job.</p>
+    <p class="creds">Product designer, Bangalore · four-plus years, B2B and B2C · currently at Porter, before that Juspay and Convin.ai</p>
   </header>
 
   <div class="deck" id="deck" role="img" tabindex="0"
@@ -319,7 +445,7 @@
 
   <section class="panel rv">
     <h2>I got into design by accident.</h2>
-    <p class="lede">I'm a <strong>computer science</strong> grad who stumbled into design sideways — making event posters and building web frontends in college. I'd sketch interface ideas on paper, look at what I'd drawn, and keep landing on the same thought.</p>
+    <p class="lede">I'm a <strong>computer science</strong> grad who stumbled into design sideways: making event posters and building web frontends in college. I'd sketch interface ideas on paper, look at what I'd drawn, and keep landing on the same thought.</p>
   </section>
 
   <div class="quote rv">
@@ -328,11 +454,14 @@
   </div>
 
   <div class="after rv">
-    <p>That thought is what led me to product design. I got fascinated by the idea that behind every feature I used day to day, someone had put that much thought and that many iterations into it. I wanted to be the person doing that — and here I am.</p>
+    <p>That thought is what led me to product design. I got fascinated by the idea that behind every feature I used day to day, someone had put that much thought and that many iterations into it. I wanted to be the person doing that. And here I am.</p>
   </div>
 
+  <!-- Movement 2 · what the thought turned into. The three habits used to be a
+       section of their own, sitting after the journey; they are how this thought
+       gets acted on, so they belong underneath it rather than beside it. -->
   <section class="panel rv">
-    <h2>I'm usually mid-experiment.</h2>
+    <h2>So I stopped describing things and started building them.</h2>
     <div class="split">
       <div>
         <p>Always curious, always pulling apart some new tool. Beyond product design itself I tinker with <strong>motion design and advanced prototypes</strong> — the kind that are close enough to the real thing that nobody has to imagine it.</p>
@@ -346,10 +475,29 @@
         </ul>
       </div>
     </div>
+
+    <h3 class="beat">Three habits that survived every team.</h3>
+    <div class="princ">
+      <div>
+        <h4>Iteration with intent</h4>
+        <p>Volume isn't the point. Every round should be answering a question I couldn't answer in the last one. Otherwise it's just redecorating.</p>
+      </div>
+      <div>
+        <h4>Sketch ideas, prototype realities</h4>
+        <p>Paper is for thinking fast and being wrong cheaply. The prototype is where an idea has to survive contact with how it actually behaves.</p>
+      </div>
+      <div>
+        <h4>Prototypes are bridges between ideas and experiences</h4>
+        <p>A good prototype ends the argument. Everyone stops describing what they think the thing is and just looks at it together.</p>
+      </div>
+    </div>
+
+    <p class="refrain">There's got to be a better way to do this.</p>
   </section>
 
+  <!-- Movement 3 · the same thought, now with a company behind it. -->
   <section class="panel rv">
-    <h2>The journey so far.</h2>
+    <h2>The same itch, on bigger surfaces.</h2>
     <ul class="tl">
       <li>
         <span class="tl-when">Aug 2023 — <br>Present</span>
@@ -357,7 +505,7 @@
         <div>
           <p class="tl-co">Porter</p>
           <p class="tl-role">Senior Product Designer</p>
-          <p class="tl-what">Led design for international expansion — vernacularising the partner app, redesigning earnings for UAE partners, and driving PMF for Delivery Note.</p>
+          <p class="tl-what">Led design for international expansion: vernacularising the partner app, redesigning earnings for UAE partners, and driving PMF for Delivery Note.</p>
         </div>
       </li>
       <li>
@@ -379,58 +527,78 @@
         </div>
       </li>
     </ul>
+
+    <p class="refrain">There's got to be a better way to do this.</p>
   </section>
 
+  <!-- Movement 4 · the turn. Everything above reads as a way of working; this
+       is where it stops being one. The interests and the photography were two
+       separate sections and are one passage now, because the point of the
+       section is that the same instinct is running in both. -->
   <section class="panel rv">
-    <h2>Understand deeply, prototype quickly, design with purpose.</h2>
-    <p class="lede">Three habits that survived every team I've worked on.</p>
-    <div class="princ">
+    <h2>It doesn't switch off.</h2>
+    <p class="lede">What I do with the rest of the week, and what it says about me that it keeps rhyming with the job.</p>
+
+    <!-- ══════════════════════════════════════════════════════════════════════
+         DUMMY COPY — every sentence in .interests below is invented so the
+         layout can be judged. Six real ones from Ajeet replace them verbatim;
+         nothing else in this block needs to change.
+         ══════════════════════════════════════════════════════════════════════ -->
+    <div class="interests">
       <div>
-        <h3>Iteration with intent</h3>
-        <p>Volume isn't the point. Every round should be answering a question I couldn't answer in the last one — otherwise it's just redecorating.</p>
+        <h3>Anime</h3>
+        <p>Three episodes deep into something I swore I would only sample.</p>
       </div>
       <div>
-        <h3>Sketch ideas, prototype realities</h3>
-        <p>Paper is for thinking fast and being wrong cheaply. The prototype is where an idea has to survive contact with how it actually behaves.</p>
+        <h3>Travel</h3>
+        <p>Less itinerary, more walking until something looks worth stopping for.</p>
       </div>
       <div>
-        <h3>Prototypes are bridges between ideas and experiences</h3>
-        <p>A good prototype ends the argument. Everyone stops describing what they think the thing is and just looks at it together.</p>
+        <h3>Cricket</h3>
+        <p>I will rearrange a weekend around a Test match and defend that at length.</p>
+      </div>
+      <div>
+        <h3>Workout</h3>
+        <p>The one hour of my week with no opinions about product in it. That is the whole point.</p>
+      </div>
+      <div>
+        <h3>Crime thrillers</h3>
+        <p>Most of the appeal is watching someone assemble a system out of fragments.</p>
+      </div>
+      <div>
+        <h3>Photography</h3>
+        <p>Started as a way to notice things. Became an app. Keep reading.</p>
       </div>
     </div>
-  </section>
 
-  <section class="panel rv">
-    <h2>Get to know me beyond design — we might just vibe.</h2>
-    <p class="lede">The things I fill the rest of my time with, in no particular order.</p>
-    <div class="tags">
-      <span class="tag">Anime</span>
-      <span class="tag">Travel</span>
-      <span class="tag">Cricket</span>
-      <span class="tag">Workout</span>
-      <span class="tag">Crime thrillers</span>
-      <span class="tag">Photography</span>
-    </div>
-  </section>
-
-  <section class="panel wide rv">
-    <h2>Another way I create.</h2>
-    <p class="lede">Some days I design pixels. Some days I chase light with my <strong>Sony &alpha;6700</strong>. Either way I'm just trying to frame a good story before it runs away.</p>
+    <h3 class="beat">Then it happened to my camera roll.</h3>
+    <p>Some days I design pixels. Some days I chase light with my <strong>Sony &alpha;6700</strong>. Either way I'm just trying to frame a good story before it runs away — and when I wanted a better way to live with the results, I built one.</p>
     <div class="stat-line">
-      <b>200K</b><span>views</span>
-      <b>1,000+</b><span>downloads — including the shots behind my wallpaper app. Not bad for a side quest.</span>
+      <b>200K</b><span>views on my photos</span>
+      <b>1,000+</b><span>downloads, including the shots behind my wallpaper app. Not bad for a side quest.</span>
     </div>
-    <div class="photo-grid">
-      <div class="photo ph-a" data-n="Photo 01"></div>
-      <div class="photo ph-b" data-n="Photo 02"></div>
-      <div class="photo ph-c" data-n="Photo 03"></div>
-      <div class="photo ph-d" data-n="Photo 04"></div>
-      <div class="photo ph-e" data-n="Photo 05"></div>
-      <div class="photo ph-f" data-n="Photo 06"></div>
-      <div class="photo ph-g" data-n="Photo 07"></div>
-      <div class="photo ph-h" data-n="Photo 08"></div>
-      <div class="photo ph-i" data-n="Photo 09"></div>
+
+    <!-- the wall leaves the measure every other section holds — see .bleed.
+         It stays inside the section because it belongs to this passage, and
+         because the full-bleed offset resolves against .panel's 720px box. -->
+    <div class="bleed">
+      <div class="photo-grid">
+        <div class="photo ph-a" data-n="Photo 01"></div>
+        <div class="photo ph-b" data-n="Photo 02"></div>
+        <div class="photo ph-c" data-n="Photo 03"></div>
+        <div class="photo ph-d" data-n="Photo 04"></div>
+        <div class="photo ph-e" data-n="Photo 05"></div>
+        <div class="photo ph-f" data-n="Photo 06"></div>
+        <div class="photo ph-g" data-n="Photo 07"></div>
+        <div class="photo ph-h" data-n="Photo 08"></div>
+        <div class="photo ph-i" data-n="Photo 09"></div>
+      </div>
     </div>
+
+    <!-- the fourth and last time the sentence appears, and the only time it is
+         not about work. Nothing introduces it; the reader gets there alone. -->
+    <p class="refrain">There's got to be a better way to do this.
+      <span class="turn">On a Sunday. About a wallpaper.</span></p>
   </section>
 
   <footer class="foot rv">

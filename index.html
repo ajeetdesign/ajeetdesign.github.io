@@ -441,11 +441,11 @@
   .bites-close svg { width: 18px; height: 18px; }
   .bslide { position: absolute; inset: 0; opacity: 0; visibility: hidden; transition: opacity .35s ease; }
   .bslide.on { opacity: 1; visibility: visible; }
-  /* placeholder art — swap .bimg for an <img class="bimg"> when shots land */
+  /* placeholder art — swap the .bimg div for a real img.bimg when shots land */
   /* width/height 100% are required, not redundant with inset:0 — an
-     absolutely positioned REPLACED element (<img>) takes its intrinsic
-     size when width is auto, so inset alone will not stretch it. Without
-     these the swap from placeholder div to real <img> silently breaks. */
+     absolutely positioned REPLACED element takes its intrinsic size when
+     width is auto, so inset alone will not stretch it. Without these the
+     swap from placeholder div to real image silently breaks. */
   /* contain, not cover: these shots are wide desktop UI composed with their own
      generous margins, and cover both cropped the panels mid-word and upscaled a
      2400px source past native on retina (~1.27x at 1512 CSS px, DPR 2). The
@@ -585,7 +585,12 @@
   .pcard .cta:hover { transform: translateY(-2px); box-shadow: 0 12px 26px -12px rgba(15, 30, 50, 0.7); }
   .pcard .cta svg { width: 14px; height: 14px; transition: transform .35s cubic-bezier(.2,.9,.25,1); }
   .pcard .cta:hover svg { transform: translateX(3px); }
-  /* image placeholder — swap the .art div for an <img> when the shots are ready */
+  /* A study still hosted elsewhere leaves the site, so its arrow leaves the
+     button — up and out rather than along, which is the direction the icon
+     itself points. The class is applied by script from the href; see wiring
+     at the foot of the page. */
+  .pcard .cta.is-ext:hover svg { transform: translate(2px, -2px); }
+  /* image placeholder — swap the .art div for a real image when shots are ready */
   .pcard .art {
     position: relative; align-self: stretch; min-height: 260px;
     border-radius: 20px; border: 1px solid rgba(255,255,255,0.55);
@@ -594,8 +599,8 @@
   }
   /* Same trap as .bimg: .art is a stretched grid item, but `align-self: stretch`
      does not stretch a REPLACED element that has its own intrinsic size, so an
-     <img class="art"> would collapse to its natural box. width/height 100% are
-     doing real work here, not duplicating the stretch. */
+     img.art would collapse to its natural box. width/height 100% are doing
+     real work here, not duplicating the stretch. */
   img.art { width: 100%; height: 100%; object-fit: cover; object-position: center; }
   .pcard .art::after {
     content: 'Image'; font-size: 12px; font-weight: 700;
@@ -650,9 +655,16 @@
   /* ── 3 · building with AI (storm) ───────────────────────────────────── */
   #s-ai { display: block; padding: 26vh 5vw 20vh; color: var(--ink-light); }
   #s-ai .wrap { max-width: 1060px; margin: 0 auto; }
+  /* Centred to match #s-work and #s-contact — this was the one section header
+     on the page still setting flush left. The tiles below keep their own
+     text-align: left, so centring stops at the header. */
+  #s-ai header { text-align: center; }
   #s-ai .label { color: var(--storm-accent); }
   #s-ai h2 { font-size: clamp(34px, 5vw, 62px); font-weight: 800; letter-spacing: -0.035em; margin: 0 0 14px; text-shadow: 0 2px 30px rgba(0,0,0,0.5); }
-  #s-ai .sub { font-size: 16px; color: rgba(230, 238, 252, 0.7); margin: 0 0 7vh; max-width: 56ch; }
+  /* auto margins as well as text-align: the 56ch cap makes this a narrow block
+     inside a 1060px one, and a centred line inside a left-hugging box still
+     reads as left-aligned */
+  #s-ai .sub { font-size: 16px; color: rgba(230, 238, 252, 0.7); margin: 0 auto 7vh; max-width: 56ch; }
   /* 4-card bento: one wide + one tall on row 1, two halves filling row 2.
      big(4) + tall(2) = 6; then sm(2) + sm(2) + tall's second row = 6. */
   .bento { display: grid; grid-template-columns: repeat(6, 1fr); gap: 16px; }
@@ -669,16 +681,138 @@
   .t-copy { display: flex; flex-direction: column; gap: 8px; }
   .tile h3 { font-size: clamp(17px, 1.7vw, 21px); font-weight: 700; letter-spacing: -0.02em; line-height: 1.25; margin: 0; color: #eef4ff; }
   .tile p { font-size: 13.5px; line-height: 1.55; color: rgba(214, 226, 248, 0.66); margin: 0; }
-  /* image placeholder — swap .t-shot for an <img class="t-shot"> when shots land */
+  /* Lifts a claim or a number out of the description. The separator between two
+     of them stays at the muted weight, so the eye reads them as two facts
+     rather than one run-on phrase. */
+  .tile p strong { font-weight: 700; color: rgba(238, 244, 255, 0.94); }
+  /* ── tile vignettes ────────────────────────────────────────────────────────
+     Each tile shows a miniature of the thing it describes, drawn in markup
+     rather than dropped in as a screenshot: it stays sharp at any density,
+     re-themes with the palette, weighs nothing, and cannot go stale against a
+     product that has moved on.
+
+     The vignette is deliberately taller than its frame and anchored to the top,
+     so the frame crops it. A miniature that fits exactly reads as a diagram; one
+     that runs off the edge reads as a window onto something larger.
+
+     .t-shot keeps its art-N class — the modal copies it onto #aim-shot to carry
+     the card's gradient across — but paints its own dark ground here, which wins
+     on source order over the .art-* gradients defined above. */
   .t-shot {
-    flex: 1; min-height: 118px; border-radius: 14px; overflow: hidden;
-    display: grid; place-items: center; object-fit: cover;
-    border: 1px solid rgba(255, 255, 255, 0.14);
+    position: relative; flex: 1; min-height: 118px;
+    border-radius: 14px; overflow: hidden;
+    /* No plate and no border: the vignette's own elements sit straight on the
+       card, so a card does not contain a second card. `transparent` has to be
+       stated rather than omitted — the art-N class stays on this element for
+       the modal to copy, and without a background here those gradients would
+       paint through. */
+    background: transparent;
+    padding: 13px 13px 0;
   }
-  .t-shot::after {
-    content: 'Image'; font-size: 11px; font-weight: 700;
-    letter-spacing: 0.18em; text-transform: uppercase; color: rgba(255, 255, 255, 0.85);
+  /* ── a vignette that is a real asset ───────────────────────────────────────
+     Same frame as the drawn vignettes, but filled with an exported image. The
+     frame keeps the card's radius and clips; everything else differs.
+
+     Layout: the copy leads and the asset runs off the bottom edge beneath it.
+     With the asset last, whatever height it could not fill piled up under the
+     text as dead space, and no fixed frame ratio could close that — the copy
+     grows as the card narrows, so the height that would close it moves from
+     1/1.64 to 1/1.91 across the range. Leading with the copy puts that surplus
+     at the very bottom of the card instead, past the fade, where there is
+     nothing for it to separate.
+
+     Scale: no object-fit. The image lays out from its own width at its own
+     proportions and whatever runs past the frame is cut. object-fit: cover
+     would rescale it to the frame, which is the squeeze this avoids.
+
+     Edge: the cut is a fade. A gradient overlay is the usual way, but this card
+     is translucent glass over a moving scene, so a solid colour would band the
+     moment the scene behind it changed. A mask fades the pixels themselves to
+     transparent, which stays correct at any scroll position. It sits on the
+     image, not the frame: the frame stretches to the card and the image does
+     not, so a fade measured on the frame would finish in empty space and leave
+     the picture ending at part opacity — a soft edge is still an edge. On the
+     image it resolves to nothing exactly where the image stops, at any width.
+     Opaque to 72% so the Save button survives; only the row under it goes. */
+  .t-shot.is-media { padding: 0; flex: 1 1 auto; }
+  .t-media {
+    display: block; width: 100%; height: auto;
+    -webkit-mask-image: linear-gradient(180deg, #000 72%, transparent 100%);
+    mask-image: linear-gradient(180deg, #000 72%, transparent 100%);
   }
+  /* pulls the asset through the card's bottom padding so it meets the edge */
+  .tile.tall .t-shot.is-media { margin-bottom: -20px; }
+  /* primitives every vignette is assembled from */
+  .vg { font-size: 11px; line-height: 1.45; color: rgba(226, 236, 252, 0.92); display: flex; flex-direction: column; gap: 9px; }
+  .vg-panel { background: rgba(143, 183, 255, 0.07); border: 1px solid rgba(143, 183, 255, 0.13); border-radius: 10px; }
+  .vg-row { display: flex; align-items: center; gap: 7px; }
+  .vg-mute { color: rgba(214, 226, 248, 0.5); }
+  .vg-accent { color: var(--storm-accent); }
+  /* skeleton line: stands in for text too small to set, sized by --w */
+  .vg-line { height: 5px; border-radius: 3px; background: rgba(214, 226, 248, 0.16); width: var(--w, 100%); }
+
+  /* 1 · prompt in, working interface out */
+  .vg-ask { padding: 8px 10px; border-radius: 10px 10px 10px 3px; background: rgba(143, 183, 255, 0.13); border: 1px solid rgba(143, 183, 255, 0.2); align-self: flex-start; max-width: 92%; }
+  .vg-built { padding: 10px; display: flex; flex-direction: column; gap: 9px; }
+  .vg-built-h { display: flex; align-items: baseline; justify-content: space-between; font-weight: 700; }
+  .vg-chart { display: flex; align-items: flex-end; gap: 4px; height: 54px; }
+  .vg-chart i { flex: 1; height: var(--h); border-radius: 2px 2px 0 0; background: linear-gradient(180deg, var(--storm-accent), rgba(143, 183, 255, 0.35)); }
+
+  /* 2 · a voxel form on a modelling floor */
+  .t-shot > .vg { height: 100%; }
+  .vg-stage {
+    position: relative; flex: 1 1 auto; min-height: 118px;
+    border-radius: 10px; overflow: hidden;
+    perspective: 620px;
+    background: radial-gradient(120% 80% at 50% 15%, rgba(143,183,255,0.13), transparent 70%);
+  }
+  /* the floor: two crossed repeating-gradients, raked back with a rotateX */
+  .vg-floor {
+    position: absolute; inset: 50% -60% -34%;
+    background:
+      repeating-linear-gradient(90deg, rgba(143,183,255,0.22) 0 1px, transparent 1px 34px),
+      repeating-linear-gradient(0deg, rgba(143,183,255,0.22) 0 1px, transparent 1px 34px);
+    transform: perspective(240px) rotateX(66deg);
+    -webkit-mask-image: linear-gradient(180deg, transparent, #000 26%);
+    mask-image: linear-gradient(180deg, transparent, #000 26%);
+  }
+  /* A fixed box for the cluster so the cubes can be placed in px on the iso
+     grid instead of in percentages of a stage whose height changes with the
+     tile. For side s at rotateY(45deg)/rotateX(-26deg): one step along a floor
+     axis is 0.71s across and 0.31s down; one step up is 0.90s straight up.
+     Anchored to the floor rather than centred in the stage, so the model sits
+     on the grid instead of hovering over it. */
+  .vg-mass { position: absolute; left: 50%; bottom: 22%; width: 118px; height: 104px; transform: translateX(-50%); }
+  /* contact shadow — without it the mass reads as pasted over the floor */
+  .vg-mass::after {
+    content: ''; position: absolute; left: 50%; bottom: -12px;
+    width: 132px; height: 30px; transform: translateX(-50%);
+    background: radial-gradient(50% 50% at 50% 50%, rgba(0, 4, 14, 0.62), transparent 70%);
+  }
+  /* One cube = three faces in real 3D. Skewed 2D parallelograms are the usual
+     shortcut and they never quite close at the corners; preserve-3d with each
+     face pushed out half a side length is exact, and the three tones are just
+     one surface lit from above. */
+  .vg-cube {
+    position: absolute; width: var(--s); height: var(--s); left: var(--x); top: var(--y);
+    transform-style: preserve-3d; transform: rotateX(-26deg) rotateY(45deg);
+  }
+  .vg-cube i { position: absolute; inset: 0; display: block; }
+  .vg-cube .f-top { background: #c3d7ff; transform: rotateX(90deg) translateZ(calc(var(--s) / 2)); }
+  .vg-cube .f-r   { background: #5a82c4; transform: translateZ(calc(var(--s) / 2)); }
+  .vg-cube .f-l   { background: #33507f; transform: rotateY(-90deg) translateZ(calc(var(--s) / 2)); }
+
+  /* 3 · transcripts collapsing into named clusters */
+  .vg-src { padding: 8px 9px; display: flex; flex-direction: column; gap: 5px; }
+  .vg-join { display: flex; justify-content: center; color: rgba(143, 183, 255, 0.55); }
+  .vg-join svg { width: 15px; height: 15px; }
+  .vg-cluster { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 7px 9px; }
+  .vg-count { font-weight: 700; color: var(--storm-accent); font-variant-numeric: tabular-nums; }
+
+  /* 4 · generated tokens, swatch beside value */
+  .vg-tok { display: flex; align-items: center; gap: 8px; padding: 6px 9px; }
+  .vg-sw { width: 13px; height: 13px; border-radius: 4px; flex: none; border: 1px solid rgba(255,255,255,0.2); }
+  .vg-tok b { margin-left: auto; font-weight: 600; font-variant-numeric: tabular-nums; color: rgba(214, 226, 248, 0.62); }
   /* the wide one reads side-by-side, the rest stack image over copy */
   .tile.big { grid-column: span 4; min-height: 260px; flex-direction: row; align-items: stretch; }
   .tile.big .t-copy { flex: 1; justify-content: center; }
@@ -866,7 +1000,7 @@
         <div class="intro-pitch">
           <p class="label reveal">01 — At a glance</p>
           <h2 class="reveal d1">Five years of designing products that move millions.</h2>
-          <p class="lede reveal d2">Across logistics, fintech and AI — working with incredible teams to solve real problems at scale.</p>
+          <p class="lede reveal d2">Across logistics, fintech and AI, working with incredible teams to solve real problems at scale.</p>
         </div>
 
         <ul class="xp reveal d2">
@@ -928,48 +1062,57 @@
     <header>
       <p class="label reveal">02 — Selected Work</p>
       <h2 class="reveal d1">Above the noise</h2>
-      <p class="reveal d2">Keep scrolling — the deck stacks itself.</p>
+      <p class="reveal d2">Keep scrolling. The deck stacks itself.</p>
     </header>
     <div class="stack">
       <article class="pcard glass" style="--peek: 0px">
         <div class="copy">
           <div class="top"><span class="idx">01</span><span class="org">Porter</span></div>
           <h3>Building a Supply-Led Growth Engine That Drove 10% of New Customer Acquisition</h3>
-          <p>Rebuilt the rewards journey for driver-partners — clearer earning states, faster redemption, measurable lift in conversion.</p>
-          <a class="cta" href="case.html?id=porter">Read case study <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M12 5l7 7-7 7"/></svg></a>
+          <p>Rebuilt the rewards journey for driver-partners: clearer earning states, faster redemption, measurable lift in conversion.</p>
+          <a class="cta" data-case="porter" href="case.html?id=porter">Read case study <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M12 5l7 7-7 7"/></svg></a>
         </div>
-        <!-- art-a stays on the img: its gradient backs the frame while the file
-             loads, and the ::after "IMAGE" label does not render on a replaced
-             element, so it drops away on its own -->
-        <img class="art art-a" src="images/porter-card.jpg" decoding="async"
-             alt="The Porter partner app showing the Put Porter Posters, Earn Extra ₹15,000 offer above a video explaining the branding programme">
+        <!-- The art-N gradient class stays on the img: it backs the frame while
+             the file loads, and the ::after "IMAGE" label does not render on a
+             replaced element, so it drops away on its own.
+
+             Which shot sits on which card is provisional. The files are named
+             and described for what the artwork SHOWS, not for the project it is
+             currently paired with, so moving one to another card is a swapped
+             src and nothing else — no filename and no alt text left asserting a
+             project it no longer belongs to. -->
+        <img class="art art-a" src="images/card-branding-offer.jpg" decoding="async"
+             alt="A partner app screen offering extra earnings for wearing branded kit, above a video explaining the programme">
       </article>
       <article class="pcard glass" style="--peek: 14px">
         <div class="copy">
-          <div class="top"><span class="idx">02</span><span class="org">Juspay · Hyperswitch</span></div>
-          <h3>Volume-based payment routing</h3>
-          <p>A visual way to split payment traffic across processors — percentages, priorities and fallbacks without touching code.</p>
-          <a class="cta" href="case.html?id=juspay">Read case study <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M12 5l7 7-7 7"/></svg></a>
+          <div class="top"><span class="idx">02</span><span class="org">Porter</span></div>
+          <h3>Redesigned earning experience of 2 Wheeler partner in UAE</h3>
+          <p>A day's earnings broken down the way riders actually ask about them: what came from trips, what incentives added and what penalties took away.</p>
+          <a class="cta" data-case="porter-uae-earnings" href="case.html?id=porter-uae-earnings">Read case study <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M12 5l7 7-7 7"/></svg></a>
         </div>
-        <div class="art art-b"></div>
+        <img class="art art-b" src="images/card-daily-earnings.jpg" decoding="async" loading="lazy"
+             alt="A daily earnings screen with a week of bars, the selected day highlighted, and a stats breakdown below">
       </article>
       <article class="pcard glass" style="--peek: 28px">
         <div class="copy">
-          <div class="top"><span class="idx">03</span><span class="org">Vedantu</span></div>
-          <h3>FinOps lender management</h3>
-          <p>Ranking lenders, distributing lead share and configuring education-loan flows — an ops platform that scales with the funnel.</p>
-          <a class="cta" href="case.html?id=vedantu">Read case study <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M12 5l7 7-7 7"/></svg></a>
+          <div class="top"><span class="idx">03</span><span class="org">Porter</span></div>
+          <h3>Increasing cash collection from driver partners in UAE</h3>
+          <p>Showing partners how much company cash they are still holding, against the limit that will stop them earning. The deposit becomes the obvious next step.</p>
+          <a class="cta" data-case="porter-uae-cash" href="case.html?id=porter-uae-cash">Read case study <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M12 5l7 7-7 7"/></svg></a>
         </div>
-        <div class="art art-c"></div>
+        <img class="art art-c" src="images/card-cash-ledger.jpg" decoding="async" loading="lazy"
+             alt="A cash balance screen with a deposit prompt against a limit, above a ledger of recent settlements, fares and deposits">
       </article>
       <article class="pcard glass" style="--peek: 42px">
         <div class="copy">
-          <div class="top"><span class="idx">04</span><span class="org">Convin.ai</span></div>
-          <h3>AI conversation intelligence</h3>
-          <p>Designing AI-assisted QA workflows that help support teams review every conversation — not just a sample.</p>
-          <a class="cta" href="case.html?id=convin">Read case study <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M12 5l7 7-7 7"/></svg></a>
+          <div class="top"><span class="idx">04</span><span class="org">Juspay</span></div>
+          <h3>Reducing devs efforts to configure payment routes</h3>
+          <p>Splitting live traffic across processors by percentage in a form the business already owns, so changing a route no longer means shipping code.</p>
+          <a class="cta" data-case="juspay" href="case.html?id=juspay">Read case study <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M12 5l7 7-7 7"/></svg></a>
         </div>
-        <div class="art art-d"></div>
+        <img class="art art-d" src="images/card-routing-config.jpg" decoding="async" loading="lazy"
+             alt="A payment routing configuration screen splitting traffic across three processors by percentage">
       </article>
       <div class="stack-tail" aria-hidden="true"></div>
     </div>
@@ -994,36 +1137,88 @@
   <!-- 3 · storm · building with AI -->
   <section id="s-ai">
     <div class="wrap">
-      <p class="label reveal">03 — Current obsession</p>
-      <h2 class="reveal d1">Building with AI</h2>
-      <p class="sub reveal d2">Where design instinct meets machine leverage — experiments, workflows and shipped things.</p>
+      <header>
+        <p class="label reveal">03 — Current obsession</p>
+        <h2 class="reveal d1">Building with AI</h2>
+        <p class="sub reveal d2">Where design instinct meets machine leverage: experiments, workflows and shipped things.</p>
+      </header>
+      <!-- Order is load-bearing, not editorial. Four cards over six columns
+           resolve one way: tall(2) claims column 1 across both rows, big(4)
+           fills the rest of row 1, then the two sm(2) close row 2 beside the
+           tall card's second half. Move any card out of this sequence and the
+           grid leaves ragged empty columns. The reveal delays follow the same
+           order, so the stagger reads down the left column then across. -->
       <div class="bento">
-        <button type="button" class="tile glass-dark big reveal">
+        <button type="button" class="tile glass-dark tall reveal">
           <div class="t-copy">
-            <h3>Prompt → prototype in hours, not weeks</h3>
-            <p>Design intent expressed in words, iterated in code, validated on real users the same day.</p>
+            <h3>Velia, your days in color</h3>
+            <p>A minimal mood journal that turns your days into a visual story. <strong>Built with AI</strong> &middot; <strong>100+ downloads in its first month</strong></p>
           </div>
-          <div class="t-shot art-a"></div>
+          <!-- art-b stays on the frame: the modal copies it onto #aim-shot -->
+          <div class="t-shot art-b is-media" aria-hidden="true">
+            <img class="t-media" src="images/ai-velia.png" alt="" loading="lazy" decoding="async"
+                 width="903" height="1470">
+          </div>
         </button>
-        <button type="button" class="tile glass-dark tall reveal d1">
-          <div class="t-shot art-b"></div>
+        <!-- Copy before vignette here because .tile.big lays out as a row, so
+             source order decides which side each lands on. -->
+        <button type="button" class="tile glass-dark big reveal d1">
           <div class="t-copy">
-            <h3>This site’s 3D mascot</h3>
-            <p>A voxel horse modeled, lit and animated in Three.js — pair-programmed with an AI agent, from first cube to final turntable.</p>
+            <h3>Design tokens that write themselves</h3>
+            <p>Tokens generated from real usage, documented and shipped without hand-kept tables.</p>
+          </div>
+          <!-- vignettes use div/span only: the modal reads tile.querySelector('p')
+               for its body copy, so a <p> in here would hijack it -->
+          <div class="t-shot art-d" aria-hidden="true">
+            <div class="vg">
+              <div class="vg-panel vg-tok"><i class="vg-sw" style="background:#2f7fd4"></i><span>color.accent</span><b>#2F7FD4</b></div>
+              <div class="vg-panel vg-tok"><i class="vg-sw" style="background:#1c2b3a"></i><span>color.ink</span><b>#1C2B3A</b></div>
+              <div class="vg-panel vg-tok"><i class="vg-sw" style="background:#eddcbc"></i><span>color.sand</span><b>#EDDCBC</b></div>
+              <div class="vg-panel vg-tok"><i class="vg-sw" style="background:rgba(143,183,255,0.35)"></i><span>radius.card</span><b>24px</b></div>
+            </div>
           </div>
         </button>
         <button type="button" class="tile glass-dark sm reveal d2">
-          <div class="t-shot art-c"></div>
+          <div class="t-shot art-c" aria-hidden="true">
+            <div class="vg">
+              <div class="vg-panel vg-src">
+                <div class="vg-row vg-mute"><span>P04 · transcript</span></div>
+                <div class="vg-line" style="--w:92%"></div>
+                <div class="vg-line" style="--w:74%"></div>
+                <div class="vg-line" style="--w:83%"></div>
+              </div>
+              <div class="vg-join">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M6 13l6 6 6-6"/></svg>
+              </div>
+              <div class="vg-panel vg-cluster"><span>Onboarding friction</span><span class="vg-count">12</span></div>
+              <div class="vg-panel vg-cluster"><span>Trust in payouts</span><span class="vg-count">8</span></div>
+            </div>
+          </div>
           <div class="t-copy">
             <h3>Agentic research synthesis</h3>
             <p>Interview transcripts → clustered insights → testable hypotheses, overnight.</p>
           </div>
         </button>
+        <!-- vignette before copy: .tile.sm stacks, with the copy pushed to the
+             bottom so both half-cards' images line up -->
         <button type="button" class="tile glass-dark sm reveal d3">
-          <div class="t-shot art-d"></div>
+          <div class="t-shot art-a" aria-hidden="true">
+            <div class="vg">
+              <div class="vg-ask">Make the earnings card show a weekly trend</div>
+              <div class="vg-panel vg-built">
+                <div class="vg-built-h"><span>Weekly earnings</span><span class="vg-accent">+18%</span></div>
+                <div class="vg-chart">
+                  <i style="--h:34%"></i><i style="--h:58%"></i><i style="--h:41%"></i>
+                  <i style="--h:72%"></i><i style="--h:53%"></i><i style="--h:88%"></i>
+                  <i style="--h:64%"></i>
+                </div>
+                <div class="vg-row vg-mute"><span>Mon</span><span style="margin-left:auto">Sun</span></div>
+              </div>
+            </div>
+          </div>
           <div class="t-copy">
-            <h3>Design tokens that write themselves</h3>
-            <p>Tokens generated from real usage, documented and shipped without hand-kept tables.</p>
+            <h3>Prompt → prototype in hours, not weeks</h3>
+            <p>Design intent expressed in words, iterated in code, validated on real users the same day.</p>
           </div>
         </button>
       </div>
@@ -1124,6 +1319,11 @@
 <div id="case" role="dialog" aria-modal="true" aria-label="Case study" aria-hidden="true">
   <iframe id="case-frame" title="Case study" src="about:blank"></iframe>
 </div>
+<!-- Which studies are still hosted elsewhere; must load before the wiring below.
+     v= is not decoration: this file is what flips a card between the in-page
+     overlay and an external write-up, so a stale copy sends readers to the
+     wrong place. Bump it here AND in case.html whenever the table changes. -->
+<script src="js/case-links.js?v=1"></script>
 <script>
   (function () {
     var layer = document.getElementById('case');
@@ -1133,7 +1333,7 @@
     function open(id) {
       lastY = scrollY;
       /* v= busts stale iframe caches — bump after case.html template changes */
-      frame.src = 'case.html?id=' + id + '&embed=1&v=44';
+      frame.src = 'case.html?id=' + id + '&embed=1&v=45';
       document.documentElement.classList.add('case-open');
       layer.classList.add('on');
       layer.setAttribute('aria-hidden', 'false');
@@ -1146,20 +1346,54 @@
       setTimeout(function () { if (!layer.classList.contains('on')) frame.src = 'about:blank'; }, 500);
     }
 
-    document.querySelectorAll('.pcard .cta').forEach(function (a) {
-      a.addEventListener('click', function (e) {
-        var m = /id=([a-z]+)/.exec(a.getAttribute('href'));
-        if (!m) return;              // no id → let the link navigate normally
-        e.preventDefault();
-        open(m[1]);
-      });
+    /* Some write-ups still live on an external site. Which ones is declared in
+       js/case-links.js and nowhere else; everything that follows from it is
+       derived here — whether a click opens the overlay or leaves the site, the
+       new tab, the icon, the label. Bringing a study in-house is a one-line
+       change in that file. case.html reads the same table, so its internal URL
+       redirects to the same destination and a project never has two homes. */
+    var LINKS = window.CASE_LINKS || {};
+    function linkFor(id) {
+      return Object.prototype.hasOwnProperty.call(LINKS, id) ? LINKS[id] : null;
+    }
+
+    /* the box-with-an-arrow, replacing the in-page arrow on links that leave */
+    var EXT_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"' +
+      ' stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">' +
+      '<path d="M13 5h6v6M19 5l-10 10M18 14v4a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4"/></svg>';
+
+    document.querySelectorAll('.pcard .cta[data-case]').forEach(function (a) {
+      var id = a.getAttribute('data-case');
+      var away = linkFor(id);
+      if (!away) {
+        a.addEventListener('click', function (e) { e.preventDefault(); open(id); });
+        return;
+      }
+      /* external: say so in the href, the icon, the tab it opens, and to a
+         screen reader, which otherwise gets no warning that the site changes */
+      a.href = away;
+      a.classList.add('is-ext');
+      a.target = '_blank';
+      a.rel = 'noopener noreferrer';
+      var icon = a.querySelector('svg');
+      if (icon) icon.outerHTML = EXT_ICON;
+      var org = a.closest('.pcard').querySelector('.org');
+      a.setAttribute('aria-label', 'Read the ' + (org ? org.textContent : 'full') +
+        ' case study (opens in a new tab)');
     });
     addEventListener('message', function (e) { if (e.data === 'case:close') close(); });
     addEventListener('keydown', function (e) { if (e.key === 'Escape' && layer.classList.contains('on')) close(); });
 
-    /* ?case=porter deep-links straight into a study */
-    var deep = new URLSearchParams(location.search).get('case');
-    if (deep && document.querySelector('.pcard .cta[href*="' + deep + '"]')) open(deep);
+    /* ?case=porter deep-links straight into a study; one pointing at an external
+       study follows it, because reaching the write-up is the point of the link.
+       Stripped to [a-z-] before it reaches a selector or a property lookup — it
+       comes off the query string, so it is reader-controlled. The hyphen is
+       allowed because ids name projects, not case files: porter-uae-cash. */
+    var deep = (new URLSearchParams(location.search).get('case') || '').replace(/[^a-z-]/g, '');
+    if (deep) {
+      if (linkFor(deep)) location.replace(linkFor(deep));
+      else if (document.querySelector('.pcard .cta[data-case="' + deep + '"]')) open(deep);
+    }
   })();
 </script>
 
@@ -1184,31 +1418,31 @@
     <div class="bslide"><img class="bimg g1" data-src="images/bite-cash-ledger.jpg" alt="Three phone screens showing a driver cash-balance ledger in green, amber and red states, each with a deposit prompt" decoding="async"><div class="btext">
       <span class="bk">Quick bite 01</span>
       <h3>Project name</h3>
-      <p>One line of context — what it was and what changed.</p>
+      <p>One line of context: what it was and what changed.</p>
     </div></div>
 
     <div class="bslide"><img class="bimg g2" data-src="images/bite-prompt-logs.jpg" alt="Two views of a prompt-ops console for an airline support agent — a filtered run log with success, failure and pending states, and a trace timeline opened to one span's input, output and metadata" decoding="async"><div class="btext">
       <span class="bk">Quick bite 02</span>
       <h3>Project name</h3>
-      <p>One line of context — what it was and what changed.</p>
+      <p>One line of context: what it was and what changed.</p>
     </div></div>
 
     <div class="bslide"><img class="bimg g3" data-src="images/bite-routing-config.jpg" alt="Two payment routing setup screens — a volume-based configuration splitting traffic across Adyen, Stripe and Authorize.net by percentage, and a rule-based builder with conditions and fallback routing" decoding="async"><div class="btext">
       <span class="bk">Quick bite 03</span>
       <h3>Project name</h3>
-      <p>One line of context — what it was and what changed.</p>
+      <p>One line of context: what it was and what changed.</p>
     </div></div>
 
     <div class="bslide"><div class="bimg g4"></div><div class="btext">
       <span class="bk">Quick bite 04</span>
       <h3>Project name</h3>
-      <p>One line of context — what it was and what changed.</p>
+      <p>One line of context: what it was and what changed.</p>
     </div></div>
 
     <div class="bslide"><div class="bimg g5"></div><div class="btext">
       <span class="bk">Quick bite 05</span>
       <h3>Project name</h3>
-      <p>One line of context — what it was and what changed.</p>
+      <p>One line of context: what it was and what changed.</p>
     </div></div>
 
     <div class="bnav" aria-hidden="true"><div class="bz bz-prev"></div><div class="bz bz-next"></div></div>

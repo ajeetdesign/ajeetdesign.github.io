@@ -290,15 +290,20 @@
     display: grid; grid-template-columns: repeat(4, 1fr); align-items: end;
     gap: clamp(14px, 1.8vw, 24px) clamp(10px, 1.4vw, 20px);
     margin-bottom: clamp(22px, 2.8vw, 32px);
+    --screen: 391 / 860;
   }
   /* Every shot is cropped to its screen and normalised to one aspect, because
      the source mockups were drawn at four different proportions and no amount
      of scaling makes those read as one set. The device frame is drawn here
      instead — one ring for all four, so they are identical by construction.
-     A spread shadow costs no layout width, so the sizes stay equal. */
+     A spread shadow costs no layout width, so the sizes stay equal.
+     The ratio is a variable because it is a property of the export, not of the
+     component: one demo's screens come out of Figma at 391x860 and another's at
+     720x1440, and forcing the second into the first's box stretches the type by
+     a tenth. A demo that ships a different aspect declares it on the grid. */
   .vgrid img {
     display: block; justify-self: center; width: auto;
-    height: clamp(240px, 27vw, 400px); aspect-ratio: 391 / 860;
+    height: clamp(240px, 27vw, 400px); aspect-ratio: var(--screen);
     border-radius: clamp(10px, 1.1vw, 15px);
     box-shadow: 0 0 0 5px #1b1f26, 0 0 0 6px #454b55,
                 0 16px 30px -20px rgba(15, 30, 50, 0.45);
@@ -527,9 +532,32 @@
   </form>
 </div>
 
+<!-- Which studies are still hosted elsewhere; read by the redirect just below.
+     Keep v= in step with the copy of this tag in index.html — a stale table
+     here would redirect a reader who has already been sent the other way. -->
+<script src="js/case-links.js?v=1"></script>
 <script>
 /* embedded in index.html's full-screen layer? then close = tell the parent */
 var EMBED = new URLSearchParams(location.search).get('embed') === '1';
+
+/* A study still hosted elsewhere has one destination however a reader arrives:
+   index.html points its card straight out, and this catches anyone who reaches
+   the internal URL directly. Declared once in js/case-links.js — deleting a
+   line there brings that study back in-house and this stops firing for it.
+
+   Deliberately ahead of the password gate: being sent off the site should not
+   require unlocking content the reader is never going to see. And when embedded
+   the whole tab moves rather than the iframe, which would otherwise load
+   another site inside our own overlay. */
+(function () {
+  var links = window.CASE_LINKS || {};
+  var want = (new URLSearchParams(location.search).get('id') || '').replace(/[^a-z-]/g, '');
+  /* hasOwnProperty, not a bare lookup: ?id=constructor would otherwise resolve
+     to something inherited and truthy */
+  if (Object.prototype.hasOwnProperty.call(links, want) && links[want]) {
+    (EMBED ? parent : window).location.replace(links[want]);
+  }
+})();
 
 /* ─────────────────────────────────────────────────────────────────────────────
    One template, four case studies. Structure follows the reference:
@@ -678,6 +706,37 @@ var DEMOS = { porter: {
             alt: 'Audit failed, naming the reason — the Porter logo was not visible' }
         ] }
     ]
+  },
+  /* The dashboard, in the four states a partner actually meets it in. These
+     screens export at 720x1440 rather than the verification set's 391x860, so
+     the grid is told its aspect instead of stretching them into the other's.
+     TODO the two step labels and their copy are placeholders — replace. */
+  'Final dashboard': {
+    ratio: '1 / 2',
+    video: {
+      src: 'images/porter-dashboard.mp4',
+      poster: 'images/porter-dashboard-poster.jpg',
+      alt: 'A scroll through the finished performance dashboard — the month\'s progress card, the day\'s audits, earnings and audit history, and the tutorials at the bottom'
+    },
+    note: 'TODO — the lead-in between the clip and the four states.',
+    steps: [
+      { label: 'TODO — the progress pair',
+        text: 'TODO — what the two at-risk states are doing: naming the shortfall and the action that closes it.',
+        shots: [
+          { src: 'images/porter-dashboard-01-days-short.png',
+            alt: 'The dashboard at risk on days online — 15 of 24, telling the partner to go online for four more days and pass verification' },
+          { src: 'images/porter-dashboard-02-pass-short.png',
+            alt: 'The dashboard at risk on pass rate — 50% against a 60% bar, telling the partner they need six more days of successful verification, with a link to learn how to click the selfie' }
+        ] },
+      { label: 'TODO — the earnings pair',
+        text: 'TODO — what the two payout states are doing: closing the month, paid or not, against the same progress card.',
+        shots: [
+          { src: 'images/porter-dashboard-03-payout-paid.png',
+            alt: 'The dashboard on track, with June\'s payout of ₹1500 added to the partner\'s wallet' },
+          { src: 'images/porter-dashboard-04-payout-zero.png',
+            alt: 'The dashboard on track, with June\'s payout at ₹0 because the partner failed to pass their audits' }
+        ] }
+    ]
   }
 } };
 
@@ -736,10 +795,13 @@ function caption(label) {
    it decomposes into. muted is what makes autoplay legal in every browser;
    playsinline stops iOS from throwing it into the fullscreen player. */
 function demo(d) {
-  var h = '<div class="proto rv">' +
+  /* The clip is optional: a demo whose recording has not landed yet still has
+     four screens worth showing, and an empty <video> would render as a broken
+     black plate rather than as nothing. */
+  var h = d.video ? '<div class="proto rv">' +
     '<video src="' + d.video.src + '" poster="' + d.video.poster + '"' +
     ' autoplay muted loop playsinline preload="metadata" disablepictureinpicture' +
-    ' aria-label="' + d.video.alt + '"></video></div>';
+    ' aria-label="' + d.video.alt + '"></video></div>' : '';
   /* every mockup first, then the labels — the grid puts each label back under
      its own pair, and this order is what the phone breakpoint reshuffles */
   if (d.note) h += '<p class="proto-note rv">' + d.note + '</p>';
@@ -751,7 +813,8 @@ function demo(d) {
     labels += '<div class="lbl"><p class="t"><span class="n">0' + (i + 1) + '</span>' +
       st.label + '</p>' + (st.text ? '<p class="d">' + st.text + '</p>' : '') + '</div>';
   });
-  return h + '<div class="vgrid rv">' + shots + labels + '</div>';
+  var ratio = d.ratio ? ' style="--screen:' + d.ratio + '"' : '';
+  return h + '<div class="vgrid rv"' + ratio + '>' + shots + labels + '</div>';
 }
 
 /* sections number themselves — cases can skip any of them */
