@@ -6,6 +6,7 @@
   fog, lights and cloud groups all interpolate along it.
 */
 import * as THREE from './three.module.min.js';
+import { createCarousel } from './cloud-carousel.js';
 
 (function () {
   if (window.__adSkyInit) return; window.__adSkyInit = true;
@@ -128,6 +129,64 @@ import * as THREE from './three.module.min.js';
     { p: [30, 106, -370], l: [78, 96, -455] },
     { p: [60, 4.5, -510], l: [60, 9, -587] }
   ].map(k => ({ p: new THREE.Vector3().fromArray(k.p), l: new THREE.Vector3().fromArray(k.l) }));
+
+  /* ── the card wall on the cloudline leg ──────────────────────────────────
+     Placed against K[3]: 62 units down the camera's own sight line, then
+     turned to face it. lookAt aims local +z at the target and the wall's
+     front IS +z, so that one call does the whole orientation.
+     Scale sets the apparent size: a 3.46-unit card at 62 units would read
+     tiny in a 55° frame, so 11x puts a card at roughly a third of the width,
+     which is the proportion the study was composed at. */
+  var CAROUSEL_CARDS = [
+    /* PLACEHOLDER — the study shipped with another designer's project list.
+       Titles, tags and colours here are stand-ins for Ajeet's own. */
+    { title: 'Card one',   tag: 'Placeholder', a: '#3f6fd8', b: '#1b3a86' },
+    { title: 'Card two',   tag: 'Placeholder', a: '#d8683f', b: '#8a2f1b' },
+    { title: 'Card three', tag: 'Placeholder', a: '#3fb0a0', b: '#14514c' },
+    { title: 'Card four',  tag: 'Placeholder', a: '#8a6bd8', b: '#3a2a7a' },
+    { title: 'Card five',  tag: 'Placeholder', a: '#d8a83f', b: '#8a5f14' },
+    { title: 'Card six',   tag: 'Placeholder', a: '#4a86c8', b: '#1d3f6a' },
+    { title: 'Card seven', tag: 'Placeholder', a: '#c85a8a', b: '#6a1d3f' },
+    { title: 'Card eight', tag: 'Placeholder', a: '#5ac888', b: '#1d6a3f' }
+  ];
+  var carousel = createCarousel(THREE, CAROUSEL_CARDS,
+    Math.min(8, renderer.capabilities.getMaxAnisotropy()));
+  (function placeCarousel() {
+    var camP = K[3].p, camL = K[3].l;
+    var dir = camL.clone().sub(camP).normalize();
+    carousel.group.position.copy(camP).addScaledVector(dir, 62);
+    carousel.group.position.y -= 10;   // clear of the line of copy above it
+    carousel.group.scale.setScalar(10);
+    carousel.group.lookAt(camP);
+    carousel.group.visible = false;
+    scene.add(carousel.group);
+  })();
+
+  /* Scroll drives the strip; the pointer dents it. The dent is found by
+     intersecting the pointer ray with the wall's own plane and converting the
+     hit into wall-local units, which worldToLocal does including the scale. */
+  var carRay = new THREE.Raycaster(), carPlane = new THREE.Plane();
+  var carNrm = new THREE.Vector3(), carHit = new THREE.Vector3();
+  var carPtr = new THREE.Vector2(), carPtrLive = false, carLastY = window.pageYOffset;
+  addEventListener('pointermove', function (e) {
+    carPtr.set(e.clientX / innerWidth * 2 - 1, -(e.clientY / innerHeight * 2 - 1));
+    carPtrLive = true;
+  }, { passive: true });
+  addEventListener('pointerleave', function () { carPtrLive = false; }, { passive: true });
+
+  function carouselDrive() {
+    var y = window.pageYOffset, d = y - carLastY;
+    carLastY = y;
+    return d * 0.0016;   // page pixels -> wall units
+  }
+  function carouselPoke() {
+    if (!carPtrLive || !carousel.group.visible) return null;
+    carousel.group.getWorldDirection(carNrm);
+    carPlane.setFromNormalAndCoplanarPoint(carNrm, carousel.group.position);
+    carRay.setFromCamera(carPtr, camera);
+    if (!carRay.ray.intersectPlane(carPlane, carHit)) return null;
+    return carousel.group.worldToLocal(carHit);
+  }
 
   // ── sky dome (custom gradient shader, follows the camera) ──────────────
   var skyUni = {
@@ -1566,6 +1625,16 @@ import * as THREE from './three.module.min.js';
       .sub(camera.position).normalize();
     skyUni.uSunDir.value.copy(tmpLook);
     updateOverlays();
+
+    /* The wall belongs to leg 3. A single peak at S=3 is wrong here: the
+       reader scrolls THROUGH 3 while the section is on screen, so a peaked
+       curve dissolves the cards exactly while they are being read. Hold full
+       across a plateau either side of 3 and only fade at the approach and the
+       exit into the storm. */
+    var cd = Math.abs(S - 3);
+    var cloudFade = cd <= 0.4 ? 1 : Math.min(Math.max(1 - (cd - 0.4) / 0.45, 0), 1);
+    cloudFade = cloudFade * cloudFade * (3 - 2 * cloudFade);   // smoothstep the edges
+    carousel.update(dt, cloudFade, carouselDrive(), carouselPoke());
 
     // cloud groups: opacity/tint per state, slow drift
     var dOp = numAt(P.deckOp, i, f), sOp = numAt(P.stormOp, i, f), pOp = numAt(P.sunnyOp, i, f);
