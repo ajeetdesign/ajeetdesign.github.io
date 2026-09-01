@@ -155,11 +155,19 @@ import { createCarousel } from './cloud-carousel.js';
     var camP = K[3].p, camL = K[3].l;
     var dir = camL.clone().sub(camP).normalize();
     carousel.group.position.copy(camP).addScaledVector(dir, 62);
-    carousel.group.position.y -= 10;   // clear of the line of copy above it
-    carousel.group.scale.setScalar(10);
+    carousel.group.position.y -= 12;   // clear of the line of copy above it
+    /* Scale sets how much frame a card takes. At 10 a card stood ~33% of the
+       height and read as a small object floating in the sky; the reference
+       fills ~60% and reads as a wall you are flying along. 15 puts a card at
+       roughly half the height in this 55 deg camera, which is as close as the
+       proportion gets without the neighbours leaving frame entirely — the
+       reference is composed for a much wider viewport than this one. */
+    carousel.group.scale.setScalar(15);
     carousel.group.lookAt(camP);
     carousel.group.visible = false;
     scene.add(carousel.group);
+    var host = document.querySelector('#s-cloudline .stage');
+    if (host) host.appendChild(carousel.layer);
   })();
 
   /* Scroll drives the strip; the pointer dents it. The dent is found by
@@ -1635,6 +1643,10 @@ import { createCarousel } from './cloud-carousel.js';
     var cloudFade = cd <= 0.4 ? 1 : Math.min(Math.max(1 - (cd - 0.4) / 0.45, 0), 1);
     cloudFade = cloudFade * cloudFade * (3 - 2 * cloudFade);   // smoothstep the edges
     carousel.update(dt, cloudFade, carouselDrive(), carouselPoke());
+    /* after update, and after the group's world matrix is current */
+    carousel.group.updateMatrixWorld();
+    carousel.layer.style.opacity = cloudFade;
+    carousel.layoutLabels(camera, innerWidth, innerHeight);
 
     // cloud groups: opacity/tint per state, slow drift
     var dOp = numAt(P.deckOp, i, f), sOp = numAt(P.stormOp, i, f), pOp = numAt(P.sunnyOp, i, f);

@@ -23,16 +23,19 @@
    The parabola, the poke and the scroll physics are the study's, unchanged.  */
 
 export const CFG = {
-  cardW: 3.46, cardH: 2.00, gap: 0.455,
+  cardW: 3.46, cardH: 2.00,
+  /* the reference wall reads almost continuous — a seam, not a margin */
+  gap: 0.16,
   /* one parabola for the whole wall: Z = -curve * (u - apexX)^2. Every card
      evaluates the same function of u, so they form one continuous surface —
      the card over the apex bends, its neighbours read as flat panels angled
      away. Constant curvature is also why the motion is smooth: no bend
      travels through the cards, it is identical everywhere. */
-  /* 0.4118 was fitted to the study's 42 deg camera. This scene is 55 deg and
-     sees much more of the wall at once, so the same constant turned the
-     neighbours edge-on. Gentler here keeps a readable band across frame. */
-  curve: 0.155, apexX: 0.31,
+  /* Back near the study's own 0.4118. Relaxing it flattened the wall into a
+     row of separate panels; the reference reads as one curved surface with the
+     centre card face-on and its neighbours turning sharply away, and that
+     turn IS the effect. */
+  curve: 0.34, apexX: 0.31,
   segX: 72, segY: 44,
   pokeR: 1.05, pokeDepth: 0.30, pokeRing: 1.70, pokeRipple: 0.15, pokeLag: 0.15,
   lerp: 0.122,            // velocity decay per frame, measured off the original
@@ -139,6 +142,15 @@ function pageTexture(THREE, card, i) {
   return t;
 }
 
+/* The wall's shape lives in the vertex shader, so anything on the CPU that
+   needs to know where a card actually IS — labels, hit testing — has to
+   evaluate the same function. This is that twin: same u, same parabola. */
+function cardPoint(off, lx, ly, out) {
+  const u = off + lx;
+  const du = u - CFG.apexX;
+  return out.set(u, ly, -CFG.curve * du * du);
+}
+
 export function createCarousel(THREE, cards, maxAniso) {
   const group = new THREE.Group();
   const geo = new THREE.PlaneGeometry(CFG.cardW, CFG.cardH, CFG.segX, CFG.segY);
@@ -166,9 +178,25 @@ export function createCarousel(THREE, cards, maxAniso) {
     const m = new THREE.Mesh(geo, mat);
     m.frustumCulled = false;      // the shader moves vertices; the bounds lie
     group.add(m);
-    return { mesh: m, u: mat.uniforms, speed: 0.03 + (i % 4) * 0.008 };
+
+    const name = document.createElement('span');
+    name.className = 'cName';
+    name.textContent = card.title;
+    const go = document.createElement('span');
+    go.className = 'cGo';
+    go.innerHTML = '<svg viewBox="0 0 20 20" fill="none" stroke-width="1.7" ' +
+      'stroke-linecap="round" stroke-linejoin="round"><path d="M3 10h13M11 5l5 5-5 5"/></svg>';
+
+    return { mesh: m, u: mat.uniforms, speed: 0.03 + (i % 4) * 0.008, name: name, go: go };
   });
 
+  /* the labels ride in the DOM above the canvas, tracking projected corners */
+  const layer = document.createElement('div');
+  layer.className = 'cardLabels';
+  layer.setAttribute('aria-hidden', 'true');
+  items.forEach(function (it) { layer.appendChild(it.name); layer.appendChild(it.go); });
+
+  const _v = new THREE.Vector3();
   const span = items.length * SPACING;
   let pos = 0, vel = 0, poked = 0;
   const poke = new THREE.Vector2(0, -99);
@@ -207,8 +235,31 @@ export function createCarousel(THREE, cards, maxAniso) {
          would dent all of them identically instead of denting the wall once. */
       it.u.uPoke.value.set(poke.x - off, poke.y);
       it.u.uPokeAmt.value = poked;
+      it.off = off;
     }
   }
 
-  return { group, update, items, SPACING, span };
+  /* Positions each card's name and arrow against its projected bottom corners.
+     Separate from update() because it needs the camera, and because it must run
+     after the group's world matrix is current for the frame. */
+  function layoutLabels(camera, w, h) {
+    const hx = CFG.cardW / 2, hy = CFG.cardH / 2;
+    for (let i = 0; i < items.length; i++) {
+      const it = items[i];
+      /* a card past the apex by more than one turn is edge-on or behind */
+      const vis = group.visible && Math.abs(it.off - CFG.apexX) < SPACING * 1.15;
+      it.name.style.display = it.go.style.display = vis ? 'block' : 'none';
+      if (!vis) continue;
+
+      cardPoint(it.off, -hx, -hy, _v).applyMatrix4(group.matrixWorld).project(camera);
+      it.name.style.transform =
+        'translate(' + ((_v.x * 0.5 + 0.5) * w) + 'px,' + ((-_v.y * 0.5 + 0.5) * h) + 'px)';
+
+      cardPoint(it.off, hx, -hy, _v).applyMatrix4(group.matrixWorld).project(camera);
+      it.go.style.transform =
+        'translate(' + ((_v.x * 0.5 + 0.5) * w) + 'px,' + ((-_v.y * 0.5 + 0.5) * h) + 'px)';
+    }
+  }
+
+  return { group, update, layoutLabels, layer, items, SPACING, span };
 }
