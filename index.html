@@ -676,29 +676,9 @@
     color: var(--ink-light); text-shadow: 0 2px 30px rgba(8, 34, 84, 0.5);
     margin: 0 auto 7vh; max-width: 30ch;
   }
-  /* The cards are drawn in the 3D scene, not in the DOM, so this is only a
-     spacer: it holds the section's height — and therefore the scroll room the
-     leg needs — while showing nothing itself. */
+  /* a spacer: holds the section's height, and therefore the scroll room the
+     leg needs to fly through, while showing nothing itself */
   #s-cloudline .stage { min-height: 52vh; }
-  /* The cards are drawn in WebGL; their names and buttons are DOM on top,
-     positioned each frame from the projected bottom corners of the curved
-     card. Fixed, because the projection is in viewport coordinates. */
-  .cardLabels { position: fixed; inset: 0; pointer-events: none; z-index: 3; }
-  .cardLabels > * { position: absolute; top: 0; left: 0; will-change: transform; }
-  .cName {
-    margin: -34px 0 0 18px; font-size: 15px; font-weight: 600;
-    letter-spacing: -0.01em; color: #fff; white-space: nowrap;
-    text-shadow: 0 1px 12px rgba(6, 22, 54, 0.6);
-  }
-  .cGo {
-    margin: -46px 0 0 -52px; width: 34px; height: 34px; border-radius: 999px;
-    display: grid; place-items: center;
-    background: rgba(255, 255, 255, 0.14); border: 1px solid rgba(255, 255, 255, 0.5);
-    backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
-  }
-  .cGo svg { width: 17px; height: 17px; }
-  .cGo svg path { stroke: #fff; }
-
   #s-ai { display: block; padding: 26vh 5vw 20vh; color: var(--ink-light); }
   #s-ai .wrap { max-width: 1060px; margin: 0 auto; }
   /* Centred to match #s-work and #s-contact — this was the one section header
@@ -1180,15 +1160,14 @@
     </div>
   </section>
 
-  <!-- 3 · cloudline · golden hour above the cloud deck.
-       TODO copy: label, heading and subtitle below are placeholders. The
-       carousel from curved-carousel.html lands in .stage. -->
+  <!-- 3 · cloudline · open blue between the work sky and the storm.
+       One line, no kicker and no heading. The section is otherwise empty:
+       .stage is a spacer holding the height the leg needs to fly through.
+       TODO: the line below is a placeholder. -->
   <section id="s-cloudline">
     <div class="wrap">
-      <!-- one line only: no kicker, no heading. The scene is the entrance;
-           the cards are the content. -->
       <header>
-        <p class="sub reveal">TODO — one line introducing what these cards are.</p>
+        <p class="sub reveal">TODO — one line for this section.</p>
       </header>
       <div class="stage" aria-hidden="true"></div>
     </div>
@@ -1726,7 +1705,7 @@
       .add({ duration: 1500, complete: finish });
   })();
 </script>
-<script type="module" src="js/sky.js?v=76"></script>
+<script type="module" src="js/sky.js?v=77"></script>
 <script>
   /* nav active state — rect-based like the reveals (IO never fires in captures) */
   (function () {
