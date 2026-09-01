@@ -146,7 +146,10 @@ import { createCardWall } from './card-wall.js';
     { title: 'Card six',   a: '#c85a8a', b: '#5e1a3a' }
   ];
   var wall = createCardWall(THREE, WALL_CARDS);
-  var wallDist = 62, wallScale = 15;
+  /* 15 put the centre card at ~60% of frame width and pushed its neighbours
+     off the edges. The reference sits at 44%, which leaves room for four
+     cards to span the frame and run off both sides. */
+  var wallDist = 62, wallScale = 12.6;
   (function placeWall() {
     var camP = K[3].p;
     var dir = K[3].l.clone().sub(camP).normalize();

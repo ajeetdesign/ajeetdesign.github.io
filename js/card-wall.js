@@ -31,7 +31,12 @@ const CARD_W = 3.46;          // 1.73:1, a browser viewport
 const CARD_H = 2.00;
 const SEAM   = 0.14;          // hairline, per the capture
 const SPACING = CARD_W + SEAM;
-const CURVE  = 0.34;          // sagitta ~ CURVE * (CARD_W/2)^2 over the card
+/* Gentle. At 0.34 a card one place along sits so much further back that it
+   curls out of frame and the wall reads as a barrel seen from inside; the
+   reference is a shallow arc that runs off both edges of the screen with four
+   cards showing. Recession per step is CURVE * SPACING^2, so this is the
+   single number that decides wall-versus-cylinder. */
+const CURVE  = 0.115;
 const APEX   = 0.0;           // strip coordinate the wall is nearest at
 const SEG_X  = 64, SEG_Y = 40;
 
@@ -171,6 +176,9 @@ export function createCardWall(THREE, cards, opts) {
   layer.setAttribute('aria-hidden', 'true');
   items.forEach(function (it) { layer.appendChild(it.name); layer.appendChild(it.go); });
 
+  /* the reference never sits still — it drifts, and a drag rides on top of
+     that rather than replacing it */
+  const DRIFT = 0.34;   // wall units per second
   let pos = 0, vel = 0, pressAmt = 0, dragging = false, lastX = 0, moved = 0;
   const press = new THREE.Vector2(0, -99);
   const _v = new THREE.Vector3();
@@ -205,6 +213,7 @@ export function createCardWall(THREE, cards, opts) {
     if (!group.visible) return;
 
     if (!dragging) {
+      pos += DRIFT * dt;              // the carousel always moves
       pos += vel;
       vel *= Math.exp(-DECAY * dt);   // frame-rate independent, no snapping
       if (Math.abs(vel) < 1e-5) vel = 0;
