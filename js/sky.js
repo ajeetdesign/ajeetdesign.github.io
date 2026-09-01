@@ -141,6 +141,7 @@ import { PROJECTS } from './gallery-assets.js';
      without leaving the frame */
   gallery.place(K[3].p, K[3].l, camera.fov, 1.25);
   gallery.rig.visible = false;
+  var galRamp = 0;   // eases the cards in behind the section's line
   scene.add(gallery.rig);
   (function () {
     var host = document.querySelector('#s-cloudline .stage');
@@ -1595,6 +1596,14 @@ import { PROJECTS } from './gallery-assets.js';
       var shown = Math.min(gr.bottom, innerHeight) - Math.max(gr.top, 0);
       gf = Math.min(Math.max(shown / Math.min(gr.height, innerHeight), 0), 1);
       gf = gf * gf * (3 - 2 * gf);
+      /* The line and the cards are one section, so they arrive in order: the
+         cards wait on the line's own reveal and then ease up behind it. The
+         ramp is a follower rather than a delay timer, so scrolling back out
+         and in again replays the entrance instead of skipping it. */
+      var gline = gsec.querySelector('.sub');
+      var lineIn = gline && gline.classList.contains('in');
+      galRamp += ((lineIn ? 1 : 0) - galRamp) * Math.min(1, dt * 1.7);
+      gf *= galRamp;
     }
     gallery.update(T, dt * 1000, gf, camera);
 

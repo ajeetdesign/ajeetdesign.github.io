@@ -218,6 +218,11 @@ export function createGallery(THREE, cards, maxAniso) {
     });
   }
 
+  /* Not in the source, which is driven only by wheel and drag: the wall here
+     creeps on its own and gives way the moment a card is hovered, so the
+     reader can stop it simply by looking at one. */
+  const AUTO = 0.055;          // strip units per second
+
   /* --- motion state (verbatim) --- */
   const state = { scroll: -1.3, mid: -1.3, target: -FOCUS_LOCAL[0] / STEP, vel: 0 };
   const bend = { p: 0, v: 0 };        // spring state for the elastic whip
@@ -269,6 +274,10 @@ export function createGallery(THREE, cards, maxAniso) {
     if (throwT < 1) {
       throwT = Math.min(1, throwT + (dtMs / 1000) / throwDur);
       state.target = throwFrom + (throwTo - throwFrom) * expoOut(throwT);
+    } else if (!isDragging && hovered === null) {
+      /* the drift only runs when nothing else is driving: a throw still
+         has right of way, and a hovered card halts it outright */
+      state.target += AUTO * (dtMs / 1000);
     }
 
     // two cascaded exponentials -> S-curved response: motion eases IN
