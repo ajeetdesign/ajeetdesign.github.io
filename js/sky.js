@@ -7,6 +7,7 @@
 */
 import * as THREE from './three.module.min.js';
 import { createGallery } from './curved-gallery.js';
+import { PROJECTS } from './gallery-assets.js';
 
 (function () {
   if (window.__adSkyInit) return; window.__adSkyInit = true;
@@ -133,21 +134,12 @@ import { createGallery } from './curved-gallery.js';
   /* ── the curved gallery on the cloudline leg ─────────────────────────────
      The module reproduces its source's camera-relative geometry, so it only
      needs to know where this scene's camera stands on that leg. */
-  var GALLERY_CARDS = [
-    /* PLACEHOLDER titles and colours */
-    { title: 'Card one',   a: '#3f6fd8', b: '#16326f' },
-    { title: 'Card two',   a: '#d8683f', b: '#7a2718' },
-    { title: 'Card three', a: '#3fb0a0', b: '#124742' },
-    { title: 'Card four',  a: '#8a6bd8', b: '#33246c' },
-    { title: 'Card five',  a: '#d8a83f', b: '#7a5312' },
-    { title: 'Card six',   a: '#c85a8a', b: '#5e1a3a' }
-  ];
-  var gallery = createGallery(THREE, GALLERY_CARDS,
+  var gallery = createGallery(THREE, PROJECTS,
     Math.min(8, renderer.capabilities.getMaxAnisotropy()));
   window.__gallery = gallery;                       // verification hook
   /* dropped a little over half a card so the wall clears the line of copy
      without leaving the frame */
-  gallery.place(K[3].p, K[3].l, camera.fov, 1.9);
+  gallery.place(K[3].p, K[3].l, camera.fov, 1.25);
   gallery.rig.visible = false;
   scene.add(gallery.rig);
   (function () {
@@ -1593,12 +1585,17 @@ import { createGallery } from './curved-gallery.js';
     skyUni.uSunDir.value.copy(tmpLook);
     updateOverlays();
 
-    /* Leg 3 only, held flat across a plateau either side of 3: the reader
-       scrolls THROUGH 3 while the section is on screen, so a peak would
-       dissolve the cards exactly while they are being looked at. */
-    var gd = Math.abs(S - 3);
-    var gf = gd <= 0.4 ? 1 : Math.min(Math.max(1 - (gd - 0.4) / 0.45, 0), 1);
-    gf = gf * gf * (3 - 2 * gf);
+    /* The cards belong to the section, so they arrive with it rather than with
+       the flight: the fade is read off how much of #s-cloudline is on screen,
+       which is the same thing the .reveal elements respond to. Squared into a
+       smoothstep so the entrance is eased rather than linear. */
+    var gf = 0, gsec = document.getElementById('s-cloudline');
+    if (gsec) {
+      var gr = gsec.getBoundingClientRect();
+      var shown = Math.min(gr.bottom, innerHeight) - Math.max(gr.top, 0);
+      gf = Math.min(Math.max(shown / Math.min(gr.height, innerHeight), 0), 1);
+      gf = gf * gf * (3 - 2 * gf);
+    }
     gallery.update(T, dt * 1000, gf, camera);
 
 

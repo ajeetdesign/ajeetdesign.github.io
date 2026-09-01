@@ -31,6 +31,8 @@
       CDN on every page load, so the throw is written out below. The easing is
       the same curve.                                                        */
 
+import { TW, TH } from './gallery-assets.js';
+
 /* --- layout constants (verbatim) --- */
 const PW = 5.6, PH = 3.3, GAP = 0.28, STEP = PW + GAP;
 const RADIUS = 19;                  // gentle arc — cards enter/exit at a shallow angle
@@ -135,21 +137,17 @@ const fsh = `
   }
 `;
 
-/* Stand-in artwork. The original draws each project procedurally; these are
-   placeholders until real captures exist. */
-function placeholderDraw(card) {
-  return function (x, w, h) {
-    const g = x.createLinearGradient(0, 0, w, h);
-    g.addColorStop(0, card.a); g.addColorStop(1, card.b);
-    x.fillStyle = g; x.fillRect(0, 0, w, h);
-    x.fillStyle = 'rgba(255,255,255,0.13)';
-    x.fillRect(w * 0.07, h * 0.12, w * 0.86, h * 0.46);
-    x.fillStyle = 'rgba(255,255,255,0.2)';
-    for (let r = 0; r < 3; r++) x.fillRect(w * 0.07, h * 0.68 + r * h * 0.075, w * (0.56 - r * 0.13), h * 0.032);
-    x.fillStyle = '#fff';
-    x.font = '600 ' + Math.round(w * 0.052) + 'px Sora, system-ui, sans-serif';
-    x.fillText(card.title, w * 0.07, h * 0.64);
-  };
+/* the original's makeTexture, unchanged apart from taking anisotropy as an
+   argument instead of reaching for its own renderer */
+function makeTexture(THREE, p, maxAniso) {
+  const c = document.createElement('canvas');
+  c.width = TW; c.height = TH;
+  p.draw(c.getContext('2d'), TW, TH);
+  const t = new THREE.CanvasTexture(c);
+  if (maxAniso) t.anisotropy = maxAniso;
+  t.minFilter = THREE.LinearFilter;
+  t.wrapS = t.wrapT = THREE.ClampToEdgeWrapping;
+  return t;
 }
 
 export function createGallery(THREE, cards, maxAniso) {
@@ -169,14 +167,7 @@ export function createGallery(THREE, cards, maxAniso) {
   const screens = [];
 
   cards.forEach(function (card, i) {
-    const cv = document.createElement('canvas');
-    cv.width = 1024; cv.height = Math.round(1024 * PH / PW);
-    placeholderDraw(card)(cv.getContext('2d'), cv.width, cv.height);
-    const tex = new THREE.CanvasTexture(cv);
-    if (maxAniso) tex.anisotropy = maxAniso;
-    tex.minFilter = THREE.LinearFilter;
-    tex.wrapS = tex.wrapT = THREE.ClampToEdgeWrapping;
-
+    const tex = makeTexture(THREE, card, maxAniso);
     const mat = new THREE.ShaderMaterial({
       vertexShader: vsh, fragmentShader: fsh, transparent: true, depthWrite: false,
       uniforms: {
