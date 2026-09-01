@@ -33,13 +33,10 @@ const SEAM   = 0.14;          // hairline, per the capture
 const SPACING = CARD_W + SEAM;
 /* Gentle. At 0.34 a card one place along sits so much further back that it
    curls out of frame and the wall reads as a barrel seen from inside; the
-   reference is a shallow arc filled by about three cards, the outer two cut
-   off by the viewport edges and barely turned from the centre one. Recession
-   per step is CURVE * SPACING^2, so this is the single number that decides
-   wall-versus-cylinder: at 0.072 a neighbour sits about a sixth of the camera
-   distance further back, which turns it enough to read as a curve without
-   rolling it away. */
-const CURVE  = 0.072;
+   reference is a shallow arc that runs off both edges of the screen with four
+   cards showing. Recession per step is CURVE * SPACING^2, so this is the
+   single number that decides wall-versus-cylinder. */
+const CURVE  = 0.115;
 const APEX   = 0.0;           // strip coordinate the wall is nearest at
 const SEG_X  = 64, SEG_Y = 40;
 

@@ -146,17 +146,15 @@ import { createCardWall } from './card-wall.js';
     { title: 'Card six',   a: '#c85a8a', b: '#5e1a3a' }
   ];
   var wall = createCardWall(THREE, WALL_CARDS);
-  /* Sized against the reference: its centre card is 46% of frame width and
-     55% of height, with THREE cards spanning the viewport and the outer two
-     running off the edges. Small cards packed five across was the wrong read —
-     edge to edge means the cards are big enough to reach the edges, not that
-     more of them fit. */
-  var wallDist = 62, wallScale = 16.5;
+  /* 15 put the centre card at ~60% of frame width and pushed its neighbours
+     off the edges. The reference sits at 44%, which leaves room for four
+     cards to span the frame and run off both sides. */
+  var wallDist = 62, wallScale = 12.6;
   (function placeWall() {
     var camP = K[3].p;
     var dir = K[3].l.clone().sub(camP).normalize();
     wall.group.position.copy(camP).addScaledVector(dir, wallDist);
-    wall.group.position.y -= 10;              // low enough to clear the line of copy
+    wall.group.position.y -= 12;              // clear of the line of copy
     wall.group.scale.setScalar(wallScale);
     wall.group.lookAt(camP);
     wall.group.visible = false;
