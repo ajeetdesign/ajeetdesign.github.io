@@ -676,9 +676,13 @@
     color: var(--ink-light); text-shadow: 0 2px 30px rgba(8, 34, 84, 0.5);
     margin: 0 auto 7vh; max-width: 30ch;
   }
-  /* a spacer: holds the section's height, and therefore the scroll room the
-     leg needs to fly through, while showing nothing itself */
-  #s-cloudline .stage { min-height: 52vh; }
+  /* Holds the section's height — and therefore the scroll room the leg flies
+     through — and is the surface the gallery is dragged on, since the sky
+     canvas sits behind the page and never sees the pointer. */
+  #s-cloudline .stage {
+    min-height: 52vh; cursor: grab; touch-action: pan-y;
+  }
+  #s-cloudline .stage:active { cursor: grabbing; }
   #s-ai { display: block; padding: 26vh 5vw 20vh; color: var(--ink-light); }
   #s-ai .wrap { max-width: 1060px; margin: 0 auto; }
   /* Centred to match #s-work and #s-contact — this was the one section header
@@ -1705,7 +1709,7 @@
       .add({ duration: 1500, complete: finish });
   })();
 </script>
-<script type="module" src="js/sky.js?v=86"></script>
+<script type="module" src="js/sky.js?v=88"></script>
 <script>
   /* nav active state — rect-based like the reveals (IO never fires in captures) */
   (function () {
