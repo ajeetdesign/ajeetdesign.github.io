@@ -97,6 +97,7 @@
      screen — the whole scene change completes before the section arrives */
   #s-intro { margin-top: 90vh; }
   #s-work { margin-top: 100vh; }
+  #s-cloudline { margin-top: 90vh; }
   #s-ai { margin-top: 90vh; }
   #s-contact { margin-top: 100vh; }
   .ovl { will-change: opacity, transform; }
@@ -653,6 +654,34 @@
   .bites-pill:hover .bp-arrow { transform: translateX(3px); color: #fff; }
 
   /* ── 3 · building with AI (storm) ───────────────────────────────────── */
+  /* ── 3 · cloudline (golden hour above the deck) ──────────────────────────
+     Light section over a warm sky, so it takes the dark ink the hero uses
+     rather than the light ink of the blue and storm legs. */
+  /* The camera pitches up here, so the header sits against deep blue and the
+     warm band and cloud deck fall to the lower frame where the cards go —
+     light ink, like the other two sections that sit on a dark sky. */
+  #s-cloudline { display: block; padding: 26vh 5vw 20vh; color: var(--ink-light); }
+  #s-cloudline .wrap { max-width: 1060px; margin: 0 auto; }
+  #s-cloudline header { text-align: center; }
+  #s-cloudline .label { color: #ffc98e; }
+  #s-cloudline h2 {
+    font-size: clamp(34px, 5vw, 62px); font-weight: 800; letter-spacing: -0.035em;
+    margin: 0 0 14px; text-shadow: 0 2px 30px rgba(4, 16, 40, 0.55);
+  }
+  #s-cloudline .sub {
+    font-size: 16px; color: var(--ink-light-soft);
+    margin: 0 auto 7vh; max-width: 56ch;
+  }
+  /* the carousel lands here — a reserved well so the scene can be judged
+     with the section at its real height before the cards exist */
+  #s-cloudline .stage {
+    min-height: 46vh; border-radius: 24px;
+    border: 1px dashed rgba(244, 248, 252, 0.3);
+    display: grid; place-items: center;
+    font-size: 12px; font-weight: 700; letter-spacing: 0.18em;
+    text-transform: uppercase; color: rgba(244, 248, 252, 0.6);
+  }
+
   #s-ai { display: block; padding: 26vh 5vw 20vh; color: var(--ink-light); }
   #s-ai .wrap { max-width: 1060px; margin: 0 auto; }
   /* Centred to match #s-work and #s-contact — this was the one section header
@@ -1134,11 +1163,25 @@
     </div>
   </section>
 
-  <!-- 3 · storm · building with AI -->
+  <!-- 3 · cloudline · golden hour above the cloud deck.
+       TODO copy: label, heading and subtitle below are placeholders. The
+       carousel from curved-carousel.html lands in .stage. -->
+  <section id="s-cloudline">
+    <div class="wrap">
+      <header>
+        <p class="label reveal">03 — TODO section kicker</p>
+        <h2 class="reveal d1">TODO — cloudline heading</h2>
+        <p class="sub reveal d2">TODO — one line introducing what these cards are.</p>
+      </header>
+      <div class="stage reveal d3">carousel lands here</div>
+    </div>
+  </section>
+
+  <!-- 4 · storm · building with AI -->
   <section id="s-ai">
     <div class="wrap">
       <header>
-        <p class="label reveal">03 — Current obsession</p>
+        <p class="label reveal">04 — Current obsession</p>
         <h2 class="reveal d1">Building with AI</h2>
         <p class="sub reveal d2">Where design instinct meets machine leverage: experiments, workflows and shipped things.</p>
       </header>
@@ -1228,7 +1271,7 @@
   <!-- 4 · sunny meadow · contact -->
   <section id="s-contact">
     <div class="ovl">
-      <p class="label reveal">04 — Clear skies ahead</p>
+      <p class="label reveal">05 — Clear skies ahead</p>
       <h2 class="reveal d1">Let’s build something together.</h2>
       <div class="contact-row reveal d2">
         <a class="cta-btn cta-solid" href="mailto:ajeet.kr646@gmail.com">
@@ -1666,7 +1709,7 @@
       .add({ duration: 1500, complete: finish });
   })();
 </script>
-<script type="module" src="js/sky.js?v=73"></script>
+<script type="module" src="js/sky.js?v=74"></script>
 <script>
   /* nav active state — rect-based like the reveals (IO never fires in captures) */
   (function () {

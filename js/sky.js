@@ -65,51 +65,51 @@ import * as THREE from './three.module.min.js';
   // hero = Cartier-journey sunset: soft teal zenith → cream → golden haze,
   // warm-tinted cloud sea, low sun glow near the horizon
   var P = {
-    top: ['#aacfd1', '#a8c4cd', '#1156c9', '#0d1220', '#3d7cb2'].map(c => new THREE.Color(c)),
-    mid: ['#f0e2ba', '#f0dcb4', '#4d9fe8', '#1c2434', '#f4cf95'].map(c => new THREE.Color(c)),
-    bot: ['#eec092', '#f0c493', '#cfe9fb', '#39445a', '#f8bd7d'].map(c => new THREE.Color(c)),
-    fogC: ['#edd2a9', '#eed6ab', '#a9cdf0', '#232c3c', '#f2d3a4'].map(c => new THREE.Color(c)),
+    top: ['#aacfd1', '#a8c4cd', '#1156c9', '#0b3a8f', '#0d1220', '#3d7cb2'].map(c => new THREE.Color(c)),
+    mid: ['#f0e2ba', '#f0dcb4', '#4d9fe8', '#4a7fc0', '#1c2434', '#f4cf95'].map(c => new THREE.Color(c)),
+    bot: ['#eec092', '#f0c493', '#cfe9fb', '#ffb26b', '#39445a', '#f8bd7d'].map(c => new THREE.Color(c)),
+    fogC: ['#edd2a9', '#eed6ab', '#a9cdf0', '#f3cfa2', '#232c3c', '#f2d3a4'].map(c => new THREE.Color(c)),
     // row 4 carries real haze now: exp2 fog is negligible on the near grass
     // (<1% at 50 units) but ~40% on the backdrop ranges at ~380, which is what
     // dissolves them into the sky and sells the distance
-    fogD: [0.0015, 0.0026, 0.0012, 0.0045, 0.0018],
-    glowC: ['#ffc998', '#ffce9c', '#ffbe92', '#28324a', '#ffb469'].map(c => new THREE.Color(c)),
-    glowI: [1.0, 0.75, 0.62, 0.08, 1.05],
-    starsOp: [0, 0, 0, 0.85, 0],
+    fogD: [0.0015, 0.0026, 0.0012, 0.0016, 0.0045, 0.0018],
+    glowC: ['#ffc998', '#ffce9c', '#ffbe92', '#ffd09a', '#28324a', '#ffb469'].map(c => new THREE.Color(c)),
+    glowI: [1.0, 0.75, 0.62, 1.2, 0.08, 1.05],
+    starsOp: [0, 0, 0, 0.22, 0.85, 0],
     // hemi/dir only reach LIT meshes (mountains, airships, meadow) — clouds
     // are unlit sprites, so these can run hot to keep the snow white
     // row 4 trades hemi for dir: golden hour is a LOW, directional, warm key
     // with little ambient fill, which is what separates it from a flat noon
-    hemiI: [1.25, 1.2, 1.5, 0.38, 1.02],
-    dirI: [1.5, 1.45, 1.8, 0.22, 1.9],
-    dirC: ['#ffcf9c', '#ffd2a0', '#ffddb6', '#9fb2d8', '#ffc27e'].map(c => new THREE.Color(c)),
+    hemiI: [1.25, 1.2, 1.5, 1.08, 0.38, 1.02],
+    dirI: [1.5, 1.45, 1.8, 1.7, 0.22, 1.9],
+    dirC: ['#ffcf9c', '#ffd2a0', '#ffddb6', '#ffc98e', '#9fb2d8', '#ffc27e'].map(c => new THREE.Color(c)),
     // hemisphere GROUND colour — the bounce coming back up off the terrain.
     // Cool grey everywhere the sky is cool; warm earth under the golden hour,
     // so the grass is lit warm from below as well as from the sun.
-    hemiG: ['#b9c4cf', '#b9c4cf', '#b9c4cf', '#b9c4cf', '#c88b4c'].map(c => new THREE.Color(c)),
+    hemiG: ['#b9c4cf', '#b9c4cf', '#b9c4cf', '#c9a483', '#b9c4cf', '#c88b4c'].map(c => new THREE.Color(c)),
     // hemisphere SKY colour, and the reason the meadow reads warm at all: the
     // one DirectionalLight is shared by all five states and runs nearly
     // parallel to the meadow floor (dot with the ground normal ≈0.16), so an
     // up-facing surface takes almost its whole value from this term. Warming
     // dirC alone left the grass noon-green — this is the lever that works.
-    hemiS: ['#ffffff', '#ffffff', '#ffffff', '#ffffff', '#ffd2a0'].map(c => new THREE.Color(c)),
-    deckOp: [0.38, 0.45, 0, 0, 0.12], // hero shows only a few crisp tops through the soft sea
-    deck2Op: [0, 0, 0.5, 0.35, 0],    // forward cloud band under the work/storm legs
-    deckC: ['#f6e2c4', '#f7e0bd', '#ffffff', '#8e99ac', '#ffffff'].map(c => new THREE.Color(c)),
-    seaOp: [1, 0.45, 0, 0, 0],      // hero fog-sea: stays below the camera on the approach
-    stormOp: [0, 0, 0, 0.55, 0],
-    sunnyOp: [0, 0, 0, 0, 0.55],
-    sunOp: [0, 0, 0, 0, 0.72], // dimmed: a light source, not the hero graphic
-    sun2Op: [0, 0, 0.9, 0, 0],  // the work scene's low red sunset sun
-    groundOp: [0, 0, 0, 0, 1], // meadow hidden until the final descent
-    heroPkOp: [1, 1, 0, 0, 0],      // hero summit; scene 1 flies in close to it
-    peaksOp: [0, 0, 0.85, 0, 0],    // work scene: the wider snowy ranges
-    heroBalOp: [0.92, 0, 0, 0, 0],  // hero: a single drifting airship
-    balOp: [0, 0, 0.85, 0, 0],      // work scene: the other two
-    birdOp: [0.7, 0, 0.8, 0, 0], // needs to run high — silhouettes wash out over white clouds
-    jetOp: [0, 0, 0.9, 0, 0.85], // distant airliner + contrail: work sky and meadow finale
-    sparkOp: [0, 0, 0, 0.9, 0],     // firefly lights in the night leg
-    roll: [0.035, -0.05, 0.075, -0.09] // banking per transition
+    hemiS: ['#ffffff', '#ffffff', '#ffffff', '#ffd9b0', '#ffffff', '#ffd2a0'].map(c => new THREE.Color(c)),
+    deckOp: [0.38, 0.45, 0, 0.5, 0, 0.12], // hero shows only a few crisp tops through the soft sea
+    deck2Op: [0, 0, 0.5, 0.34, 0.35, 0],    // forward cloud band under the work/storm legs
+    deckC: ['#f6e2c4', '#f7e0bd', '#ffffff', '#ffdcb4', '#8e99ac', '#ffffff'].map(c => new THREE.Color(c)),
+    seaOp: [1, 0.45, 0, 0.85, 0, 0],      // hero fog-sea: stays below the camera on the approach
+    stormOp: [0, 0, 0, 0, 0.55, 0],
+    sunnyOp: [0, 0, 0, 0, 0, 0.55],
+    sunOp: [0, 0, 0, 0.8, 0, 0.72], // dimmed: a light source, not the hero graphic
+    sun2Op: [0, 0, 0.9, 0, 0, 0],  // the work scene's low red sunset sun
+    groundOp: [0, 0, 0, 0, 0, 1], // meadow hidden until the final descent
+    heroPkOp: [1, 1, 0, 0, 0, 0],      // hero summit; scene 1 flies in close to it
+    peaksOp: [0, 0, 0.85, 0, 0, 0],    // work scene: the wider snowy ranges
+    heroBalOp: [0.92, 0, 0, 0, 0, 0],  // hero: a single drifting airship
+    balOp: [0, 0, 0.85, 0, 0, 0],      // work scene: the other two
+    birdOp: [0.7, 0, 0.8, 0.5, 0, 0], // needs to run high — silhouettes wash out over white clouds
+    jetOp: [0, 0, 0.9, 0, 0, 0.85], // distant airliner + contrail: work sky and meadow finale
+    sparkOp: [0, 0, 0, 0, 0.9, 0],     // firefly lights in the night leg
+    roll: [0.035, -0.05, 0.075, -0.06, -0.09] // banking per transition
   };
 
   // camera keyframes (pos, look) per state:
@@ -121,6 +121,10 @@ import * as THREE from './three.module.min.js';
     // z always decreases scene to scene so every transition flies FORWARD —
     // the climb over the summit connects the approach to the open work sky
     { p: [20, 124, -300], l: [20, 146, -400] }, // work: high up, pitched into open blue (ridge ≈ bottom fifth)
+    // cloudline: the pitch comes down off the open blue to a level horizon, so
+    // the low sun and the cloud deck it lights both sit in frame. Still flying
+    // forward — z keeps decreasing — and drifting right toward the sun.
+    { p: [24, 104, -336], l: [46, 121, -424] },
     { p: [30, 106, -370], l: [78, 96, -455] },
     { p: [60, 4.5, -510], l: [60, 9, -587] }
   ].map(k => ({ p: new THREE.Vector3().fromArray(k.p), l: new THREE.Vector3().fromArray(k.l) }));
@@ -1352,9 +1356,9 @@ import * as THREE from './three.module.min.js';
     var a = document.body.getAttribute('data-sky-lock');
     return a === null ? null : parseFloat(a);
   }
-  var sections = ['s-hero', 's-intro', 's-work', 's-ai', 's-contact']
+  var sections = ['s-hero', 's-intro', 's-work', 's-cloudline', 's-ai', 's-contact']
     .map(function (id) { return document.getElementById(id); });
-  var tops = [0, 0, 0, 0, 0];
+  var tops = [0, 0, 0, 0, 0, 0];
   function measure() {
     var sy = window.pageYOffset;
     for (var i = 0; i < sections.length; i++) {
@@ -1391,8 +1395,11 @@ import * as THREE from './three.module.min.js';
   function lerp(a, b, f) { return a + (b - a) * f; }
   function smooth(f) { return f * f * (3 - 2 * f); }
   var tmpA = new THREE.Color(), tmpPos = new THREE.Vector3(), tmpLook = new THREE.Vector3();
-  function colAt(arr, i, f, out) { return out.lerpColors(arr[i], arr[Math.min(i + 1, 4)], f); }
-  function numAt(arr, i, f) { return lerp(arr[i], arr[Math.min(i + 1, 4)], f); }
+  // LAST is the top palette index. It was 4 for five states; the cloudline
+  // leg makes six, so every clamp that used to say 4 or 3 shifts by one.
+  var LAST = 5;
+  function colAt(arr, i, f, out) { return out.lerpColors(arr[i], arr[Math.min(i + 1, LAST)], f); }
+  function numAt(arr, i, f) { return lerp(arr[i], arr[Math.min(i + 1, LAST)], f); }
 
   // ── lightning ───────────────────────────────────────────────────────────
   var flash = 0, nextFlash = 2.5, flashfx = document.getElementById('flashfx');
@@ -1447,7 +1454,7 @@ import * as THREE from './three.module.min.js';
   // ── overlay fades: headline blocks fade in near viewport centre and back
   // out as the flight continues (measure the SECTION — it has no transform —
   // and style the inner wrapper, or the translate would feed back into rects)
-  var ovls = [['s-hero', 0], ['s-intro', 1], ['s-contact', 4]].map(function (d) {
+  var ovls = [['s-hero', 0], ['s-intro', 1], ['s-contact', 5]].map(function (d) {
     var sec = document.getElementById(d[0]);
     return { sec: sec, el: sec ? sec.querySelector('.ovl') : null, idx: d[1] };
   }).filter(function (o) { return o.el; });
@@ -1491,11 +1498,12 @@ import * as THREE from './three.module.min.js';
     // easing reads as jerky when frames drop), slow enough to stay cinematic
     S = INSTANT ? tgt : S + (tgt - S) * Math.min(1, dt * 3.4);
     window.__adS = S; // debug/verification hook
-    var i = Math.min(Math.floor(S), 3);
+    var i = Math.min(Math.floor(S), LAST - 1);
     var f = smooth(Math.min(Math.max(S - i, 0), 1));
     // storm approach gets a second smoothstep: gentler in and out of the
-    // leg, faster through the middle — the night falls in one dramatic move
-    if (i === 2) f = smooth(f);
+    // leg, faster through the middle — the night falls in one dramatic move.
+    // The storm is entered from 3 now that cloudline sits at 3 (was 2).
+    if (i === 3) f = smooth(f);
 
     // sky, fog, lights
     skyUni.uTop.value.copy(colAt(P.top, i, f, tmpA));
@@ -1531,7 +1539,7 @@ import * as THREE from './three.module.min.js';
     tmpLook.lerpVectors(K[i].l, K[Math.min(i + 1, 4)].l, f);
     // final descent: nose pitches down toward the earth mid-dive, then
     // flares level over the grass
-    if (i === 3) tmpLook.y -= Math.sin(f * Math.PI) * 30;
+    if (i === 4) tmpLook.y -= Math.sin(f * Math.PI) * 30;  // dip into the storm (was 3 before cloudline)
     // storm approach: dive under the advancing cloud front, then flare
     // level as the night settles
     if (i === 2) { tmpPos.y -= Math.sin(f * Math.PI) * 9; tmpLook.y -= Math.sin(f * Math.PI) * 13; }
@@ -1649,7 +1657,7 @@ import * as THREE from './three.module.min.js';
     // the same jet serves the work sky and the meadow finale: it re-bases
     // lower and deeper while faded out through the storm leg (jetOp ≈ 0),
     // so from the meadow it reads as the same airliner still crossing
-    var jetDY = S < 3.02 ? 0 : -165, jetDZ = S < 3.02 ? -640 : -805;
+    var jetDY = S < 4.02 ? 0 : -165, jetDZ = S < 4.02 ? -640 : -805;  // was 3.02 before cloudline
     trail.position.y = jetDY; trail.position.z = jetDZ;
     jetGrp.position.z = jetDZ;
     jetGrp.position.y = jetY(jetGrp.position.x) + jetDY;
@@ -1736,7 +1744,7 @@ import * as THREE from './three.module.min.js';
   // ── content reveals ─────────────────────────────────────────────────────
   // Rect-based (not IntersectionObserver): reliable under headless capture,
   // iframes and instant scrolls alike.
-  var sceneIdx = { 's-hero': 0, 's-intro': 1, 's-work': 2, 's-ai': 3, 's-contact': 4 };
+  var sceneIdx = { 's-hero': 0, 's-intro': 1, 's-work': 2, 's-cloudline': 3, 's-ai': 4, 's-contact': 5 };
   var revealEls = Array.prototype.slice.call(document.querySelectorAll('.reveal')).map(function (el) {
     var sec = el.closest('section');
     return { el: el, idx: sec ? sceneIdx[sec.id] : 0 };
