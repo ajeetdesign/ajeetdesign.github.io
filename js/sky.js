@@ -65,48 +65,48 @@ import * as THREE from './three.module.min.js';
   // hero = Cartier-journey sunset: soft teal zenith → cream → golden haze,
   // warm-tinted cloud sea, low sun glow near the horizon
   var P = {
-    top: ['#aacfd1', '#a8c4cd', '#1156c9', '#0b3a8f', '#0d1220', '#3d7cb2'].map(c => new THREE.Color(c)),
-    mid: ['#f0e2ba', '#f0dcb4', '#4d9fe8', '#4a7fc0', '#1c2434', '#f4cf95'].map(c => new THREE.Color(c)),
-    bot: ['#eec092', '#f0c493', '#cfe9fb', '#ffb26b', '#39445a', '#f8bd7d'].map(c => new THREE.Color(c)),
-    fogC: ['#edd2a9', '#eed6ab', '#a9cdf0', '#f3cfa2', '#232c3c', '#f2d3a4'].map(c => new THREE.Color(c)),
+    top: ['#aacfd1', '#a8c4cd', '#1156c9', '#0a3f9e', '#0d1220', '#3d7cb2'].map(c => new THREE.Color(c)),
+    mid: ['#f0e2ba', '#f0dcb4', '#4d9fe8', '#5fa3e0', '#1c2434', '#f4cf95'].map(c => new THREE.Color(c)),
+    bot: ['#eec092', '#f0c493', '#cfe9fb', '#dceaf7', '#39445a', '#f8bd7d'].map(c => new THREE.Color(c)),
+    fogC: ['#edd2a9', '#eed6ab', '#a9cdf0', '#cfe0f2', '#232c3c', '#f2d3a4'].map(c => new THREE.Color(c)),
     // row 4 carries real haze now: exp2 fog is negligible on the near grass
     // (<1% at 50 units) but ~40% on the backdrop ranges at ~380, which is what
     // dissolves them into the sky and sells the distance
     fogD: [0.0015, 0.0026, 0.0012, 0.0016, 0.0045, 0.0018],
-    glowC: ['#ffc998', '#ffce9c', '#ffbe92', '#ffd09a', '#28324a', '#ffb469'].map(c => new THREE.Color(c)),
-    glowI: [1.0, 0.75, 0.62, 1.2, 0.08, 1.05],
-    starsOp: [0, 0, 0, 0.22, 0.85, 0],
+    glowC: ['#ffc998', '#ffce9c', '#ffbe92', '#cfe4f7', '#28324a', '#ffb469'].map(c => new THREE.Color(c)),
+    glowI: [1.0, 0.75, 0.62, 0, 0.08, 1.05],
+    starsOp: [0, 0, 0, 0, 0.85, 0],
     // hemi/dir only reach LIT meshes (mountains, airships, meadow) — clouds
     // are unlit sprites, so these can run hot to keep the snow white
     // row 4 trades hemi for dir: golden hour is a LOW, directional, warm key
     // with little ambient fill, which is what separates it from a flat noon
     hemiI: [1.25, 1.2, 1.5, 1.08, 0.38, 1.02],
     dirI: [1.5, 1.45, 1.8, 1.7, 0.22, 1.9],
-    dirC: ['#ffcf9c', '#ffd2a0', '#ffddb6', '#ffc98e', '#9fb2d8', '#ffc27e'].map(c => new THREE.Color(c)),
+    dirC: ['#ffcf9c', '#ffd2a0', '#ffddb6', '#eaf2fb', '#9fb2d8', '#ffc27e'].map(c => new THREE.Color(c)),
     // hemisphere GROUND colour — the bounce coming back up off the terrain.
     // Cool grey everywhere the sky is cool; warm earth under the golden hour,
     // so the grass is lit warm from below as well as from the sun.
-    hemiG: ['#b9c4cf', '#b9c4cf', '#b9c4cf', '#c9a483', '#b9c4cf', '#c88b4c'].map(c => new THREE.Color(c)),
+    hemiG: ['#b9c4cf', '#b9c4cf', '#b9c4cf', '#b9c4cf', '#b9c4cf', '#c88b4c'].map(c => new THREE.Color(c)),
     // hemisphere SKY colour, and the reason the meadow reads warm at all: the
     // one DirectionalLight is shared by all five states and runs nearly
     // parallel to the meadow floor (dot with the ground normal ≈0.16), so an
     // up-facing surface takes almost its whole value from this term. Warming
     // dirC alone left the grass noon-green — this is the lever that works.
-    hemiS: ['#ffffff', '#ffffff', '#ffffff', '#ffd9b0', '#ffffff', '#ffd2a0'].map(c => new THREE.Color(c)),
-    deckOp: [0.38, 0.45, 0, 0.5, 0, 0.12], // hero shows only a few crisp tops through the soft sea
-    deck2Op: [0, 0, 0.5, 0.34, 0.35, 0],    // forward cloud band under the work/storm legs
-    deckC: ['#f6e2c4', '#f7e0bd', '#ffffff', '#ffdcb4', '#8e99ac', '#ffffff'].map(c => new THREE.Color(c)),
-    seaOp: [1, 0.45, 0, 0.85, 0, 0],      // hero fog-sea: stays below the camera on the approach
+    hemiS: ['#ffffff', '#ffffff', '#ffffff', '#ffffff', '#ffffff', '#ffd2a0'].map(c => new THREE.Color(c)),
+    deckOp: [0.38, 0.45, 0, 0.3, 0, 0.12], // hero shows only a few crisp tops through the soft sea
+    deck2Op: [0, 0, 0.5, 0.2, 0.35, 0],    // forward cloud band under the work/storm legs
+    deckC: ['#f6e2c4', '#f7e0bd', '#ffffff', '#ffffff', '#333b4d', '#ffffff'].map(c => new THREE.Color(c)),
+    seaOp: [1, 0.45, 0, 0, 0, 0],      // hero fog-sea: stays below the camera on the approach
     stormOp: [0, 0, 0, 0, 0.55, 0],
     sunnyOp: [0, 0, 0, 0, 0, 0.55],
-    sunOp: [0, 0, 0, 0.8, 0, 0.72], // dimmed: a light source, not the hero graphic
+    sunOp: [0, 0, 0, 0, 0, 0.72], // dimmed: a light source, not the hero graphic
     sun2Op: [0, 0, 0.9, 0, 0, 0],  // the work scene's low red sunset sun
     groundOp: [0, 0, 0, 0, 0, 1], // meadow hidden until the final descent
     heroPkOp: [1, 1, 0, 0, 0, 0],      // hero summit; scene 1 flies in close to it
     peaksOp: [0, 0, 0.85, 0, 0, 0],    // work scene: the wider snowy ranges
     heroBalOp: [0.92, 0, 0, 0, 0, 0],  // hero: a single drifting airship
     balOp: [0, 0, 0.85, 0, 0, 0],      // work scene: the other two
-    birdOp: [0.7, 0, 0.8, 0.5, 0, 0], // needs to run high — silhouettes wash out over white clouds
+    birdOp: [0.7, 0, 0.8, 0, 0, 0], // needs to run high — silhouettes wash out over white clouds
     jetOp: [0, 0, 0.9, 0, 0, 0.85], // distant airliner + contrail: work sky and meadow finale
     sparkOp: [0, 0, 0, 0, 0.9, 0],     // firefly lights in the night leg
     roll: [0.035, -0.05, 0.075, -0.06, -0.09] // banking per transition
@@ -124,7 +124,7 @@ import * as THREE from './three.module.min.js';
     // cloudline: the pitch comes down off the open blue to a level horizon, so
     // the low sun and the cloud deck it lights both sit in frame. Still flying
     // forward — z keeps decreasing — and drifting right toward the sun.
-    { p: [24, 104, -336], l: [46, 121, -424] },
+    { p: [24, 104, -336], l: [26, 112, -424] },
     { p: [30, 106, -370], l: [78, 96, -455] },
     { p: [60, 4.5, -510], l: [60, 9, -587] }
   ].map(k => ({ p: new THREE.Vector3().fromArray(k.p), l: new THREE.Vector3().fromArray(k.l) }));
@@ -1700,7 +1700,7 @@ import * as THREE from './three.module.min.js';
 
     // lightning inside the storm leg — held back until the flight has mostly
     // settled into the night so flashes never strobe the day→night transition
-    var stormFactor = Math.min(Math.max(1 - Math.abs(S - 3), 0), 1);
+    var stormFactor = Math.min(Math.max(1 - Math.abs(S - 4), 0), 1);  // storm moved 3 -> 4
     if (!REDUCED && !INSTANT && stormFactor > 0.7 && T > nextFlash) {
       flash = 1;
       strike();
