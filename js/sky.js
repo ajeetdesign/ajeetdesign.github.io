@@ -6,7 +6,6 @@
   fog, lights and cloud groups all interpolate along it.
 */
 import * as THREE from './three.module.min.js';
-import { createCardWall } from './card-wall.js';
 
 (function () {
   if (window.__adSkyInit) return; window.__adSkyInit = true;
@@ -129,70 +128,6 @@ import { createCardWall } from './card-wall.js';
     { p: [30, 106, -370], l: [78, 96, -455] },
     { p: [60, 4.5, -510], l: [60, 9, -587] }
   ].map(k => ({ p: new THREE.Vector3().fromArray(k.p), l: new THREE.Vector3().fromArray(k.l) }));
-
-  /* ── the card wall on the cloudline leg ──────────────────────────────────
-     Placed 62 units down K[3]'s own sight line and turned to face it: lookAt
-     aims local +z at the target and the wall's front IS +z, so one call does
-     the orientation. Scale is set so a card stands at about 55% of frame
-     height, which is the proportion measured off the reference (58% there, in
-     a wider frame than this one). */
-  var WALL_CARDS = [
-    /* PLACEHOLDER content — titles and colours are stand-ins. */
-    { title: 'Card one',   a: '#3f6fd8', b: '#16326f' },
-    { title: 'Card two',   a: '#d8683f', b: '#7a2718' },
-    { title: 'Card three', a: '#3fb0a0', b: '#124742' },
-    { title: 'Card four',  a: '#8a6bd8', b: '#33246c' },
-    { title: 'Card five',  a: '#d8a83f', b: '#7a5312' },
-    { title: 'Card six',   a: '#c85a8a', b: '#5e1a3a' }
-  ];
-  var wall = createCardWall(THREE, WALL_CARDS);
-  /* 15 put the centre card at ~60% of frame width and pushed its neighbours
-     off the edges. The reference sits at 44%, which leaves room for four
-     cards to span the frame and run off both sides. */
-  var wallDist = 62, wallScale = 12.6;
-  (function placeWall() {
-    var camP = K[3].p;
-    var dir = K[3].l.clone().sub(camP).normalize();
-    wall.group.position.copy(camP).addScaledVector(dir, wallDist);
-    wall.group.position.y -= 12;              // clear of the line of copy
-    wall.group.scale.setScalar(wallScale);
-    wall.group.lookAt(camP);
-    wall.group.visible = false;
-    window.__wall = wall;   // debug/verification hook, like __adS
-    scene.add(wall.group);
-
-    var host = document.querySelector('#s-cloudline .stage');
-    if (host) {
-      host.appendChild(wall.layer);
-      /* one wall unit spans this many screen pixels, so a drag of N pixels
-         moves the wall by the distance under the cursor */
-      wall.bindDrag(host, function () {
-        var vFov = camera.fov * Math.PI / 180;
-        var worldPerPx = 2 * Math.tan(vFov / 2) * wallDist / innerHeight;
-        return worldPerPx / wallScale;
-      });
-    }
-  })();
-
-  /* the dent follows the cursor: intersect the pointer ray with the wall's own
-     plane, then convert the hit into wall units (worldToLocal undoes scale) */
-  var wRay = new THREE.Raycaster(), wPlane = new THREE.Plane();
-  var wNrm = new THREE.Vector3(), wHit = new THREE.Vector3();
-  var wPtr = new THREE.Vector2(), wPtrLive = false;
-  addEventListener('pointermove', function (e) {
-    wPtr.set(e.clientX / innerWidth * 2 - 1, -(e.clientY / innerHeight * 2 - 1));
-    wPtrLive = true;
-  }, { passive: true });
-  addEventListener('pointerleave', function () { wPtrLive = false; }, { passive: true });
-
-  function wallPress() {
-    if (!wPtrLive || !wall.group.visible) return null;
-    wall.group.getWorldDirection(wNrm);
-    wPlane.setFromNormalAndCoplanarPoint(wNrm, wall.group.position);
-    wRay.setFromCamera(wPtr, camera);
-    if (!wRay.ray.intersectPlane(wPlane, wHit)) return null;
-    return wall.group.worldToLocal(wHit);
-  }
 
   // ── sky dome (custom gradient shader, follows the camera) ──────────────
   var skyUni = {
@@ -1631,18 +1566,6 @@ import { createCardWall } from './card-wall.js';
       .sub(camera.position).normalize();
     skyUni.uSunDir.value.copy(tmpLook);
     updateOverlays();
-
-    /* The wall belongs to leg 3. Held flat across a plateau either side of 3
-       rather than peaking on it: the reader scrolls THROUGH 3 while the
-       section is on screen, so a peak would dissolve the cards exactly while
-       they are being looked at. */
-    var wd = Math.abs(S - 3);
-    var wf = wd <= 0.4 ? 1 : Math.min(Math.max(1 - (wd - 0.4) / 0.45, 0), 1);
-    wf = wf * wf * (3 - 2 * wf);
-    wall.update(dt, wf, wallPress());
-    wall.group.updateMatrixWorld();
-    wall.layer.style.opacity = wf;
-    wall.layoutLabels(camera, innerWidth, innerHeight);
 
 
     // cloud groups: opacity/tint per state, slow drift

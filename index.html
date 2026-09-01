@@ -676,31 +676,9 @@
     color: var(--ink-light); text-shadow: 0 2px 30px rgba(8, 34, 84, 0.5);
     margin: 0 auto 7vh; max-width: 30ch;
   }
-  /* Holds the section's height — and therefore the scroll room the leg flies
-     through — and is also the surface the wall is dragged on, since the sky
-     canvas sits behind the page and never sees the pointer. */
-  #s-cloudline .stage {
-    min-height: 52vh; cursor: grab; touch-action: pan-y;
-  }
-  #s-cloudline .stage:active { cursor: grabbing; }
-
-  /* The cards are WebGL; their name and arrow are DOM on top, placed each
-     frame from points ON the card's surface so they ride its bow. */
-  .cardWall { position: fixed; inset: 0; pointer-events: none; z-index: 3; }
-  .cardWall > * { position: absolute; top: 0; left: 0; will-change: transform; }
-  .cwName {
-    margin: -10px 0 0 0; transform-origin: 0 0;
-    font-size: 15px; font-weight: 600; letter-spacing: -0.01em;
-    color: #fff; white-space: nowrap; text-shadow: 0 1px 14px rgba(6, 22, 54, 0.7);
-  }
-  .cwGo {
-    margin: -17px 0 0 -34px; width: 34px; height: 34px; border-radius: 999px;
-    display: grid; place-items: center;
-    background: rgba(255, 255, 255, 0.16); border: 1px solid rgba(255, 255, 255, 0.55);
-    backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
-  }
-  .cwGo svg { width: 17px; height: 17px; }
-  .cwGo svg path { stroke: #fff; }
+  /* a spacer: holds the section's height, and therefore the scroll room the
+     leg needs to fly through, while showing nothing itself */
+  #s-cloudline .stage { min-height: 52vh; }
   #s-ai { display: block; padding: 26vh 5vw 20vh; color: var(--ink-light); }
   #s-ai .wrap { max-width: 1060px; margin: 0 auto; }
   /* Centred to match #s-work and #s-contact — this was the one section header
@@ -1727,7 +1705,7 @@
       .add({ duration: 1500, complete: finish });
   })();
 </script>
-<script type="module" src="js/sky.js?v=85"></script>
+<script type="module" src="js/sky.js?v=86"></script>
 <script>
   /* nav active state — rect-based like the reveals (IO never fires in captures) */
   (function () {
