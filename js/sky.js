@@ -67,17 +67,17 @@ import { PROJECTS } from './gallery-assets.js';
   // hero = Cartier-journey sunset: soft teal zenith → cream → golden haze,
   // warm-tinted cloud sea, low sun glow near the horizon
   var P = {
-    top: ['#aacfd1', '#a8c4cd', '#1156c9', '#0a3f9e', '#0d1220', '#3d7cb2'].map(c => new THREE.Color(c)),
-    mid: ['#f0e2ba', '#f0dcb4', '#4d9fe8', '#5fa3e0', '#1c2434', '#f4cf95'].map(c => new THREE.Color(c)),
-    bot: ['#eec092', '#f0c493', '#cfe9fb', '#dceaf7', '#39445a', '#f8bd7d'].map(c => new THREE.Color(c)),
-    fogC: ['#edd2a9', '#eed6ab', '#a9cdf0', '#cfe0f2', '#232c3c', '#f2d3a4'].map(c => new THREE.Color(c)),
+    top: ['#aacfd1', '#a8c4cd', '#1156c9', '#0a3f9e', '#1f2a3d', '#3d7cb2'].map(c => new THREE.Color(c)),
+    mid: ['#f0e2ba', '#f0dcb4', '#4d9fe8', '#5fa3e0', '#35445f', '#f4cf95'].map(c => new THREE.Color(c)),
+    bot: ['#eec092', '#f0c493', '#cfe9fb', '#dceaf7', '#3f4d68', '#f8bd7d'].map(c => new THREE.Color(c)),
+    fogC: ['#edd2a9', '#eed6ab', '#a9cdf0', '#cfe0f2', '#33415a', '#f2d3a4'].map(c => new THREE.Color(c)),
     // row 4 carries real haze now: exp2 fog is negligible on the near grass
     // (<1% at 50 units) but ~40% on the backdrop ranges at ~380, which is what
     // dissolves them into the sky and sells the distance
     fogD: [0.0015, 0.0026, 0.0012, 0.0016, 0.0045, 0.0018],
     glowC: ['#ffc998', '#ffce9c', '#ffbe92', '#cfe4f7', '#28324a', '#ffb469'].map(c => new THREE.Color(c)),
     glowI: [1.0, 0.75, 0.62, 0, 0.08, 1.05],
-    starsOp: [0, 0, 0, 0, 0.85, 0],
+    starsOp: [0, 0, 0, 0, 0.42, 0],   // a storm ceiling does not show a full field of stars
     // hemi/dir only reach LIT meshes (mountains, airships, meadow) — clouds
     // are unlit sprites, so these can run hot to keep the snow white
     // row 4 trades hemi for dir: golden hour is a LOW, directional, warm key
@@ -99,7 +99,7 @@ import { PROJECTS } from './gallery-assets.js';
     deck2Op: [0, 0, 0.5, 0.2, 0.35, 0],    // forward cloud band under the work/storm legs
     deckC: ['#f6e2c4', '#f7e0bd', '#ffffff', '#ffffff', '#333b4d', '#ffffff'].map(c => new THREE.Color(c)),
     seaOp: [1, 0.45, 0, 0, 0, 0],      // hero fog-sea: stays below the camera on the approach
-    stormOp: [0, 0, 0, 0, 0.55, 0],
+    stormOp: [0, 0, 0, 0, 0.85, 0],   // a black ceiling has to be dense to read as one
     sunnyOp: [0, 0, 0, 0, 0, 0.55],
     sunOp: [0, 0, 0, 0, 0, 0.72], // dimmed: a light source, not the hero graphic
     sun2Op: [0, 0, 0.9, 0, 0, 0],  // the work scene's low red sunset sun
@@ -110,7 +110,7 @@ import { PROJECTS } from './gallery-assets.js';
     balOp: [0, 0, 0.85, 0, 0, 0],      // work scene: the other two
     birdOp: [0.7, 0, 0.8, 0, 0, 0], // needs to run high — silhouettes wash out over white clouds
     jetOp: [0, 0, 0.9, 0, 0, 0.85], // distant airliner + contrail: work sky and meadow finale
-    sparkOp: [0, 0, 0, 0, 0.9, 0],     // firefly lights in the night leg
+    sparkOp: [0, 0, 0, 0, 0.3, 0],     // embers, not the subject of the frame
     /* per-LEG, not per-state like every other row here: one bank per
        transition, so this list is one shorter than the palettes. The
        cloudline leg was inserted at 2, which pushed the storm turn and the
@@ -131,7 +131,7 @@ import { PROJECTS } from './gallery-assets.js';
     // the low sun and the cloud deck it lights both sit in frame. Still flying
     // forward — z keeps decreasing — and drifting right toward the sun.
     { p: [24, 104, -336], l: [26, 112, -424] },
-    { p: [30, 106, -370], l: [78, 96, -455] },
+    { p: [30, 106, -370], l: [78, 110, -470] },
     { p: [60, 4.5, -510], l: [60, 9, -587] }
   ].map(k => ({ p: new THREE.Vector3().fromArray(k.p), l: new THREE.Vector3().fromArray(k.l) }));
 
@@ -312,7 +312,15 @@ import { PROJECTS } from './gallery-assets.js';
   // not the crisp cauliflower ones — crisp sprites read as separate puffs;
   // the storm should fuse into one continuous churning mass
   var stormTexs = [softCloudTexture(), softCloudTexture(), null]; // null → crisp, set below
-  var storm = cloudGroup(48, { x: [-40, 160], y: [64, 112], z: [-80, -330] }, 80, 160, stormTexs);
+  /* A CEILING, which means every sprite has to be ahead of the camera and
+     above it. This cluster used to be centred ON the storm keyframe — the
+     camera stood at [30,106,-370] and the sprites spanned y 88..136,
+     z -300..-550, x -40..160, so it sat inside the mass on all three axes.
+     Sprites 80-160 units wide a few units from the lens have no readable
+     shape; they just smear, which is why the leg rendered as flat navy fog
+     with no clouds in it at all. Widened as well: pushed this far forward the
+     frame is much broader at the far end of the bank. */
+  var storm = cloudGroup(104, { x: [-160, 300], y: [64, 112], z: [-80, -330] }, 80, 160, stormTexs);
   for (var si = 0; si < storm.children.length; si++) {
     var ss = storm.children[si];
     // every third sprite keeps a crisp cauliflower map: readable billows
@@ -323,11 +331,16 @@ import { PROJECTS } from './gallery-assets.js';
     // Crisp billows run a brighter slate band than the soft filler so the
     // ceiling reads as churning structure, not one flat wall
     var gy = Math.min(1, Math.max(0, (ss.position.y - 64) / 48));
+    /* Both bands run far darker than the sky behind them now. They used to be
+       lighter than it, which is why the ceiling read as pale cloud on a black
+       night rather than as black cloud against a storm sky. */
     ss.userData.sc = crisp
-      ? new THREE.Color().lerpColors(new THREE.Color(0x2b3652), new THREE.Color(0x4d5d84), gy)
-      : new THREE.Color().lerpColors(new THREE.Color(0x101724), new THREE.Color(0x28334c), gy);
+      ? new THREE.Color().lerpColors(new THREE.Color(0x0c111c), new THREE.Color(0x1b2333), gy)
+      : new THREE.Color().lerpColors(new THREE.Color(0x05070c), new THREE.Color(0x101623), gy);
   }
-  storm.position.set(0, 24, -220);
+  // clears the camera: world y 114..162 (it flies at 106), z -460..-710 (it
+  // stands at -370), so the bank hangs ahead and low, sitting on the horizon
+  storm.position.set(0, 50, -380);
   // friendly puffs over the meadow
   // five, not nine, and spread wider: the sun needs clean sky around it and
   // the composition needs large areas of empty blue to breathe
@@ -1478,6 +1491,7 @@ import { PROJECTS } from './gallery-assets.js';
     return gl;
   });
   scene.add(bolt);
+  window.__adBolt = bolt;   // debug/verification hook: is lightning firing?
   function strike() {
     bolt.geometry.dispose(); bolt.geometry = boltGeometry();
     boltBranch.geometry.dispose(); boltBranch.geometry = boltGeometry();
@@ -1699,7 +1713,7 @@ import { PROJECTS } from './gallery-assets.js';
       sp.visible = sp.material.opacity > 0.01;
       sp.material.color.copy(sp.userData.sc);
       // strikes light the ceiling from within (flash lags one frame — fine)
-      if (flash > 0.02) sp.material.color.lerp(tmpA.set(0x93a7d0), flash * 0.45);
+      if (flash > 0.02) sp.material.color.lerp(tmpA.set(0x7f93bd), flash * 0.3);
     }
     for (c = 0; c < sunny.children.length; c++) {
       sp = sunny.children[c];
@@ -1796,10 +1810,16 @@ import { PROJECTS } from './gallery-assets.js';
     // lightning inside the storm leg — held back until the flight has mostly
     // settled into the night so flashes never strobe the day→night transition
     var stormFactor = Math.min(Math.max(1 - Math.abs(S - 4), 0), 1);  // storm moved 3 -> 4
-    if (!REDUCED && !INSTANT && stormFactor > 0.7 && T > nextFlash) {
+    /* 0.45, not 0.7: the gate opens a little earlier on the approach and holds
+       a beat into the dive, so a parting strike lights the ceiling as we drop
+       out from under it. Still nowhere near the cloudline leg at S=3, which
+       has to stay clear. */
+    if (!REDUCED && !INSTANT && stormFactor > 0.45 && T > nextFlash) {
       flash = 1;
       strike();
-      nextFlash = T + 5 + Math.random() * 6;
+      // one every 3-7s rather than 5-11: at the old cadence a reader could
+      // cross the whole leg on two strikes
+      nextFlash = T + 2.9 + Math.random() * 4.1;
       if (Math.random() < 0.3) nextFlash = T + 0.14; // double-strike
     }
     if (window.__adFlashHold) { // capture hook: pin flash at a given level
@@ -1807,15 +1827,20 @@ import { PROJECTS } from './gallery-assets.js';
       flash = +window.__adFlashHold || 0.9;
     }
     flash *= Math.exp(-dt * 7);
-    // sky whitens LESS than the bolt so the channel stays readable at peak
-    skyUni.uFlash.value = flash * stormFactor * 0.55;
-    flashfx.style.opacity = (flash * stormFactor * 0.3).toFixed(3);
-    hemi.intensity += flash * stormFactor * 1.6;
+    /* All four of these used to stack into a full white-out: the dome, a
+       full-screen DOM sheet, the hemisphere and the cloud tint all went up
+       together and the black ceiling turned pale grey at exactly the moment
+       it should have been at its most dramatic. The bolt is the bright thing
+       now; the sky only lifts enough to say something lit it. */
+    skyUni.uFlash.value = flash * stormFactor * 0.2;
+    flashfx.style.opacity = (flash * stormFactor * 0.09).toFixed(3);
+    hemi.intensity += flash * stormFactor * 0.8;
     // sqrt: the channel lingers a beat after the sky flash dims
     var boltOp = Math.sqrt(flash) * stormFactor;
-    boltMat.opacity = boltOp * 0.9;
-    boltBranch.material.opacity = boltOp * 0.55;
-    boltGhosts[0].material.opacity = boltGhosts[1].material.opacity = boltOp * 0.4;
+    boltMat.opacity = boltOp;
+    boltBranch.material.opacity = boltOp * 0.7;
+    // WebGL ignores linewidth, so the two offset ghosts ARE the bolt's weight
+    boltGhosts[0].material.opacity = boltGhosts[1].material.opacity = boltOp * 0.62;
     bolt.visible = boltOp > 0.02;
 
     renderer.render(scene, camera);
