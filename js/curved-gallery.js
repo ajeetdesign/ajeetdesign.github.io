@@ -131,13 +131,18 @@ const fsh = `
     if (alpha < 0.01) discard;
     // brightness = horizontal falloff from the same focus, wider than the bulge,
     // so a card fades smoothly across its own width as it moves away
-    /* 0.2 was right against the source's near-black page, where an off-focus
-       card fading to a fifth reads as depth. Over a bright sky the same value
-       reads as dirty, so the floor comes up — the falloff still shapes the
-       wall, it just no longer sinks the outer cards into mud. */
-    float bright = mix(0.62, 1.0, smoothstep(0.03, 0.85, vB));
+    /* Two separate things were making these read dull, and only one of them
+       was the falloff. The floor was 0.2, right against the source's
+       near-black page where an off-focus card fading to a fifth reads as
+       depth; over a bright sky it reads as dirt, so it comes up again. */
+    float bright = mix(0.84, 1.0, smoothstep(0.03, 0.85, vB));
     bright = min(bright + uHover * 0.12, 1.05);
-    vec3 col = tex.rgb * bright;
+    /* The other half: the artwork itself is drawn for a dark page — several of
+       these are black rooms and midnight scenes — so scaling it up only made
+       a dark image brighter, still muddy. A gamma lift opens the shadows and
+       midtones instead and leaves the highlights where they are, which is
+       what actually gets the colour back. */
+    vec3 col = pow(tex.rgb, vec3(0.78)) * bright;
     col *= 1.0 - vPress * 0.14;           // soft shadow inside the press dent
     col *= 1.0 - 0.06 * length(vUv - 0.5);   // vignette eased for the same reason
     gl_FragColor = vec4(col, alpha * uFade);
@@ -245,7 +250,7 @@ export function createGallery(THREE, cards, maxAniso) {
   /* Not in the source, which is driven only by wheel and drag: the wall here
      creeps on its own and gives way the moment a card is hovered, so the
      reader can stop it simply by looking at one. */
-  const AUTO = 0.15;           // cards per second
+  const AUTO = 0.30;           // cards per second
 
   /* --- motion state (verbatim) --- */
   const state = { scroll: -1.3, mid: -1.3, target: -FOCUS_LOCAL[0] / STEP, vel: 0 };

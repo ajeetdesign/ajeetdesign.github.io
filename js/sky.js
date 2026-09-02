@@ -1596,7 +1596,13 @@ import { PROJECTS } from './gallery-assets.js';
     if (gsec) {
       var gr = gsec.getBoundingClientRect();
       var shown = Math.min(gr.bottom, innerHeight) - Math.max(gr.top, 0);
-      gf = Math.min(Math.max(shown / Math.min(gr.height, innerHeight), 0), 1);
+      var vis = Math.min(Math.max(shown / Math.min(gr.height, innerHeight), 0), 1);
+      /* A gate, not a dimmer. Tying opacity straight to how much of the section
+         is on screen meant the cards were never quite solid — they sat a per
+         cent or two under while any sliver was off screen, and dipped again at
+         both ends. This reaches full once the section is ~60% shown and holds
+         there, so they only fade on the way in and out. */
+      gf = Math.min(Math.max((vis - 0.22) / 0.38, 0), 1);
       gf = gf * gf * (3 - 2 * gf);
       /* The line and the cards are one section, so they arrive in order: the
          cards wait on the line's own reveal and then ease up behind it. The
@@ -1604,7 +1610,12 @@ import { PROJECTS } from './gallery-assets.js';
          and in again replays the entrance instead of skipping it. */
       var gline = gsec.querySelector('.sub');
       var lineIn = gline && gline.classList.contains('in');
-      galRamp += ((lineIn ? 1 : 0) - galRamp) * Math.min(1, dt * 1.7);
+      galRamp += ((lineIn ? 1 : 0) - galRamp) * Math.min(1, dt * 2.6);
+      /* a follower only ever approaches its target, so it would sit at 0.99
+         for ever and the cards would never be quite solid — snap the last
+         fraction so they land at full opacity once the line is in */
+      if (lineIn && galRamp > 0.985) galRamp = 1;
+      if (!lineIn && galRamp < 0.015) galRamp = 0;
       gf *= galRamp;
       /* and it rises as it fades, the way every other section's content does */
       gallery.setEntrance(galRamp);
