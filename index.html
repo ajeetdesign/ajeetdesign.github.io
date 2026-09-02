@@ -99,7 +99,10 @@
   #s-work { margin-top: 100vh; }
   #s-cloudline { margin-top: 90vh; }
   #s-ai { margin-top: 90vh; }
-  #s-contact { margin-top: 100vh; }
+  /* The descent's runway. The storm holds while the AI cards are read; this
+     gap is the flight itself, so it has to be long enough for a 175-unit fall
+     to play out after the cards have gone. */
+  #s-contact { margin-top: 205vh; }
   .ovl { will-change: opacity, transform; }
   .label {
     font-size: 13px; font-weight: 700; letter-spacing: 0.22em; text-transform: uppercase;
@@ -1721,7 +1724,7 @@
       .add({ duration: 1500, complete: finish });
   })();
 </script>
-<script type="module" src="js/sky.js?v=99"></script>
+<script type="module" src="js/sky.js?v=100"></script>
 <script>
   /* nav active state — rect-based like the reveals (IO never fires in captures) */
   (function () {

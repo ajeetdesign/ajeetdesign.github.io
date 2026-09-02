@@ -1384,11 +1384,17 @@ import { PROJECTS } from './gallery-assets.js';
   var sections = ['s-hero', 's-intro', 's-work', 's-cloudline', 's-ai', 's-contact']
     .map(function (id) { return document.getElementById(id); });
   var tops = [0, 0, 0, 0, 0, 0];
+  // the descent is anchored to the AI cards leaving the screen rather than to
+  // a fixed offset above the contact section, so editing that grid can never
+  // push the flight back on top of the cards again
+  var aiCards = document.querySelector('#s-ai .bento');
+  var aiExit = 0;
   function measure() {
     var sy = window.pageYOffset;
     for (var i = 0; i < sections.length; i++) {
       if (sections[i]) tops[i] = sections[i].getBoundingClientRect().top + sy;
     }
+    aiExit = aiCards ? aiCards.getBoundingClientRect().bottom + sy : tops[4];
   }
   function targetS() {
     var lk = lockedS();
@@ -1401,17 +1407,21 @@ import { PROJECTS } from './gallery-assets.js';
       // appears in a settled scene
       var a = tops[i] - vh * 1.9, b = tops[i] - vh * 0.75;
       if (i === sections.length - 1) {
-        // the final descent falls 175 world units through the cloud deck —
-        // four times the distance of any other leg. On an equal runway it
-        // reads as a drop rather than a flight, so it gets a longer one.
-        a = tops[i] - vh * 2.85;
-        // ...but never so long that it starts before the previous leg has
-        // landed, or two transitions would advance at once.
+        // The storm holds for as long as the AI cards are on screen. Only
+        // once their bottom edge clears the top of the viewport does the
+        // descent start, so the flight owns the empty gap that follows
+        // instead of playing out behind something the reader is still on.
+        a = aiExit;
+        // never start before the previous leg has landed, or two transitions
+        // would advance at once
         var prevB = tops[i - 1] - vh * 0.75;
         if (a < prevB) a = prevB;
         // last zone must finish within reachable scroll or the sunny
         // meadow state is never fully entered
         if (b > maxY - 4) { b = maxY - 4; a = Math.min(a, b - vh * 1.15); }
+        // a zone with no width would divide by zero; if the layout ever
+        // leaves no room, a hurried descent still beats a broken one
+        if (b - a < vh * 0.5) a = b - vh * 0.5;
       }
       s += Math.min(1, Math.max(0, (y - a) / (b - a)));
     }
@@ -1531,6 +1541,7 @@ import { PROJECTS } from './gallery-assets.js';
     // easing reads as jerky when frames drop), slow enough to stay cinematic
     S = INSTANT ? tgt : S + (tgt - S) * Math.min(1, dt * 3.4);
     window.__adS = S; // debug/verification hook
+    window.__adT = tgt; // unsmoothed target, so checks don't wait on the follower
     var i = Math.min(Math.floor(S), LAST - 1);
     var f = smooth(Math.min(Math.max(S - i, 0), 1));
     // storm approach gets a second smoothstep: gentler in and out of the
