@@ -1555,15 +1555,19 @@ import { PROJECTS } from './gallery-assets.js';
 
     // camera along keyframes + idle drift + parallax + banking roll
     // flying-speed cue: the lens widens mid-transition, settles on arrival
-    var baseFov = 55 + (REDUCED ? 0 : Math.sin(f * Math.PI) * (i === 2 ? 9 : 5));
-    tmpPos.lerpVectors(K[i].p, K[Math.min(i + 1, 4)].p, f);
-    tmpLook.lerpVectors(K[i].l, K[Math.min(i + 1, 4)].l, f);
+    var baseFov = 55 + (REDUCED ? 0 : Math.sin(f * Math.PI) * (i === 3 ? 9 : 5));
+    /* LAST, not 4. This clamp still named the old final state, so once the
+       cloudline leg made the meadow K[5] the camera lerped K[4] -> K[4] and
+       the meadow was flown with the STORM's camera — a hillside at close
+       range instead of the wide vista. */
+    tmpPos.lerpVectors(K[i].p, K[Math.min(i + 1, LAST)].p, f);
+    tmpLook.lerpVectors(K[i].l, K[Math.min(i + 1, LAST)].l, f);
     // final descent: nose pitches down toward the earth mid-dive, then
     // flares level over the grass
-    if (i === 4) tmpLook.y -= Math.sin(f * Math.PI) * 30;  // dip into the storm (was 3 before cloudline)
+    if (i === 4) tmpLook.y -= Math.sin(f * Math.PI) * 30;
     // storm approach: dive under the advancing cloud front, then flare
-    // level as the night settles
-    if (i === 2) { tmpPos.y -= Math.sin(f * Math.PI) * 9; tmpLook.y -= Math.sin(f * Math.PI) * 13; }
+    // level as the night settles. The storm is entered from 3 now, not 2.
+    if (i === 3) { tmpPos.y -= Math.sin(f * Math.PI) * 9; tmpLook.y -= Math.sin(f * Math.PI) * 13; }
     if (!REDUCED) {
       tmpPos.x += Math.sin(T * 0.13) * 0.7 + mx * 1.4;
       tmpPos.y += Math.sin(T * 0.17) * 0.5 - my * 1.0;
