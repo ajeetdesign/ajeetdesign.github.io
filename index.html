@@ -412,7 +412,7 @@
   #s-work header { text-align: center; margin-bottom: 12vh; text-shadow: 0 2px 24px rgba(10, 40, 80, 0.35); }
   #s-work h2 { font-size: clamp(34px, 5vw, 62px); font-weight: 800; letter-spacing: -0.035em; margin: 0 0 12px; }
   #s-work header p { font-size: 16px; font-weight: 500; color: var(--ink-light-soft); margin: 0; }
-  .stack { position: relative; max-width: 1120px; margin: 0 auto; }
+  .stack { position: relative; max-width: 1030px; margin: 0 auto; }
   /* card 04 needs scroll room BELOW it to reach the pin. A trailing margin
      collapses out of .stack and padding sits outside the content box that
      bounds a sticky child — only an in-flow spacer works. */
@@ -425,9 +425,9 @@
     backdrop-filter: none; -webkit-backdrop-filter: none;
     position: sticky; top: calc(13vh + var(--peek, 0px));
     margin-bottom: 52vh;
-    min-height: 600px; padding: clamp(28px, 4vw, 56px);
+    min-height: 545px; padding: clamp(24px, 3.5vw, 48px);
     display: grid; grid-template-columns: 1fr 1fr;
-    gap: clamp(28px, 4vw, 56px); align-items: center;
+    gap: clamp(24px, 3.5vw, 48px); align-items: center;
     color: var(--ink-dark);
     transition: transform .5s cubic-bezier(.2,.9,.25,1), box-shadow .5s ease;
   }
@@ -463,7 +463,7 @@
   .pcard .cta.is-ext:hover svg { transform: translate(2px, -2px); }
   /* image placeholder — swap the .art div for a real image when shots are ready */
   .pcard .art {
-    position: relative; align-self: stretch; min-height: 260px;
+    position: relative; align-self: stretch; min-height: 238px;
     border-radius: 20px; border: 1px solid rgba(255,255,255,0.55);
     display: grid; place-items: center; overflow: hidden;
     transition: transform .6s cubic-bezier(.2,.9,.25,1);
