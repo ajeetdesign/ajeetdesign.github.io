@@ -1,5 +1,31 @@
 .DS_Store
+
+# Agent and design-tool state. Local to this machine and rebuilt on demand —
+# .impeccable/ also holds the archived critique, which is working notes rather
+# than anything the site serves.
 .claude/
-ajeet-portfolio/
+.agents/
+.codex/
+.impeccable/
+skills-lock.json
+
+# Scratch pages for probing the sky journey in a browser. Nothing links to
+# them, so they would deploy as orphan pages if they were ever committed.
 debug-anchor.html
+__e2e.html
+__skydebug.html
+__skyprobe.html
+
+# Hand-made snapshots taken before risky passes over the scene, plus the
+# stylesheet from the quality pass that was reverted. Kept locally until the
+# change each one guards has settled; none are referenced by any page.
+*.before-scene-quality-pass
+*.quality-pass-reverted
+sky-quality.css
+
+# The React build, on hold — the live site is index.html.
+ajeet-portfolio/
+
+# Plaintext case copy. cases.enc.json is the deployable artefact; this decrypts
+# to the same content and must never ship.
 cases.src.mjs
