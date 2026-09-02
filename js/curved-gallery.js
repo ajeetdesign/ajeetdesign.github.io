@@ -45,6 +45,9 @@ const BRIGHT_SIGMA = 4.1; // brightness falls off over a wider range than the bu
 
 /* the original's camera, which the rig reproduces */
 const SRC_CAM = { pos: [0, 0.12, 7.6], fov: 50 };
+/* how far the wall sits below its resting place at the start of the
+   entrance — the 3D equivalent of .reveal's translateY */
+const RISE = 1.15;
 
 const clamp = (lo, hi, v) => Math.min(hi, Math.max(lo, v));
 
@@ -164,6 +167,22 @@ export function createGallery(THREE, cards, maxAniso) {
 
   const geo = new THREE.PlaneGeometry(PW, PH, 64, 32);
   const focusWorld = new THREE.Vector3();
+  let baseY = 0;
+
+  /* uFocus is a WORLD point, so it has to be recomputed whenever the rig
+     moves — otherwise the lens stays put while the wall slides underneath it
+     and the bulge appears to travel across the cards. */
+  function refocus() {
+    rig.updateMatrixWorld(true);
+    focusWorld.set(FOCUS_LOCAL[0], FOCUS_LOCAL[1], FOCUS_LOCAL[2]).applyMatrix4(wall.matrixWorld);
+  }
+
+  /* The entrance the rest of the page uses: content rises from below as it
+     fades in. `t` runs 0 (fully below, hidden) to 1 (settled). */
+  function setEntrance(t) {
+    const y = baseY - (1 - t) * RISE;
+    if (y !== rig.position.y) { rig.position.y = y; refocus(); }
+  }
   const screens = [];
 
   cards.forEach(function (card, i) {
@@ -208,7 +227,8 @@ export function createGallery(THREE, cards, maxAniso) {
     rig.lookAt(camPos);                 // local +z back toward the viewer
     rig.updateMatrixWorld(true);
 
-    focusWorld.set(FOCUS_LOCAL[0], FOCUS_LOCAL[1], FOCUS_LOCAL[2]).applyMatrix4(wall.matrixWorld);
+    baseY = rig.position.y;
+    refocus();
     /* uAmp and the sigmas are world distances in the shader, so they scale
        with the rig or the dome would be the wrong size for the cards */
     screens.forEach(function (m) {
@@ -221,7 +241,7 @@ export function createGallery(THREE, cards, maxAniso) {
   /* Not in the source, which is driven only by wheel and drag: the wall here
      creeps on its own and gives way the moment a card is hovered, so the
      reader can stop it simply by looking at one. */
-  const AUTO = 0.055;          // strip units per second
+  const AUTO = 0.15;           // cards per second
 
   /* --- motion state (verbatim) --- */
   const state = { scroll: -1.3, mid: -1.3, target: -FOCUS_LOCAL[0] / STEP, vel: 0 };
@@ -336,7 +356,7 @@ export function createGallery(THREE, cards, maxAniso) {
     }
   }
 
-  return { rig, wall, screens, place, update, bindDrag,
+  return { rig, wall, screens, place, update, bindDrag, setEntrance,
            hoveredIndex: function () { return hovered; },
            dragged: function () { return dragMoved; },
            state: state, PW, PH, STEP };

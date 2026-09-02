@@ -1604,6 +1604,8 @@ import { PROJECTS } from './gallery-assets.js';
       var lineIn = gline && gline.classList.contains('in');
       galRamp += ((lineIn ? 1 : 0) - galRamp) * Math.min(1, dt * 1.7);
       gf *= galRamp;
+      /* and it rises as it fades, the way every other section's content does */
+      gallery.setEntrance(galRamp);
     }
     gallery.update(T, dt * 1000, gf, camera);
 
