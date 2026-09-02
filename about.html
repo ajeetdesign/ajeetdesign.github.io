@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>About — Ajeet</title>
-<meta name="description" content="Ajeet — product designer in Bangalore. How I got into design, where I've worked, and what I do with the rest of my time.">
+<meta name="description" content="Ajeet — product designer in Bangalore. Curiosity, travel, photography, swimming, anime, and the way all of it feeds back into the work.">
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="icon" type="image/png" sizes="32x32" href="images/favicon-32.png">
 <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
@@ -27,12 +27,12 @@
        Every size on the page came from its own clamp() before this, so curves
        crossed and landed on 17 distinct sizes — eight of them inside a 4px band
        at tablet width, plus 54/52, 22/21 and 18/17 pairs that no reader could
-       tell apart. Nine steps now, each at least ~1.15x its neighbour where the
+       tell apart. Eight steps now, each at least ~1.15x its neighbour where the
        roles sit next to each other.
 
-       The bottom three converge on small screens on purpose: below ~15px there
-       is no room left for size to carry meaning, so meta and label separate
-       from body by weight, case and tracking instead. */
+       The bottom two converge on small screens on purpose: below ~15px there is
+       no room left for size to carry meaning, so meta separates from body by
+       weight and tracking instead. */
     --t-display: clamp(40px, 5.4vw, 68px);   /* h1                            */
     --t-xxl:     clamp(30px, 4.2vw, 52px);   /* pull quote, closing h2        */
     --t-xl:      clamp(24px, 3.3vw, 40px);   /* section h2, the big stat      */
@@ -40,8 +40,34 @@
     --t-md:      clamp(17px, 1.9vw, 23px);   /* h3, company name, mail CTA    */
     --t-lead:    clamp(16px, 1.7vw, 20px);   /* ledes and interest tags       */
     --t-body:    clamp(14.5px, 1.45vw, 17px);/* paragraphs                    */
-    --t-meta:    clamp(13px, 1.1vw, 13.5px); /* dates, roles, captions        */
-    --t-label:   12px;                       /* uppercase tracked labels      */
+    --t-meta:    clamp(13px, 1.1vw, 13.5px); /* credentials line, captions    */
+
+    /* ONE measure. The page carried five (720 / 803 / 860 / 871 / 1000), which
+       is why nothing read as ranked: every block was a wide centred column of
+       almost the same width, so none of them could be the exception. Every
+       block hangs off this now. The pull quote is the only thing allowed to
+       leave it, which is what makes it the peak. */
+    /* TWO widths, both flush to the same left edge. One measure for everything
+       was the fix for five CENTRED measures, but it overcorrected: every block
+       exactly 720px wide is its own monotony, and prose and display type do not
+       want the same width. The spine is the LEFT edge — how far right a block
+       runs is now a decision. Display type and the rail get --measure-wide;
+       running prose is capped at --measure, which is where 17px Sora lands
+       around 55 characters. */
+    /* 520, not 560. Centred text has no fixed left edge to return to, so the
+       eye has to re-find the start of every line — the comfortable measure is
+       shorter than it is flush-left. ~63 characters here against the ~70 that
+       reads fine when the lines all start in the same place. */
+    --measure:      520px;   /* running prose — ~63 characters, centred      */
+    --measure-wide: 880px;   /* headings, the rail, the closing statement    */
+
+    /* NOTE ON `ch`: do not size measure in ch on this page. `1ch` is the width
+       of the ZERO glyph, and Sora's zero is about 1.5x its average lowercase
+       character — so `max-width: 54ch` delivered ~80 real characters, not 54.
+       Every cap here was set in ch and every one of them ran long: body 80,
+       coda 80, resolve 79, credentials 89, against a 75 ceiling. Measured by
+       walking Ranges over the rendered text, not computed from the box. All
+       caps are px now, chosen from that character count. */
   }
 
   /* The page draws its own focus ring everywhere, not just on the deck: a
@@ -70,11 +96,19 @@
     position: fixed; top: 18px; right: 18px; z-index: 30;
     width: 46px; height: 46px; border-radius: 999px;
     display: grid; place-items: center; color: var(--ink-dark);
-    background: rgba(255, 255, 255, 0.62);
+    /* 0.62 let body text ghost through the blur as it scrolled under the button
+       — on a 390px column the text runs right up to it at every scroll position.
+       At 0.86 the glass still reads (the backdrop blur and saturation are doing
+       that work) but what passes behind it is hidden cleanly instead of smeared. */
+    background: rgba(255, 255, 255, 0.86);
     border: 1px solid rgba(255, 255, 255, 0.72);
     backdrop-filter: blur(12px) saturate(1.4);
     -webkit-backdrop-filter: blur(12px) saturate(1.4);
-    box-shadow: 0 8px 32px rgba(15, 30, 50, 0.14);
+    /* No shadow. A 1px hairline under a wide diffuse blur is the generated-UI
+       tell — commit to one, and for a frosted pill the defined edge IS the
+       material. The border carries a touch more ink now to hold that job on
+       its own over the light gradient and over the deck's photographs. */
+    border-color: rgba(255, 255, 255, 0.9);
     transition: transform .35s cubic-bezier(.2,.9,.25,1), background .25s ease;
   }
   .x-close:hover { background: #fff; transform: rotate(90deg); }
@@ -83,24 +117,52 @@
   /* This gap is now the only thing separating one section from the next, so it
      has to do the work the 56px of panel padding plus the plate edge used to do
      between them — hence the jump from 32 to ~104. */
-  .page { display: flex; flex-direction: column; align-items: center; padding: 11vh 5vw 12vh; gap: clamp(60px, 7.5vw, 104px); }
+  /* One gap repeated eight times gave every block equal weight — spacing that
+     encodes nothing. The gap is the TIGHT interval now, and blocks that need
+     separation buy it with their own margin. What that buys: the closer stays
+     tight to the section it concludes (it reads as that passage's payoff rather
+     than a ninth floating block), while the pull quote gets air on both sides
+     that nothing else on the page gets. */
+  .page { display: flex; flex-direction: column; align-items: center; padding: 11vh 5vw 12vh; gap: clamp(40px, 4.4vw, 64px); }
+  .panel { margin-top: clamp(14px, 2.2vw, 38px); }
+  .quote { margin: clamp(26px, 3.8vw, 60px) 0; }
+  /* the section after the quote must not add its own margin on top of the
+     quote's, or the peak sits off-centre in its own silence — 118px of air
+     before it and 150px after */
+  .quote + .panel { margin-top: 0; }
+  .foot  { margin-top: clamp(22px, 3vw, 46px); }
 
   /* ── hero ──────────────────────────────────────────────────────────────── */
-  .head { text-align: center; padding: 3vh 0 3vh; max-width: 900px; }
+  /* Left, not centred. Six of the page's nine blocks used to be centred, which
+     is the same as none of them being centred: with no fixed left edge for the
+     eye to return to, nothing can read as exceptional. The page has one spine
+     now and the pull quote is the only element that leaves it. */
+  /* Centred, per Ajeet. The trade is real and worth naming: nothing can be
+     exceptional by ALIGNMENT any more — the pull quote used to be the only
+     centred block on the page, which is what made it read as the peak. It has
+     to earn that on size, weight, isolation and its own entrance instead, so
+     the air around it and its 52px/700 are now load-bearing rather than
+     decorative. Everything below hangs off ONE centreline the way it used to
+     hang off one left edge; a centred page still needs a single axis. */
+  .head { padding: 3vh 0 1vh; }
   .head h1 {
     font-size: var(--t-display); font-weight: 800; letter-spacing: -0.04em;
     line-height: 1.04; margin: 0 0 18px;
   }
-  .head .lede { font-size: var(--t-lead); color: var(--ink-soft); line-height: 1.6; margin: 0 auto; max-width: 46ch; }
-  /* Credentials, demoted. The readers this page is for have already seen the
-     work; leading with years and employers answers a question neither of them
-     asked. It stays on the page because it is useful, one size down and after
-     the sentence that actually says something. */
+  .head .lede { font-size: var(--t-lead); color: var(--ink-soft); line-height: 1.6; margin: 0 auto; max-width: 560px; text-wrap: pretty; }
+  /* Credentials, demoted but scannable. `.sub` used to sit between this and the
+     lede — three consecutive grey paragraphs, 83 words, before the page had said
+     anything. It is gone; this stays because it is the only place the page
+     carries role, city and employers, and those were previously its SMALLEST
+     type. Still meta size, because this is metadata and not prose, but the four
+     proper nouns come up to full ink so the line can be taken in one pass.
+     Deliberately after the h1 and the sentence, never above them as an eyebrow. */
   .head .creds {
-    margin: 18px auto 0; font-size: var(--t-meta); font-weight: 600;
-    letter-spacing: 0.02em; color: var(--ink-soft);
+    margin: 22px auto 0; max-width: 470px; text-wrap: balance;
+    font-size: var(--t-meta); font-weight: 500; line-height: 1.7;
+    letter-spacing: 0.01em; color: var(--ink-soft);
   }
-  .head .lede strong { font-weight: 600; color: var(--ink-dark); }
+  .head .creds b { font-weight: 700; color: var(--ink-dark); }
 
   /* ── deck: lands as a stack, holds, then fans open ─────────────────────
      Geometry all derives from --cw. The fan itself is painted frame-by-frame
@@ -163,151 +225,143 @@
   /* One measure for every section now. The .wide variant went with the
      restructure: the photo wall was the only thing that wanted more room, and
      it takes the whole viewport instead — see .bleed. */
-  .panel { width: min(94vw, 720px); }
+  /* `width: min(94vw, N)` on a flex child of a 5vw-padded column meant the body
+     sections sat a few px OUTSIDE the left edge the header and footer held — the
+     unnameable wrongness of three different left margins. `width:100%` lets the
+     page's own padding be the only gutter, so every block starts on one line. */
+  .head, .panel, .closer, .foot { width: 100%; max-width: var(--measure-wide); text-align: center; }
+  /* Running prose stops well short of the container it sits in. The heading may
+     use the full width; the paragraph under it may not. That difference IS the
+     structure — it is what a heading and a paragraph look like when the page
+     knows which is which. */
+  /* `max-width` alone would pin a narrow paragraph to the LEFT of a wide
+     centred block, which is the classic way a centred layout comes apart — the
+     headings would centre and the prose under them would not. Everything that
+     carries a measure re-centres inside its block. */
+  p, .resolve { max-width: var(--measure); margin-inline: auto; }
+  /* Every display role on this page was 800, so size was carrying the entire
+     hierarchy on its own and the page read as one monolithic voice at four
+     scales. Weight is a second axis now: 800 belongs to the h1 alone.
+     These headings are also SENTENCES, and hedged ones — "It probably starts",
+     "Maybe that's also why". At 800 and -0.038em the type was declaiming copy
+     that is thinking out loud. 600 and looser tracking lets them sound the way
+     they read; 40px against 17px body is a 2.35x step, so size alone already
+     marks them as headings without help from weight. */
   h2 {
-    font-size: var(--t-xl); font-weight: 800; letter-spacing: -0.038em;
-    line-height: 1.14; margin: 0 0 18px;
+    font-size: var(--t-xl); font-weight: 600; letter-spacing: -0.026em;
+    /* 800, not 700: at the narrower cap `text-wrap: balance` broke the middle
+       heading into THREE centred lines while its neighbours took one and two,
+       so the three headings — which are one continuous thought — arrived as
+       three different shapes. At 800 they balance to 1 / 2 / 2. */
+    line-height: 1.2; margin: 0 auto 20px; max-width: 800px; text-wrap: balance;
   }
-  h3 { font-size: var(--t-md); font-weight: 700; letter-spacing: -0.025em; margin: 0 0 10px; }
-  p { font-size: var(--t-body); line-height: 1.72; color: var(--ink-soft); margin: 0 0 16px; }
+  /* `margin: 0 auto 16px`, not `0 0 16px`: this shorthand sits BELOW the
+     `p, .resolve { margin-inline: auto }` rule and was resetting it, so every
+     section paragraph rendered pinned to the left edge of a centred block
+     (measured mid=540 against the page's 720 centreline). */
+  p { font-size: var(--t-body); line-height: 1.72; color: var(--ink-soft); margin: 0 auto 16px; }
   p:last-child { margin-bottom: 0; }
   p strong { font-weight: 600; color: var(--ink-dark); }
-  .lede { font-size: var(--t-lead); }
+  /* `.lede` is a HEADER role now. Inside a section it set the FIRST paragraph
+     larger than the ones after it — and in the curiosity section that first
+     paragraph is the longest block on the page, 52 words. The longest passage
+     being the biggest was hierarchy pointing the wrong way, and it added a
+     fourth prose size to a page that needs fewer. Sections are h2 + body. */
+  .head .lede { font-size: var(--t-lead); }
 
   /* ── the quote: no panel, straight onto the sky — the page's first peak ── */
   .quote {
-    width: min(94vw, 1000px); text-align: center;
+    width: 100%; max-width: 1000px; text-align: center;
     padding: clamp(20px, 4vw, 48px) clamp(16px, 4vw, 60px);
   }
+  /* -0.042em was past the -0.04em tracking floor, and at 800 this was the same
+     voice as the h1 one step down. It is a thought, not a proclamation: 700
+     holds it at 52px while leaving the h1 the only 800 on the page, and the
+     tracking comes back inside the floor where a lighter weight wants it. */
   .quote p {
-    font-size: var(--t-xxl); font-weight: 800; letter-spacing: -0.042em;
+    max-width: none;
+    font-size: var(--t-xxl); font-weight: 700; letter-spacing: -0.032em;
     line-height: 1.1; color: var(--ink-dark); margin: 0;
     text-wrap: balance;
-  }
-  /* was --ink-faint at 2.81:1 on the sand. There is no lighter ink that clears
-     4.5:1 down here, so the attribution steps up to --ink-soft and stays
-     subordinate on size, weight and tracking instead of on colour. */
-  .quote .attrib {
-    display: block; margin-top: clamp(16px, 2vw, 22px);
-    font-size: var(--t-label); font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase;
-    color: var(--ink-soft);
   }
   /* the page's one authored entrance — the quote resolves out of the sky
      instead of sliding up like everything else */
   .quote.rv { transform: none; filter: blur(14px); opacity: 0; transition: opacity 1s ease, filter 1.1s cubic-bezier(.2,.7,.2,1); }
   .quote.rv.in { filter: blur(0); opacity: 1; }
 
-  /* the story resolving in the open air after the quote — deliberately not a
-     panel, so the origin beat ends outside the stack rather than in a headless box */
-  .after { width: min(94vw, 640px); text-align: center; padding: 0 0 clamp(10px, 2vw, 22px); }
-  .after p { font-size: var(--t-lead); line-height: 1.7; }
-
-  /* ── the refrain ───────────────────────────────────────────────────────────
-     The page's one sentence, coming back at the close of each movement after it
-     lands at display weight. It sits at the END of a section rather than above
-     its heading on purpose: above, it is a kicker, and a label over a heading
-     makes the heading share billing with it. Below, it is a beat — the reader
-     finishes a passage and the same thought arrives again, quieter each time.
-
-     It is never introduced or explained anywhere in the markup. The device only
-     works if the reader notices it themselves, and captioning it kills it. */
-  .refrain {
-    margin: clamp(30px, 4vw, 46px) 0 0; text-align: center;
-    font-size: var(--t-body); font-weight: 500; color: var(--ink-soft);
-    letter-spacing: -0.01em;
+  /* ── the pair ────────────────────────────────────────────────────────────────
+     Movement 2 sets one thing that slows you down against one that pushes you
+     forward, then reconciles them. It ran as two side-by-side columns, which
+     sounds right and measured wrong: 334px each at 1440 put running prose at
+     25 characters a line, well under the 45 a reader needs to keep a rhythm.
+     It then ran as two rows with the subject in a rail on the left — but a
+     hanging rail is a FLUSH-LEFT device: it works by giving the eye a second
+     fixed edge to read down, and on a centred axis there is no first one, so
+     the subject and its sentence would drift apart with nothing holding them.
+     The subject sits centred DIRECTLY above its own sentence now. The
+     opposition survives the same way it always did — two parallel rows, one
+     under the other, parted by a hairline — and the sentence still runs on
+     from its subject, unbroken. */
+  .pair { margin-top: clamp(24px, 3vw, 34px); }
+  .pair > div {
+    padding: clamp(20px, 2.4vw, 28px) 0;
+    border-top: 1px solid rgba(28, 43, 58, 0.12);
   }
-  /* the fourth appearance, where the sentence stops being about work */
-  .refrain .turn { color: var(--ink-dark); font-weight: 600; }
-
-  /* ── asymmetric split ──────────────────────────────────────────────────── */
-  .split { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: clamp(24px, 3.4vw, 48px); align-items: start; }
-  /* The aside was a box inside a box — the one nesting that is always wrong.
-     Its list already parts its own rows with hairlines, so all it needed to
-     stay a distinct column was a rule down the inside edge. Kept to 1px and
-     to ink rather than an accent, so it reads as a margin, not a callout. */
-  .now {
-    padding: 4px 0 4px clamp(18px, 2.2vw, 26px);
-    border-left: 1px solid rgba(28, 43, 58, 0.14);
-  }
-  /* was 10px in --accent: the smallest text on the page at 3.05:1, failing on
-     both counts at once. Up to the label step and onto the darkened blue. */
-  .now h3 { font-size: var(--t-label); font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: var(--accent-text); margin: 0 0 14px; }
-  .now ul { list-style: none; margin: 0; padding: 0; }
-  .now li { padding: 12px 0; border-top: 1px solid rgba(28, 43, 58, 0.12); }
-  .now li:first-child { border-top: 0; padding-top: 0; }
-  .now li:last-child { padding-bottom: 0; }
-  .now b { display: block; font-size: var(--t-body); font-weight: 700; letter-spacing: -0.015em; margin-bottom: 3px; }
-  .now span { font-size: var(--t-meta); line-height: 1.55; color: var(--ink-soft); }
-
-  /* ── journey ───────────────────────────────────────────────────────────── */
-  .tl { list-style: none; margin: clamp(14px, 2vw, 22px) 0 0; padding: 0; }
-  .tl li {
-    display: grid; grid-template-columns: minmax(104px, 140px) auto minmax(0, 1fr);
-    gap: clamp(14px, 2.4vw, 30px); align-items: start;
-    padding: clamp(20px, 2.6vw, 30px) 0; border-top: 1px solid rgba(28, 43, 58, 0.12);
-  }
-  .tl li:first-child { border-top: 0; padding-top: 0; }
-  .tl li:last-child { padding-bottom: 0; }
-  .tl-when { font-size: var(--t-meta); font-weight: 600; color: var(--ink-soft); line-height: 1.5; padding-top: 12px; font-variant-numeric: tabular-nums; }
-  /* The white plate stays — three logos drawn for light backgrounds need a
-     consistent ground, and the sand is not it. The shadow goes: it was lifting
-     the mark off a panel that no longer exists, and depth with nothing beneath
-     it to cast onto is just decoration. */
-  .tl-mark {
-    width: 48px; height: 48px; border-radius: 14px; display: grid; place-items: center;
-    background: #fff; border: 1px solid rgba(28, 43, 58, 0.1);
-  }
-  .tl-mark img { display: block; width: auto; height: auto; max-width: 60%; max-height: 60%; }
-  .tl-mark.porter img { max-height: 64%; }
-  .tl-mark.convin img { max-width: 66%; }
-  /* these must out-specify the bare `p` rule, which would add its bottom margin */
-  .tl .tl-co { font-size: var(--t-md); font-weight: 700; letter-spacing: -0.028em; line-height: 1.3; margin: 0; color: var(--ink-dark); }
-  .tl .tl-role { font-size: var(--t-meta); font-weight: 500; color: var(--ink-soft); margin: 3px 0 10px; }
-  .tl .tl-what { font-size: var(--t-body); line-height: 1.7; color: var(--ink-soft); margin: 0; }
-
-  /* ── the method ────────────────────────────────────────────────────────────
-     These three were a section of their own, each heading at display strength,
-     which made "how I work" compete with the story it belongs inside. They are
-     supporting detail for the prototyping passage now: same three beats, one
-     step down the scale, sitting under the passage they explain. */
-  .princ { margin: clamp(18px, 2.6vw, 28px) 0 0; }
-  .princ > div { padding: clamp(18px, 2.2vw, 24px) 0; border-top: 1px solid rgba(28, 43, 58, 0.12); }
-  .princ > div:first-child { border-top: 0; padding-top: 0; }
-  .princ > div:last-child { padding-bottom: 0; }
-  .princ h4 {
+  .pair > div:last-child { padding-bottom: 0; }
+  .pair b {
+    display: block; margin-bottom: 7px;
     font-size: var(--t-md); font-weight: 700; letter-spacing: -0.028em;
-    line-height: 1.25; margin: 0 0 8px; max-width: 30ch;
+    line-height: 1.3; color: var(--ink-dark);
   }
-  .princ p { max-width: 66ch; margin: 0; }
+  .pair p { margin: 0 auto; }
 
-  /* ── sub-beat heading inside a movement ────────────────────────────────────
-     A movement can carry a second passage without becoming a second section:
-     this sits below h2 in the scale and above the body, and takes its air from
-     the rule above it rather than from a plate. */
-  .beat {
-    margin: clamp(46px, 6vw, 78px) 0 clamp(14px, 1.8vw, 20px);
-    padding-top: clamp(26px, 3.2vw, 36px); border-top: 1px solid rgba(28, 43, 58, 0.12);
-    font-size: var(--t-lg); font-weight: 800; letter-spacing: -0.035em; line-height: 1.2;
+  /* The sentence that settles the two rows above it. It was 30px and centred,
+     landing between two 40px left-aligned headings — three alignments and three
+     weights inside 650px, and a body sentence borrowing display scale it had no
+     claim to. Down to lede size, on the spine; the rule above it and the short
+     measure are what mark it as a beat. */
+  .resolve {
+    /* The rule spans the BLOCK; the sentence does not. Capped at the measure
+       it would draw a 520px hairline directly under the pair's full-width ones
+       — three dividers at two lengths in one passage. A divider marks the
+       structure it divides, and that is the section, not the line length of the
+       sentence beneath it. So the box stays full width and SYMMETRIC INLINE
+       PADDING holds the measure and the centring at once. The percentage
+       resolves against the panel, so it is 180px a side at 880 and collapses to
+       0 the moment the panel is narrower than the measure — nothing to chase
+       on a phone. */
+    max-width: none; padding-inline: max(0px, calc((100% - 520px) / 2));
+    margin: clamp(30px, 3.6vw, 44px) 0 0; padding-top: clamp(24px, 2.8vw, 32px);
+    border-top: 1px solid rgba(28, 43, 58, 0.12);
+    font-size: var(--t-lead); font-weight: 500; letter-spacing: -0.012em;
+    line-height: 1.6; color: var(--ink-dark); text-wrap: balance;
   }
 
-  /* ── interests ─────────────────────────────────────────────────────────────
-     Six one-word pills promised "get to know me" and delivered a word cloud.
-     Each one carries a sentence now, which is the only thing that turns a label
-     into a person. Two columns so six items read as a set rather than a list
-     the reader has to scroll; the hairline is what separates them, in keeping
-     with the timeline and the method above. */
-  .interests {
-    display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 0 clamp(28px, 4vw, 52px); margin-top: clamp(22px, 2.6vw, 30px);
+  /* ── the closer ────────────────────────────────────────────────────────────
+     The page's thesis: six labels that only mean anything together. They sit in
+     ink at 700 while the sentence around them stays soft, so the list separates
+     from the prose without leaving it — the pieces and the person arrive in the
+     same line. One step below the pull quote on the scale: the quote is the
+     peak of the page, this is where it comes down. */
+  /* The sentence says the reader should NOT see him as just a designer, a
+     photographer, a traveller. Set at 40px/700 in full ink with the disclaimer
+     around them in grey, the typography asserted precisely what the words deny —
+     it read as a keyword cloud with connective tissue between it. One step of
+     weight now (600 against 500) and one of colour, so the six labels sit inside
+     the sentence instead of replacing it. And down a full step on the scale, so
+     the pull quote is the only display moment left above the h1. */
+  .closer p {
+    max-width: 820px; margin-inline: auto;
+    font-size: var(--t-lg); font-weight: 500; letter-spacing: -0.024em;
+    line-height: 1.34; color: var(--ink-soft); margin-block: 0; text-wrap: balance;
   }
-  .interests > div { padding: clamp(16px, 2vw, 22px) 0; border-top: 1px solid rgba(28, 43, 58, 0.12); }
-  /* the first item of each column, not just the first of the list */
-  .interests > div:nth-child(-n + 2) { border-top: 0; padding-top: 0; }
-  .interests h3 { font-size: var(--t-md); font-weight: 700; margin: 0 0 4px; }
-  .interests p { margin: 0; max-width: 40ch; }
-  @media (max-width: 620px) {
-    .interests { grid-template-columns: 1fr; }
-    .interests > div:nth-child(2) { border-top: 1px solid rgba(28, 43, 58, 0.12); padding-top: clamp(16px, 2vw, 22px); }
+  .closer b { font-weight: 600; color: var(--ink-dark); }
+  /* the last line before the ask, back at reading size so the page exhales
+     instead of ending on a second display sentence */
+  .closer .coda {
+    margin: clamp(20px, 2.6vw, 30px) auto 0; max-width: 560px; text-wrap: pretty;
+    font-size: var(--t-lead); font-weight: 400; letter-spacing: 0;
+    line-height: 1.66; color: var(--ink-soft);
   }
 
   /* ── the photo wall, edge to edge ──────────────────────────────────────────
@@ -321,50 +375,56 @@
      body has overflow-x: hidden, which absorbs the scrollbar gutter. */
   .bleed { width: 100vw; margin-left: calc(50% - 50vw); }
 
-  /* ── photo wall — each .photo div becomes an img.photo once the shots land.
-     Columns, not grid: nine frames of differing height tile with no holes. ── */
-  .photo-grid { column-count: 3; column-gap: clamp(12px, 1.6vw, 18px); margin-top: clamp(26px, 3.2vw, 36px); }
-  /* Edge to edge it can carry more columns, so no single frame dominates and
-     the wall reads as a body of work rather than nine hero shots. The inset
-     keeps the outer frames off the viewport edge without re-boxing the wall. */
-  .bleed .photo-grid { column-count: 4; padding: 0 clamp(14px, 3vw, 40px); margin-top: clamp(22px, 2.6vw, 30px); }
-  @media (max-width: 1000px) { .bleed .photo-grid { column-count: 3; } }
+  /* ── photo wall — each .photo div becomes an img.photo once the shots land ──
+     Twelve frames over four masonry columns was 1,399px — a quarter of the page
+     — of empty placeholder gradient, sitting directly between the first section
+     and the pull quote, i.e. the biggest dead zone immediately before the
+     biggest peak. That, not the prose, is where "too much" came from: the page
+     runs 409 words.
+
+     Six frames now, and a real grid rather than CSS columns. Columns balance by
+     height, so varied crops left ragged trailing edges that had to be tuned by
+     frame count; a 3x2 grid of one ratio tiles exactly and reads as a contact
+     sheet — a photographer's edit — instead of a masonry accident. Capped at
+     1120px so it still leaves the 720 measure and changes register, without
+     handing six placeholders the entire viewport. */
+  .photo-grid {
+    display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: clamp(12px, 1.6vw, 18px); margin-top: clamp(26px, 3.2vw, 36px);
+  }
+  .bleed .photo-grid {
+    max-width: 1120px; margin-inline: auto;
+    padding: 0 clamp(14px, 3vw, 40px); margin-top: clamp(24px, 3vw, 34px);
+  }
+  /* This rule used to be `.photo-grid` inside the 860 query, which lost on
+     specificity to `.bleed .photo-grid` and never once fired — the phone layout
+     was three 112px tiles, below the size at which a photograph reads as one. */
+  @media (max-width: 700px) { .photo-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
   .photo {
     position: relative; width: 100%; aspect-ratio: 4 / 5; object-fit: cover;
-    border-radius: 18px; border: 1px solid rgba(255, 255, 255, 0.6);
-    display: grid; place-items: center; overflow: hidden;
-    break-inside: avoid; -webkit-column-break-inside: avoid;
-    margin-bottom: clamp(12px, 1.6vw, 18px);
-    transition: transform .45s cubic-bezier(.2,.9,.25,1), box-shadow .45s ease;
+    border-radius: 16px; border: 1px solid rgba(255, 255, 255, 0.6);
+    overflow: hidden;
   }
-  .photo:hover { transform: translateY(-5px); box-shadow: 0 26px 54px -28px rgba(15, 30, 50, 0.55); }
-  /* varied crops so the wall reads as frames, not as a filled-in grid */
-  .photo:nth-child(3n + 1) { aspect-ratio: 4 / 5.6; }
-  .photo:nth-child(3n + 2) { aspect-ratio: 4 / 4.5; }
-  .photo:nth-child(4n + 3) { aspect-ratio: 4 / 6.1; }
-  div.photo::after {
-    content: attr(data-n); font-size: 11px; font-weight: 700;
-    letter-spacing: 0.2em; text-transform: uppercase; color: rgba(255, 255, 255, 0.85);
-  }
+  /* The hover lift is gone with the labels: it promised a lightbox that does not
+     exist, and the `PHOTO 01` captions were 11px of white on mid-gradient at
+     1.76:1 — the only measured contrast failure on the page. The gradients read
+     as placeholders perfectly well without being told they are placeholders. */
   .ph-a { background: linear-gradient(140deg, #cfe0e6, #7d9fb4 58%, #3f5c78); }
   .ph-b { background: linear-gradient(140deg, #eddcbc, #cfae8a 60%, #96705c); }
   .ph-c { background: linear-gradient(140deg, #f6d9a8, #e5a05f 58%, #b5652f); }
   .ph-d { background: linear-gradient(140deg, #cfe3c4, #93b986 58%, #5c7f57); }
   .ph-e { background: linear-gradient(140deg, #8fc4e8, #3f7fc0 58%, #1e4a80); }
   .ph-f { background: linear-gradient(140deg, #dfe4ea, #9aa4b0 58%, #4e5762); }
-  .ph-g { background: linear-gradient(140deg, #d9d2c6, #a08d78 58%, #5f4f42); }
-  .ph-h { background: linear-gradient(140deg, #a8dcea, #4fa6cf 58%, #2b6ea0); }
-  .ph-i { background: linear-gradient(140deg, #f7cf9a, #e08a52 55%, #8a4a3c); }
-
-  /* the stat sits with the copy but carries display weight */
-  .stat-line { display: flex; align-items: baseline; gap: clamp(10px, 1.4vw, 16px); flex-wrap: wrap; margin-top: clamp(18px, 2.2vw, 26px); }
-  .stat-line b { font-size: var(--t-xl); font-weight: 800; letter-spacing: -0.04em; line-height: 1; color: var(--ink-dark); }
-  .stat-line span { font-size: var(--t-body); color: var(--ink-soft); }
 
   /* ── foot ──────────────────────────────────────────────────────────────── */
-  .foot { text-align: center; padding: 5vh 0 2vh; max-width: 900px; }
-  .foot h2 { font-size: var(--t-xxl); letter-spacing: -0.04em; margin: 0 0 10px; }
-  .foot p { margin: 0 0 30px; }
+  /* On the spine like everything else, and one step down. The sign-off used to
+     be set at --t-xxl, the SAME size as the pull quote, so the page's designated
+     peak was tied with its goodbye. */
+  .foot { padding: 4vh 0 2vh; }
+  /* The one heading that is NOT hedged — it asks for something — so it keeps
+     more weight than the three that think out loud. */
+  .foot h2 { font-size: var(--t-xl); font-weight: 700; letter-spacing: -0.03em; line-height: 1.16; margin: 0 auto 12px; max-width: 620px; text-wrap: balance; }
+  .foot p { margin: 0 auto 28px; max-width: 520px; }
   .mail {
     display: inline-flex; align-items: center; gap: 12px;
     font-size: var(--t-md); font-weight: 700; letter-spacing: -0.03em;
@@ -377,14 +437,31 @@
   .mail:hover { transform: translateY(-3px); box-shadow: 0 28px 56px -24px rgba(15, 30, 50, 0.8); }
   .mail svg { width: 20px; height: 20px; flex: none; transition: transform .35s cubic-bezier(.2,.9,.25,1); }
   .mail:hover svg { transform: translateX(4px); }
-  /* was a 17px-tall block link in --ink-faint: under the 24px target minimum and
-     at 2.81:1 on the sand. Now inline-block so the padding gives it a real hit
-     area, and on --ink-soft at 4.96:1 — it is a navigation control, so it is the
-     one piece of small text that could least afford to be the faintest. */
+  /* The button used to BE the address — the most utilitarian string on the page
+     set as its climax, at 23px/700. The pill carries the invitation now and the
+     address sits under it as the pill's own caption, still visible and still
+     copyable. `user-select: all` makes one click take the whole address rather
+     than a word of it, which is the only thing anyone ever wants to do with it. */
+  .foot .addr {
+    /* `0` here reset the inherited `margin-inline: auto` and left the address
+       pinned to the left of the centred footer — the page's last off-axis
+       element, measured at mid=540 against the 720 centreline. */
+    margin: 14px auto 0; font-size: var(--t-meta); font-weight: 500;
+    letter-spacing: 0.01em; color: var(--ink-soft);
+    -webkit-user-select: all; user-select: all;
+  }
+  /* `inline-block` next to the `inline-flex` pill put both in ONE line box, so
+     `text-align: center` centred the PAIR and the button itself sat 86px left of
+     centre with this link welded to its shoulder — the last thing every reader
+     saw, on a designer's portfolio. `display: block` gives it its own line; on
+     the left spine it needs no auto margins.
+     It also takes --accent-text, which was declared with a contrast
+     justification and then used nowhere but the focus ring. This is the page's
+     only route to the work, so it is the one place that earns the hue. */
   .back {
-    display: inline-block; margin-top: clamp(24px, 3vh, 34px);
-    padding: 14px 18px; font-size: var(--t-meta); font-weight: 600;
-    color: var(--ink-soft); text-decoration: none;
+    display: block; width: fit-content; margin: 26px auto 0;
+    padding: 12px 16px; font-size: var(--t-meta); font-weight: 600;
+    color: var(--accent-text); text-decoration: none;
   }
   .back:hover { color: var(--ink-dark); }
 
@@ -397,19 +474,6 @@
     /* 44px, not 42: this is the only way off the page, and it is the one
        control a thumb reaches for on a phone */
     .x-close { top: 14px; right: 14px; width: 44px; height: 44px; }
-    .split { grid-template-columns: 1fr; gap: 24px; }
-    /* stacked, the aside sits under the copy rather than beside it, so the rule
-       that marked the inside edge becomes the line between them */
-    .now {
-      padding: clamp(18px, 4vw, 22px) 0 4px;
-      border-left: 0; border-top: 1px solid rgba(28, 43, 58, 0.14);
-    }
-    .photo-grid { column-count: 2; }
-    /* the date rail can't hold its own column at this width — it becomes a
-       caption above the row, with the mark and the copy side by side below */
-    .tl li { grid-template-columns: auto minmax(0, 1fr); gap: 14px; }
-    .tl-when { grid-column: 1 / -1; padding-top: 0; }
-    .tl-when br { display: none; }
   }
   @media (prefers-reduced-motion: reduce) {
     html { scroll-behavior: auto; }
@@ -429,186 +493,97 @@
 
 <main class="page">
 
-  <!-- The three chips that sat above the h1 are gone. Two of them ("Product
-       Designer", "4+ years") were restated in the lede one line below, in a
-       different format each time, and a label row above a heading makes the
-       heading share billing with metadata it already contains. The one fact
-       that was only in the chips — the city — moved into the lede. -->
   <header class="head rv">
-    <h1>Hi there — I'm Ajeet.</h1>
-    <p class="lede">I design products for a living. Mostly I'm a person who cannot leave a bad workflow alone, which turns out to be the same job.</p>
-    <p class="creds">Product designer, Bangalore · four-plus years, B2B and B2C · currently at Porter, before that Juspay and Convin.ai</p>
+    <h1>Hey, I&rsquo;m Ajeet.</h1>
+    <p class="lede">I&rsquo;m a product designer who likes making sense of messy problems and turning ideas into things people can actually use. But work is only one part of who I am.</p>
+    <!-- `.sub` lived here: "Outside of it, I'm constantly finding new things to get
+         excited about… Here's a little bit of that side of me." Thirty-two words
+         captioning content that begins one scroll below, in a third consecutive
+         grey centred paragraph. The page shows that side of him; it does not need
+         to announce that it is about to. -->
+    <p class="creds"><b>Product designer</b>, Bangalore &middot; four-plus years, B2B and B2C &middot; currently at <b>Porter</b>, before that <b>Juspay</b> and <b>Convin.ai</b></p>
   </header>
 
   <div class="deck" id="deck" role="img" tabindex="0"
        aria-label="A few frames from my camera roll. Drag sideways to shuffle, or use the left and right arrow keys."></div>
 
+  <!-- Movement 1 · the instinct. The four things the paragraph names — places,
+       streets, a camera, an anime — are left as prose rather than broken into a
+       card each: a grid of six one-line interests is a word cloud, and this copy
+       is deliberately written as one thought that keeps going. The photo wall
+       below it is the one claim in the passage that can be shown instead of
+       said, so it is the only thing that gets pulled out. -->
   <section class="panel rv">
-    <h2>I got into design by accident.</h2>
-    <p class="lede">I'm a <strong>computer science</strong> grad who stumbled into design sideways: making event posters and building web frontends in college. I'd sketch interface ideas on paper, look at what I'd drawn, and keep landing on the same thought.</p>
-  </section>
-
-  <div class="quote rv">
-    <p>There's got to be a better way to do this.</p>
-    <span class="attrib">Me, every time, in college</span>
-  </div>
-
-  <div class="after rv">
-    <p>That thought is what led me to product design. I got fascinated by the idea that behind every feature I used day to day, someone had put that much thought and that many iterations into it. I wanted to be the person doing that. And here I am.</p>
-  </div>
-
-  <!-- Movement 2 · what the thought turned into. The three habits used to be a
-       section of their own, sitting after the journey; they are how this thought
-       gets acted on, so they belong underneath it rather than beside it. -->
-  <section class="panel rv">
-    <h2>So I stopped describing things and started building them.</h2>
-    <div class="split">
-      <div>
-        <p>Always curious, always pulling apart some new tool. Beyond product design itself I tinker with <strong>motion design and advanced prototypes</strong> — the kind that are close enough to the real thing that nobody has to imagine it.</p>
-        <p>At Porter I built a <strong>near-app prototype</strong> of our redesigned customer app, real enough to put in front of users for testing and to get product and engineering aligned on the same thing rather than three different mental models.</p>
-      </div>
-      <div class="now">
-        <h3>Currently learning</h3>
-        <ul>
-          <li><b>Rive</b><span>Interactive motion that ships as a real component, not a video of one.</span></li>
-          <li><b>Plugins with Cursor</b><span>Building the small tools I keep wishing existed in my own workflow.</span></li>
-        </ul>
-      </div>
-    </div>
-
-    <h3 class="beat">Three habits that survived every team.</h3>
-    <div class="princ">
-      <div>
-        <h4>Iteration with intent</h4>
-        <p>Volume isn't the point. Every round should be answering a question I couldn't answer in the last one. Otherwise it's just redecorating.</p>
-      </div>
-      <div>
-        <h4>Sketch ideas, prototype realities</h4>
-        <p>Paper is for thinking fast and being wrong cheaply. The prototype is where an idea has to survive contact with how it actually behaves.</p>
-      </div>
-      <div>
-        <h4>Prototypes are bridges between ideas and experiences</h4>
-        <p>A good prototype ends the argument. Everyone stops describing what they think the thing is and just looks at it together.</p>
-      </div>
-    </div>
-
-    <p class="refrain">There's got to be a better way to do this.</p>
-  </section>
-
-  <!-- Movement 3 · the same thought, now with a company behind it. -->
-  <section class="panel rv">
-    <h2>The same itch, on bigger surfaces.</h2>
-    <ul class="tl">
-      <li>
-        <span class="tl-when">Aug 2023 — <br>Present</span>
-        <span class="tl-mark porter"><img src="images/logo-porter.svg" alt="" width="48" height="48" loading="lazy" decoding="async"></span>
-        <div>
-          <p class="tl-co">Porter</p>
-          <p class="tl-role">Senior Product Designer</p>
-          <p class="tl-what">Led design for international expansion: vernacularising the partner app, redesigning earnings for UAE partners, and driving PMF for Delivery Note.</p>
-        </div>
-      </li>
-      <li>
-        <span class="tl-when">Aug 2021 — <br>Jul 2023</span>
-        <span class="tl-mark juspay"><img src="images/logo-juspay.svg" alt="" width="48" height="48" loading="lazy" decoding="async"></span>
-        <div>
-          <p class="tl-co">Juspay</p>
-          <p class="tl-role">Product Designer</p>
-          <p class="tl-what">Designed payments products from the ground up, including affordability tools and a customisable checkout SDK.</p>
-        </div>
-      </li>
-      <li>
-        <span class="tl-when">2020 — <br>2021</span>
-        <span class="tl-mark convin"><img src="images/logo-convin.png" alt="" width="48" height="48" loading="lazy" decoding="async"></span>
-        <div>
-          <p class="tl-co">Convin.ai</p>
-          <p class="tl-role">Product Designer</p>
-          <p class="tl-what">Worked on conversation intelligence tools that help sales teams learn from their own calls and perform better.</p>
-        </div>
-      </li>
-    </ul>
-
-    <p class="refrain">There's got to be a better way to do this.</p>
-  </section>
-
-  <!-- Movement 4 · the turn. Everything above reads as a way of working; this
-       is where it stops being one. The interests and the photography were two
-       separate sections and are one passage now, because the point of the
-       section is that the same instinct is running in both. -->
-  <section class="panel rv">
-    <h2>It doesn't switch off.</h2>
-    <p class="lede">What I do with the rest of the week, and what it says about me that it keeps rhyming with the job.</p>
-
-    <!-- ══════════════════════════════════════════════════════════════════════
-         DUMMY COPY — every sentence in .interests below is invented so the
-         layout can be judged. Six real ones from Ajeet replace them verbatim;
-         nothing else in this block needs to change.
-         ══════════════════════════════════════════════════════════════════════ -->
-    <div class="interests">
-      <div>
-        <h3>Anime</h3>
-        <p>Three episodes deep into something I swore I would only sample.</p>
-      </div>
-      <div>
-        <h3>Travel</h3>
-        <p>Less itinerary, more walking until something looks worth stopping for.</p>
-      </div>
-      <div>
-        <h3>Cricket</h3>
-        <p>I will rearrange a weekend around a Test match and defend that at length.</p>
-      </div>
-      <div>
-        <h3>Workout</h3>
-        <p>The one hour of my week with no opinions about product in it. That is the whole point.</p>
-      </div>
-      <div>
-        <h3>Crime thrillers</h3>
-        <p>Most of the appeal is watching someone assemble a system out of fragments.</p>
-      </div>
-      <div>
-        <h3>Photography</h3>
-        <p>Started as a way to notice things. Became an app. Keep reading.</p>
-      </div>
-    </div>
-
-    <h3 class="beat">Then it happened to my camera roll.</h3>
-    <p>Some days I design pixels. Some days I chase light with my <strong>Sony &alpha;6700</strong>. Either way I'm just trying to frame a good story before it runs away — and when I wanted a better way to live with the results, I built one.</p>
-    <div class="stat-line">
-      <b>200K</b><span>views on my photos</span>
-      <b>1,000+</b><span>downloads, including the shots behind my wallpaper app. Not bad for a side quest.</span>
-    </div>
+    <h2>It probably starts with curiosity.</h2>
+    <p>I&rsquo;ve always been curious about the world and the things that make it interesting. I like discovering new places, getting lost in unfamiliar streets, picking up a camera and noticing the little things most people walk past, or getting completely absorbed in a good anime and its world of characters and stories.</p>
+    <p>I like travelling without having every moment planned, leaving enough room for a wrong turn, an unexpected conversation, or a place I wasn&rsquo;t looking for.</p>
 
     <!-- the wall leaves the measure every other section holds — see .bleed.
          It stays inside the section because it belongs to this passage, and
          because the full-bleed offset resolves against .panel's 720px box. -->
     <div class="bleed">
       <div class="photo-grid">
-        <div class="photo ph-a" data-n="Photo 01"></div>
-        <div class="photo ph-b" data-n="Photo 02"></div>
-        <div class="photo ph-c" data-n="Photo 03"></div>
-        <div class="photo ph-d" data-n="Photo 04"></div>
-        <div class="photo ph-e" data-n="Photo 05"></div>
-        <div class="photo ph-f" data-n="Photo 06"></div>
-        <div class="photo ph-g" data-n="Photo 07"></div>
-        <div class="photo ph-h" data-n="Photo 08"></div>
-        <div class="photo ph-i" data-n="Photo 09"></div>
+        <div class="photo ph-a"></div>
+        <div class="photo ph-b"></div>
+        <div class="photo ph-c"></div>
+        <div class="photo ph-d"></div>
+        <div class="photo ph-e"></div>
+        <div class="photo ph-f"></div>
       </div>
     </div>
-
-    <!-- the fourth and last time the sentence appears, and the only time it is
-         not about work. Nothing introduces it; the reader gets there alone. -->
-    <p class="refrain">There's got to be a better way to do this.
-      <span class="turn">On a Sunday. About a wallpaper.</span></p>
   </section>
 
+  <!-- The passage's own last sentence, lifted out of it. It is the thesis of
+       the whole page — every movement below is a different answer to it — so it
+       gets the page's one display moment, staged straight onto the sky. Not a
+       quotation and not attributed: it is still Ajeet talking, just louder. -->
+  <div class="quote rv">
+    <p>I think I enjoy the feeling of discovering something more than I enjoy knowing exactly what I&rsquo;m going to find.</p>
+  </div>
+
+  <!-- Movement 2 · the contrast. Swimming and fitness are given as opposites
+       that meet in the middle, so they are set as opposites that meet in the
+       middle. The reconciling sentence is the only thing under both columns. -->
+  <section class="panel rv">
+    <h2>Maybe that&rsquo;s also why I like doing things that pull me into the moment.</h2>
+    <div class="pair">
+      <div>
+        <b>Swimming</b>
+        <p>gives me a rare kind of quiet, where there&rsquo;s nothing to focus on except breathing, rhythm, and movement.</p>
+      </div>
+      <div>
+        <b>Fitness</b>
+        <p>gives me something completely different&mdash;it reminds me that progress usually comes from showing up consistently, even when you don&rsquo;t feel like it.</p>
+      </div>
+    </div>
+    <p class="resolve">Somewhere between the two, I&rsquo;ve learned to appreciate both slowing down and pushing forward. I think that balance has become an important part of who I am.</p>
+  </section>
+
+  <!-- Movement 3 · where it lands. The shortest section on the page, and the
+       only one about work — which is the argument the header opened with. -->
+  <section class="panel rv">
+    <h2>And that curiosity eventually found its way into what I do.</h2>
+    <p>I like understanding how things work, questioning why they work that way, and turning ideas into something tangible.</p>
+    <p>Design became one of the ways I could explore that instinct, and now <strong>AI</strong> has made the space between having an idea and actually building it smaller than ever. I&rsquo;m constantly experimenting, learning, making things, breaking them, and trying again.</p>
+  </section>
+
+  <!-- The six labels are the page's structure said out loud: each movement above
+       was one or two of them. Nothing introduces the line, and nothing follows it
+       except the ask. -->
+  <div class="closer rv">
+    <p>I don&rsquo;t really see myself as just a <b>designer</b>, <b>photographer</b>, <b>traveller</b>, <b>fitness enthusiast</b>, <b>anime nerd</b>, or <b>builder</b>&mdash;they&rsquo;re all different pieces of the same person.</p>
+    <p class="coda">And I don&rsquo;t think I want to have everything figured out either. I&rsquo;d rather keep exploring, keep learning, and see where all these interests take me next.</p>
+  </div>
+
   <footer class="foot rv">
-    <h2>That's me. Now let's talk about you.</h2>
-    <p>Drop a &lsquo;hi&rsquo; and let's start cooking something together.</p>
+    <h2>That&rsquo;s me. Now let&rsquo;s talk about you.</h2>
+    <p>Drop a &lsquo;hi&rsquo; and let&rsquo;s start cooking something together.</p>
     <a class="mail" href="mailto:ajeet.kr646@gmail.com">
-      ajeet.kr646@gmail.com
+      Say hi
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M12 5l7 7-7 7"/></svg>
     </a>
-    <a class="back" href="index.html">Back to the journey</a>
+    <p class="addr">ajeet.kr646@gmail.com</p>
+    <a class="back" href="index.html">See the work &rarr;</a>
   </footer>
 
 </main>
@@ -624,17 +599,26 @@
   });
 
   var rv = [].slice.call(document.querySelectorAll('.rv'));
+  var timer;
   function tick() {
     var vh = innerHeight;
     for (var i = 0; i < rv.length; i++) {
-      var b = rv[i].getBoundingClientRect();
-      if (b.top < vh * 0.88 && b.bottom > 0) { rv[i].classList.add('in'); rv.splice(i, 1); i--; }
+      /* The `&& b.bottom > 0` term that used to be here meant "not scrolled past
+         yet". Any block already ABOVE the viewport when a tick fired failed it —
+         and since an element is only spliced out on SUCCESS, it was re-tested
+         forever against a condition it could never satisfy again, and stayed at
+         opacity 0 for the life of the page. Reload below the fold with the
+         browser's default scroll restoration, hit End, or come back through
+         history, and the top half of the page was blank sky with no recovery.
+         A block above the viewport has simply been reached: reveal it. */
+      if (rv[i].getBoundingClientRect().top < vh * 0.88) { rv[i].classList.add('in'); rv.splice(i, 1); i--; }
     }
+    if (!rv.length) { clearInterval(timer); removeEventListener('scroll', tick); removeEventListener('resize', tick); }
   }
   addEventListener('scroll', tick, { passive: true });
   addEventListener('resize', tick);
   tick();
-  setInterval(tick, 600);
+  timer = setInterval(tick, 600);
 })();
 </script>
 
