@@ -1560,6 +1560,7 @@ import { PROJECTS } from './gallery-assets.js';
   });
   scene.add(bolt);
   window.__adBolt = bolt;   // debug/verification hook: is lightning firing?
+  window.__adCam = camera;  // debug/verification hook: where is the camera
   function strike() {
     bolt.geometry.dispose(); bolt.geometry = boltGeometry();
     boltBranch.geometry.dispose(); boltBranch.geometry = boltGeometry();
@@ -1682,11 +1683,20 @@ import { PROJECTS } from './gallery-assets.js';
     // storm approach: dive under the advancing cloud front, then flare
     // level as the night settles. The storm is entered from 3 now, not 2.
     if (i === 3) { tmpPos.y -= Math.sin(fc * Math.PI) * 9; tmpLook.y -= Math.sin(fc * Math.PI) * 13; }
+    /* The cards own the pointer on the cloudline leg. Reaching for one used to
+       swing the whole sky with it, which fought the card's own hover, so the
+       camera's mouse parallax fades out across that scene and comes back on
+       either side of it. The idle drift stays either way — that is ambient,
+       not a response to the cursor. Held flat across the settled scene, since
+       S sits at exactly 3 for the whole of it. */
+    var mg = Math.min(Math.max((Math.abs(S - 3) - 0.12) / 0.5, 0), 1);
+    mg = mg * mg * (3 - 2 * mg);
     if (!REDUCED) {
-      tmpPos.x += Math.sin(T * 0.13) * 0.7 + mx * 1.4;
-      tmpPos.y += Math.sin(T * 0.17) * 0.5 - my * 1.0;
-      tmpLook.x += mx * 3.5; tmpLook.y -= my * 2.2;
+      tmpPos.x += Math.sin(T * 0.13) * 0.7 + mx * 1.4 * mg;
+      tmpPos.y += Math.sin(T * 0.17) * 0.5 - my * 1.0 * mg;
+      tmpLook.x += mx * 3.5 * mg; tmpLook.y -= my * 2.2 * mg;
     }
+    window.__adMouseGate = mg;   // verification hook
     if (S < 0.08 && bootProgress < 1) {
       camera.fov = lerp(40, baseFov, bootEase);
     } else {
