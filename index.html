@@ -332,7 +332,14 @@
   .case-open main, .case-open .sky-nav { visibility: hidden; pointer-events: none; }
   #case {
     position: fixed; inset: 0; z-index: 40;
-    opacity: 0; visibility: hidden; pointer-events: none;   /* see #bites */
+    /* pointer-events is the belt to visibility's braces. These overlays are
+       fixed inset 0 over the whole viewport, and closing them only stops them
+       swallowing clicks once `visibility: hidden` lands — which the transition
+       defers by 0.45s and, if it is ever interrupted or never fires, may not
+       land at all. That leaves a transparent sheet eating every CTA on the
+       page. While hidden the element cannot be hit anyway, so this costs
+       nothing when the transition behaves and rescues the page when it does not. */
+    opacity: 0; visibility: hidden; pointer-events: none;
     transform: translateY(22px) scale(0.985);
     transition: opacity .45s ease, transform .6s cubic-bezier(.2,.9,.25,1), visibility 0s linear .45s;
   }
@@ -353,7 +360,7 @@
     position: fixed; inset: 0; z-index: 42;
     overflow: hidden;                       /* the brief: this one does not scroll */
     background: #0a1020;
-    opacity: 0; visibility: hidden; pointer-events: none;   /* see #bites */
+    opacity: 0; visibility: hidden; pointer-events: none;   /* see #case */
     transform: translateY(22px) scale(0.985);
     transition: opacity .45s ease, transform .6s cubic-bezier(.2,.9,.25,1), visibility 0s linear .45s;
   }
@@ -398,146 +405,6 @@
     .aim-panel { grid-template-columns: 1fr; grid-template-rows: 42vh auto; align-content: center; gap: 26px; }
     .aim-shot { min-height: 0; height: 100%; }
     .aim-copy { justify-content: flex-start; }
-  }
-
-  /* ── quick bites: full-screen story player ─────────────────────────────── */
-  .bites-open, .bites-open body { overflow: hidden; }
-  .bites-open main, .bites-open .sky-nav { visibility: hidden; pointer-events: none; }
-  #bites {
-    position: fixed; inset: 0; z-index: 45;
-    background: #07080c;
-    display: grid; place-items: center;
-    opacity: 0; visibility: hidden;
-    /* pointer-events is the belt to visibility's braces. These overlays are
-       fixed inset 0 over the whole viewport, and closing them only stops them
-       swallowing clicks once `visibility: hidden` lands — which the transition
-       defers by 0.4s and, if it is ever interrupted or never fires, may not
-       land at all. That leaves a transparent sheet eating every CTA on the
-       page. While hidden the element cannot be hit anyway, so this costs
-       nothing when the transition behaves and rescues the page when it does not. */
-    pointer-events: none;
-    transition: opacity .4s ease, visibility 0s linear .4s;
-  }
-  #bites.on { opacity: 1; visibility: visible; pointer-events: auto; transition: opacity .4s ease, visibility 0s; }
-  /* edge to edge — the bite fills the viewport, no phone-shaped frame */
-  .bstage {
-    position: relative; overflow: hidden;
-    width: 100vw; height: 100dvh; background: #11131a;
-  }
-  /* segmented progress — one bar per bite, filled by rAF (pausable) */
-  .bprog {
-    position: absolute; top: 0; left: 0; right: 0; z-index: 4;
-    display: flex; gap: 5px; padding: 16px clamp(16px, 3vw, 30px) 0;
-  }
-  .bprog i { flex: 1; height: 3px; border-radius: 999px; background: rgba(255, 255, 255, 0.32); overflow: hidden; }
-  .bprog i b { display: block; width: 0; height: 100%; border-radius: 999px; background: #fff; }
-  .bites-close {
-    position: absolute; top: 34px; right: clamp(16px, 3vw, 30px); z-index: 5;
-    width: 42px; height: 42px; border: 0; border-radius: 999px; cursor: pointer;
-    display: grid; place-items: center; color: #fff;
-    background: rgba(12, 16, 26, 0.45);
-    backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
-    transition: transform .35s cubic-bezier(.2,.9,.25,1), background .25s ease;
-  }
-  .bites-close:hover { background: rgba(12, 16, 26, 0.75); transform: rotate(90deg); }
-  /* opening focuses this button for keyboard/SR users — keep the ring for them only */
-  .bites-close:focus:not(:focus-visible) { outline: none; }
-  .bites-close svg { width: 18px; height: 18px; }
-  .bslide { position: absolute; inset: 0; opacity: 0; visibility: hidden; transition: opacity .35s ease; }
-  .bslide.on { opacity: 1; visibility: visible; }
-  /* placeholder art — swap the .bimg div for a real img.bimg when shots land */
-  /* width/height 100% are required, not redundant with inset:0 — an
-     absolutely positioned REPLACED element takes its intrinsic size when
-     width is auto, so inset alone will not stretch it. Without these the
-     swap from placeholder div to real image silently breaks. */
-  /* contain, not cover: these shots are wide desktop UI composed with their own
-     generous margins, and cover both cropped the panels mid-word and upscaled a
-     2400px source past native on retina (~1.27x at 1512 CSS px, DPR 2). The
-     grounds are flat, so a matching per-slide background hides the letterbox. */
-  .bimg {
-    position: absolute; inset: 0; width: 100%; height: 100%;
-    display: grid; place-items: center; object-fit: contain; object-position: center;
-  }
-  .bimg::after {
-    content: 'Image'; font-size: 12px; font-weight: 700;
-    letter-spacing: 0.18em; text-transform: uppercase; color: rgba(255, 255, 255, 0.8);
-  }
-  /* short enough to seat the progress bar and close button, nothing more */
-  .bslide::before {
-    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 96px; z-index: 1;
-    background: linear-gradient(to bottom, rgba(4, 6, 12, 0.42), transparent);
-    pointer-events: none;
-  }
-  /* g1–g3 are sampled from each shot's own flat ground so the contain letterbox
-     reads as part of the image; they also back the img while the file loads */
-  .g1 { background: #e5ecf4; }
-  .g2 { background: #86897e; }
-  .g3 { background: #eaf4fe; }
-  .g4 { background: linear-gradient(150deg, #e8d5ff, #b98cf5 55%, #8a6bf7); }
-  .g5 { background: linear-gradient(150deg, #ffe6a6, #f7a56b 55%, #e0625f); }
-  /* copy sits above the tap zones but stays click-through */
-  .btext {
-    position: absolute; left: 0; right: 0; bottom: 0; z-index: 3;
-    padding: clamp(44px, 9vh, 104px) clamp(22px, 5vw, 84px) clamp(34px, 7vh, 74px);
-    color: #fff; pointer-events: none;
-    /* a band that hugs the copy, not a wash over the frame — but it stays near
-       opaque at the foot because two of the three grounds are near white and
-       the white type has nothing else to sit against */
-    background: linear-gradient(to top, rgba(4, 6, 12, 0.94), rgba(4, 6, 12, 0.72) 46%, transparent);
-  }
-  /* measure stays readable even when the slide is 1440px wide */
-  .btext > * { max-width: 46ch; }
-  .btext .bk { font-size: clamp(11px, 1vw, 13px); font-weight: 800; letter-spacing: 0.2em; text-transform: uppercase; color: rgba(255, 255, 255, 0.72); }
-  .btext h3 { font-size: clamp(26px, 4.2vw, 54px); font-weight: 800; letter-spacing: -0.032em; line-height: 1.08; margin: 12px 0 10px; }
-  .btext p { font-size: clamp(15px, 1.5vw, 19px); line-height: 1.55; color: rgba(255, 255, 255, 0.8); margin: 0; }
-  /* tap zones: divs, not buttons — the real controls are the arrows + keys */
-  .bnav { position: absolute; inset: 0; z-index: 2; display: flex; }
-  .bz { cursor: pointer; -webkit-tap-highlight-color: transparent; }
-  .bz-prev { flex: 0 0 32%; }
-  .bz-next { flex: 1; }
-  /* arrows ride on top of the full-bleed slide, inset from the edges */
-  .barrow {
-    position: absolute; top: 50%; margin-top: -26px; z-index: 4;
-    width: 52px; height: 52px; border: 0; border-radius: 999px; cursor: pointer;
-    display: grid; place-items: center; color: #fff;
-    background: rgba(12, 16, 26, 0.4);
-    backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
-    transition: background .25s ease, transform .3s cubic-bezier(.2,.9,.25,1);
-  }
-  .barrow:hover { background: rgba(12, 16, 26, 0.72); }
-  .barrow svg { width: 20px; height: 20px; }
-  .b-prev-o { left: clamp(14px, 2.6vw, 38px); }
-  .b-next-o { right: clamp(14px, 2.6vw, 38px); }
-  .b-next-o:hover { transform: translateX(2px); }
-  .b-prev-o:hover { transform: translateX(-2px); }
-  @media (prefers-reduced-motion: no-preference) {
-    /* slow drift so a held frame still feels alive — placeholder gradients only.
-       On a real screenshot the 1.06 resample smears the 11px UI labels, which is
-       the whole subject, so photographed slides hold still. */
-    .bslide.on div.bimg { animation: bzoom 7s linear both; }
-    @keyframes bzoom { from { transform: scale(1); } to { transform: scale(1.06); } }
-  }
-  @media (max-width: 760px) {
-    /* Stopgap until portrait-framed exports exist. contain would fit a 16:9
-       desktop shot into a ~390x219 strip adrift in the ground colour, so crop
-       back to cover here and aim each shot at the part that still reads: at
-       390px only ~26% of the source width survives, and centre is rarely it. */
-    img.bimg { object-fit: cover; }
-    img.g1 { object-position: 48% center; }   /* the middle phone, amber state */
-    img.g2 { object-position: 58% center; }   /* 2nd window: sidebar + run table */
-    img.g3 { object-position: 7% center; }    /* volume config + connector list */
-    /* cover means copy lands on live UI here, not on the empty ground it falls
-       on at desktop width, so the band needs its runway back — and its foot has
-       to go effectively solid, since 0.94 over a white ledger row still ghosts
-       through behind the headline */
-    .btext {
-      padding-top: clamp(90px, 21vh, 200px);
-      background: linear-gradient(to top, rgba(4, 6, 12, 0.99), rgba(4, 6, 12, 0.96) 44%, rgba(4, 6, 12, 0.5) 72%, transparent);
-    }
-    .barrow { display: none; }   /* tap zones and swipe carry navigation here */
-    .btext { padding-bottom: calc(34px + env(safe-area-inset-bottom)); }
-    .bprog { padding-top: calc(16px + env(safe-area-inset-top)); }
-    .bites-close { top: calc(34px + env(safe-area-inset-top)); }
   }
 
   /* ── 2 · work (blue sky, stacking deck) ─────────────────────────────── */
@@ -601,10 +468,10 @@
     display: grid; place-items: center; overflow: hidden;
     transition: transform .6s cubic-bezier(.2,.9,.25,1);
   }
-  /* Same trap as .bimg: .art is a stretched grid item, but `align-self: stretch`
-     does not stretch a REPLACED element that has its own intrinsic size, so an
-     img.art would collapse to its natural box. width/height 100% are doing
-     real work here, not duplicating the stretch. */
+  /* .art is a stretched grid item, but `align-self: stretch` does not stretch a
+     REPLACED element that has its own intrinsic size, so an img.art would
+     collapse to its natural box. width/height 100% are doing real work here,
+     not duplicating the stretch. */
   img.art { width: 100%; height: 100%; object-fit: cover; object-position: center; }
   .pcard .art::after {
     content: 'Image'; font-size: 12px; font-weight: 700;
@@ -615,46 +482,6 @@
   .art-b { background: linear-gradient(120deg, #a6d8ff, #6c9dff 55%, #7b6bf7); }
   .art-c { background: linear-gradient(120deg, #c3f0c8, #6cc9a4 55%, #3f9d8a); }
   .art-d { background: linear-gradient(120deg, #e8d5ff, #b98cf5 55%, #8a6bf7); }
-
-  /* quick-bites pill — its own fixed element, outside the deck's flow entirely.
-     It never scrolls with the cards: JS parks it at the settled card's bottom
-     edge and fades it in a beat after card 04 lands, then out when that card
-     unpins. `top` is measured on load/resize, never per frame. */
-  .bites-wrap {
-    position: fixed; left: 0; right: 0; z-index: 6;
-    top: var(--bites-top, calc(13vh + 42px + 592px));
-    display: flex; justify-content: center; align-items: flex-start;
-    pointer-events: none;                      /* only the pill itself is clickable */
-    opacity: 0; visibility: hidden; transform: translateY(14px);
-    transition: opacity .55s ease, transform .65s cubic-bezier(.2,.9,.25,1), visibility 0s linear .55s;
-  }
-  .bites-wrap.on {
-    opacity: 1; visibility: visible; transform: none;
-    transition: opacity .55s ease, transform .65s cubic-bezier(.2,.9,.25,1), visibility 0s;
-  }
-  .bites-pill {
-    pointer-events: auto;
-    display: inline-flex; align-items: center; gap: 18px;
-    padding: 17px 30px 17px 26px; border-radius: 999px; cursor: pointer;
-    font: inherit; text-align: left; color: #fff;
-    background: #0a0e14; border: 0;
-    box-shadow: 0 22px 50px -18px rgba(6, 14, 28, 0.6);
-    transition: transform .35s cubic-bezier(.2,.9,.25,1), box-shadow .35s ease;
-  }
-  .bites-pill:hover { transform: translateY(-3px); box-shadow: 0 30px 62px -20px rgba(6, 14, 28, 0.72); }
-  .bites-pill:active { transform: translateY(-1px); }
-  .bp-icon { flex: none; display: grid; place-items: center; color: #3f8cff; }
-  .bp-icon svg { width: 27px; height: 27px; }
-  .bp-copy { display: flex; flex-direction: column; gap: 4px; }
-  .bp-h { font-size: 21px; font-weight: 800; letter-spacing: -0.022em; line-height: 1.1; }
-  .bp-s { font-size: 15px; font-weight: 500; color: rgba(255, 255, 255, 0.66); line-height: 1.1; }
-  .bp-arrow {
-    display: grid; place-items: center; color: rgba(255, 255, 255, 0.6);
-    margin-left: clamp(18px, 2.4vw, 40px);
-    transition: transform .35s cubic-bezier(.2,.9,.25,1);
-  }
-  .bp-arrow svg { width: 19px; height: 19px; }
-  .bites-pill:hover .bp-arrow { transform: translateX(3px); color: #fff; }
 
   /* ── 3 · building with AI (storm) ───────────────────────────────────── */
   /* ── 3 · cloudline (golden hour above the deck) ──────────────────────────
@@ -698,6 +525,12 @@
     min-height: 62vh; cursor: grab; touch-action: pan-y;
   }
   #s-cloudline .stage:active { cursor: grabbing; }
+  /* reachable by screen readers, absent for everyone else */
+  .sr-only {
+    position: absolute; width: 1px; height: 1px; margin: -1px;
+    padding: 0; border: 0; overflow: hidden; white-space: nowrap;
+    clip: rect(0 0 0 0); clip-path: inset(50%);
+  }
   #s-ai { display: block; padding: 26vh 5vw 20vh; color: var(--ink-light); }
   #s-ai .wrap { max-width: 1060px; margin: 0 auto; }
   /* Centred to match #s-work and #s-contact — this was the one section header
@@ -917,13 +750,6 @@
       padding: 26px 22px; gap: 22px; align-items: start;
     }
     .pcard .art { min-height: 190px; }
-    /* the pill has to fit inside a 390px card */
-    .bites-pill { gap: 13px; padding: 13px 22px 13px 19px; }
-    .bp-icon svg { width: 23px; height: 23px; }
-    .bp-h { font-size: 17px; }
-    .bp-s { font-size: 13px; }
-    .bp-arrow { margin-left: 14px; }
-    .bp-arrow svg { width: 17px; height: 17px; }
     /* nav: compact centred pill + drop-down sheet (the full link row overflowed at 390px) */
     .sky-nav {
       left: 50%; right: auto; transform: translateX(-50%);
@@ -974,8 +800,7 @@
   }
   /* #instant mode (reduced motion / capture probes): reveals snap, no tween */
   .sky-instant .reveal { transition: none !important; }
-  .sky-instant #bites, .sky-instant .bslide, .sky-instant #case,
-  .sky-instant .bites-wrap, .sky-instant #ai-modal,
+  .sky-instant #case, .sky-instant #ai-modal,
   .sky-instant .aim-panel { transition: none !important; }
 </style>
 </head>
@@ -1161,22 +986,6 @@
       </article>
       <div class="stack-tail" aria-hidden="true"></div>
     </div>
-    <!-- its own fixed element — parked at the settled card's bottom edge, shown
-         on a timer once card 04 lands, never moved by scrolling -->
-    <div class="bites-wrap">
-      <button class="bites-pill" id="bites-open" type="button" aria-haspopup="dialog">
-        <span class="bp-icon" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M13.5 2 4 13.8h6.2L9.4 22 20 9.7h-6.4z"/></svg>
-        </span>
-        <span class="bp-copy">
-          <span class="bp-h">Explore Quick Bites</span>
-          <span class="bp-s">Few work highlights</span>
-        </span>
-        <span class="bp-arrow" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M12 5l7 7-7 7"/></svg>
-        </span>
-      </button>
-    </div>
   </section>
 
   <!-- 3 · cloudline · open blue between the work sky and the storm.
@@ -1190,6 +999,15 @@
         <p class="sub reveal">and here&rsquo;s a few quick bites&hellip;</p>
       </header>
       <div class="stage" aria-hidden="true"></div>
+      <!-- The stage is a WebGL canvas, so its cards carry no text for a screen
+           reader. The removed bites player described each of these shots; the
+           work did not become decorative when it moved onto the carousel, so
+           the descriptions come with it. -->
+      <ul class="sr-only">
+        <li>Three phone screens showing a driver cash-balance ledger in green, amber and red states, each with a deposit prompt.</li>
+        <li>Two views of a prompt-ops console for an airline support agent &mdash; a filtered run log with success, failure and pending states, and a trace timeline opened to one span&rsquo;s input, output and metadata.</li>
+        <li>Two payment routing setup screens &mdash; a volume-based configuration splitting traffic across Adyen, Stripe and Authorize.net by percentage, and a rule-based builder with conditions and fallback routing.</li>
+      </ul>
     </div>
   </section>
 
@@ -1456,212 +1274,6 @@
   })();
 </script>
 
-<!-- Quick bites: full-screen story player, one edge-to-edge .bslide per bite.
-     Swap the .bimg div for <img class="bimg" src="…"> once the shots exist. -->
-<div id="bites" role="dialog" aria-modal="true" aria-label="Quick bites" aria-hidden="true">
-  <button class="barrow b-prev-o" type="button" aria-label="Previous bite">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>
-  </button>
-
-  <div class="bstage">
-    <div class="bprog" aria-hidden="true">
-      <i><b></b></i><i><b></b></i><i><b></b></i><i><b></b></i><i><b></b></i>
-    </div>
-    <button class="bites-close" type="button" aria-label="Close quick bites">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
-    </button>
-
-    <!-- g1 stays on the img: its gradient shows as the backdrop while the
-         file loads, and fills the letterbox if a viewport ever out-runs cover.
-         src is held in data-src and swapped in on open — see hydrate() below. -->
-    <div class="bslide"><img class="bimg g1" data-src="images/bite-cash-ledger.jpg" alt="Three phone screens showing a driver cash-balance ledger in green, amber and red states, each with a deposit prompt" decoding="async"><div class="btext">
-      <span class="bk">Quick bite 01</span>
-      <h3>Project name</h3>
-      <p>One line of context: what it was and what changed.</p>
-    </div></div>
-
-    <div class="bslide"><img class="bimg g2" data-src="images/bite-prompt-logs.jpg" alt="Two views of a prompt-ops console for an airline support agent — a filtered run log with success, failure and pending states, and a trace timeline opened to one span's input, output and metadata" decoding="async"><div class="btext">
-      <span class="bk">Quick bite 02</span>
-      <h3>Project name</h3>
-      <p>One line of context: what it was and what changed.</p>
-    </div></div>
-
-    <div class="bslide"><img class="bimg g3" data-src="images/bite-routing-config.jpg" alt="Two payment routing setup screens — a volume-based configuration splitting traffic across Adyen, Stripe and Authorize.net by percentage, and a rule-based builder with conditions and fallback routing" decoding="async"><div class="btext">
-      <span class="bk">Quick bite 03</span>
-      <h3>Project name</h3>
-      <p>One line of context: what it was and what changed.</p>
-    </div></div>
-
-    <div class="bslide"><div class="bimg g4"></div><div class="btext">
-      <span class="bk">Quick bite 04</span>
-      <h3>Project name</h3>
-      <p>One line of context: what it was and what changed.</p>
-    </div></div>
-
-    <div class="bslide"><div class="bimg g5"></div><div class="btext">
-      <span class="bk">Quick bite 05</span>
-      <h3>Project name</h3>
-      <p>One line of context: what it was and what changed.</p>
-    </div></div>
-
-    <div class="bnav" aria-hidden="true"><div class="bz bz-prev"></div><div class="bz bz-next"></div></div>
-  </div>
-
-  <button class="barrow b-next-o" type="button" aria-label="Next bite">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg>
-  </button>
-</div>
-<script>
-  (function () {
-    var layer = document.getElementById('bites');
-    var pill = document.getElementById('bites-open');
-    if (!layer || !pill) return;
-
-    var stage = layer.querySelector('.bstage');
-    var slides = Array.prototype.slice.call(layer.querySelectorAll('.bslide'));
-    var bars = Array.prototype.slice.call(layer.querySelectorAll('.bprog b'));
-    var closeBtn = layer.querySelector('.bites-close');
-    var DUR = 6000;                       // auto-advance per bite
-    var REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-    var i = -1, elapsed = 0, last = 0, raf = 0;
-    var live = false, paused = false, lastY = 0;
-
-    /* The layer is fixed + inset 0 and merely visibility:hidden, so the browser
-       counts it as in-viewport and would fetch every bite image on first paint —
-       ~700 KB for a deck behind a click, and loading="lazy" won't defer it for
-       the same reason. Each img holds its URL in data-src until its slide comes
-       up; the neighbour is pulled in behind it, so the 6 s dwell covers the next
-       load and only the first bite is ever waited on. */
-    function hydrate(n) {
-      var slide = slides[n];
-      if (!slide) return;
-      var img = slide.querySelector('img[data-src]');
-      if (!img) return;                              // hydrated already, or still a placeholder
-      img.src = img.getAttribute('data-src');
-      img.removeAttribute('data-src');
-    }
-
-    function show(n) {
-      if (n < 0) n = 0;
-      if (n >= slides.length) { close(); return; }   // past the last bite → out
-      if (i >= 0 && slides[i]) slides[i].classList.remove('on');
-      i = n;
-      hydrate(i); hydrate(i + 1);
-      slides[i].classList.add('on');
-      bars.forEach(function (b, k) { b.style.width = k < i || REDUCED && k === i ? '100%' : '0%'; });
-      elapsed = 0; last = performance.now();
-    }
-    function tick(now) {
-      raf = requestAnimationFrame(tick);
-      if (!live || REDUCED) return;
-      if (paused || document.hidden) { last = now; return; }   // hold → freeze the bar
-      elapsed += now - last; last = now;
-      var p = elapsed / DUR;
-      if (p >= 1) { show(i + 1); return; }
-      bars[i].style.width = (p * 100) + '%';
-    }
-
-    function open() {
-      lastY = scrollY; live = true; paused = false;
-      document.documentElement.classList.add('bites-open');
-      layer.classList.add('on');
-      layer.setAttribute('aria-hidden', 'false');
-      i = -1; show(0);
-      cancelAnimationFrame(raf); raf = requestAnimationFrame(tick);
-      closeBtn.focus();
-    }
-    function close() {
-      live = false; cancelAnimationFrame(raf); raf = 0;
-      layer.classList.remove('on');
-      layer.setAttribute('aria-hidden', 'true');
-      document.documentElement.classList.remove('bites-open');
-      scrollTo({ top: lastY, behavior: 'instant' });   // land back on the pill
-      pill.focus();
-    }
-
-    pill.addEventListener('click', open);
-    closeBtn.addEventListener('click', close);
-    layer.querySelector('.b-prev-o').addEventListener('click', function () { show(i - 1); });
-    layer.querySelector('.b-next-o').addEventListener('click', function () { show(i + 1); });
-
-    /* press-and-hold pauses; a quick tap navigates; a drag swipes.
-       One pointer pass drives all three so a swipe never also fires the zone. */
-    var px = 0, pt = 0, swiped = false;
-    stage.addEventListener('pointerdown', function (e) {
-      px = e.clientX; pt = Date.now(); swiped = false; paused = true;
-    });
-    stage.addEventListener('pointermove', function (e) {
-      if (paused && Math.abs(e.clientX - px) > 40) swiped = true;
-    });
-    addEventListener('pointerup', function (e) {
-      if (!live || !paused) return;
-      paused = false;
-      if (swiped) show(e.clientX < px ? i + 1 : i - 1);
-    });
-    addEventListener('pointercancel', function () { paused = false; });
-
-    layer.querySelector('.bz-prev').addEventListener('click', function () { if (tapped()) show(i - 1); });
-    layer.querySelector('.bz-next').addEventListener('click', function () { if (tapped()) show(i + 1); });
-    function tapped() { return !swiped && Date.now() - pt < 400; }   // not a swipe, not a hold
-
-    addEventListener('keydown', function (e) {
-      if (!live) return;
-      if (e.key === 'Escape') close();
-      else if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); show(i + 1); }
-      else if (e.key === 'ArrowLeft') { e.preventDefault(); show(i - 1); }
-    });
-
-    /* ── the pill: settled-then-delayed, never scroll-linked ────────────────
-       Card 04 has landed once it has reached its sticky offset and is still
-       mostly on screen. That flips a timer, not a position: the pill fades in
-       DELAY ms later and fades out when the card leaves. Nothing here moves
-       with the scroll — the resting `top` is measured on load/resize only. */
-    var wrap = pill.parentNode;
-    var cards = document.querySelectorAll('.stack .pcard');
-    var lastCard = cards[cards.length - 1];
-    var DELAY = 650;
-    var landed = false, showTimer = 0, restTop = 0;
-
-    function sizeBites() {
-      if (!lastCard) return;
-      /* Read the card's OWN resolved sticky offset. Deriving it as
-         innerHeight * 0.13 + peek looks equivalent to calc(13vh + var(--peek))
-         but drifts under browser zoom, and on mobile vh tracks the large
-         viewport while innerHeight tracks the visible one — the pill then never
-         registers as landed. Fall back to the arithmetic only if `top` is auto. */
-      var cs = getComputedStyle(lastCard), t = parseFloat(cs.top);
-      restTop = isFinite(t) ? t : innerHeight * 0.13 + (parseFloat(cs.getPropertyValue('--peek')) || 0);
-      var edge = restTop + lastCard.offsetHeight - 8;
-      // a card taller than the viewport would push the pill off the bottom
-      wrap.style.setProperty('--bites-top', Math.round(Math.min(edge, innerHeight - 104)) + 'px');
-    }
-
-    function checkLanded() {
-      if (!lastCard) return;
-      var r = lastCard.getBoundingClientRect();
-      /* Landed = the card has reached its sticky offset and is still mostly on
-         screen. A range, not an equality: subpixel rounding must not decide it. */
-      var isLanded = r.top <= restTop + 4 && r.bottom > restTop + 200;
-      if (isLanded === landed) return;
-      landed = isLanded;
-      clearTimeout(showTimer);
-      if (landed) {
-        sizeBites();
-        showTimer = setTimeout(function () { wrap.classList.add('on'); }, DELAY);
-      } else {
-        wrap.classList.remove('on');
-      }
-    }
-
-    addEventListener('scroll', checkLanded, { passive: true });
-    addEventListener('resize', function () { sizeBites(); checkLanded(); });
-    addEventListener('load', sizeBites);   // webfonts can still resize the card
-    setInterval(checkLanded, 250);         // also covers landings with no scroll event
-    sizeBites();
-    checkLanded();
-  })();
-</script>
 
 <script src="js/anime.min.js"></script>
 <script>
@@ -1725,7 +1337,7 @@
       .add({ duration: 1500, complete: finish });
   })();
 </script>
-<script type="module" src="js/sky.js?v=100"></script>
+<script type="module" src="js/sky.js?v=102"></script>
 <script>
   /* nav active state — rect-based like the reveals (IO never fires in captures) */
   (function () {

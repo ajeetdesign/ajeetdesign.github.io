@@ -1630,6 +1630,10 @@ import { PROJECTS } from './gallery-assets.js';
     var gf = 0, gsec = document.getElementById('s-cloudline');
     if (gsec) {
       var gr = gsec.getBoundingClientRect();
+      /* Fetch the card artwork a viewport and a half out, so it is decoded by
+         the time the leg arrives without costing the initial load. hydrate()
+         is idempotent, so calling it every frame from here is free. */
+      if (gr.top < innerHeight * 2.5) gallery.hydrate();
       var shown = Math.min(gr.bottom, innerHeight) - Math.max(gr.top, 0);
       var vis = Math.min(Math.max(shown / Math.min(gr.height, innerHeight), 0), 1);
       /* A gate, not a dimmer. Tying opacity straight to how much of the section

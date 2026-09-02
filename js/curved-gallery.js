@@ -31,7 +31,11 @@
       CDN on every page load, so the throw is written out below. The easing is
       the same curve.                                                        */
 
-import { TW, TH } from './gallery-assets.js';
+/* The card's own aspect, not the reference's canvas size. The procedural art
+   was drawn at 1152x712 (1.62) onto a 1.70 card and quietly stretched to fit;
+   a photograph of real UI cannot absorb that, so the backing canvas matches
+   the card and the shot is cover-cropped into it instead. */
+const CW = 1600, CH = Math.round(CW * 3.3 / 5.6);
 
 /* --- layout constants (verbatim) --- */
 const PW = 5.6, PH = 3.3, GAP = 0.28, STEP = PW + GAP;
@@ -137,29 +141,67 @@ const fsh = `
        depth; over a bright sky it reads as dirt, so it comes up again. */
     float bright = mix(0.84, 1.0, smoothstep(0.03, 0.85, vB));
     bright = min(bright + uHover * 0.12, 1.05);
-    /* The other half: the artwork itself is drawn for a dark page — several of
-       these are black rooms and midnight scenes — so scaling it up only made
-       a dark image brighter, still muddy. A gamma lift opens the shadows and
-       midtones instead and leaves the highlights where they are, which is
-       what actually gets the colour back. */
-    vec3 col = pow(tex.rgb, vec3(0.78)) * bright;
+    /* No gamma lift any more. It was here because the reference's artwork was
+       drawn for a dark page — black rooms and midnight scenes that only went
+       muddy when scaled. These are bright shots of real UI on near-white
+       ground, where lifting the midtones just flattens them against the
+       background and costs the 11px labels their contrast. */
+    vec3 col = tex.rgb * bright;
     col *= 1.0 - vPress * 0.14;           // soft shadow inside the press dent
     col *= 1.0 - 0.06 * length(vUv - 0.5);   // vignette eased for the same reason
     gl_FragColor = vec4(col, alpha * uFade);
   }
 `;
 
-/* the original's makeTexture, unchanged apart from taking anisotropy as an
-   argument instead of reaching for its own renderer */
+/* One texture per distinct file. The card list repeats the same three shots to
+   keep the carousel's loop long, and decoding a 2400x1350 JPEG once per copy
+   would cost three times the memory for identical pixels. */
+const texCache = new Map();
+let pending = [];
+
 function makeTexture(THREE, p, maxAniso) {
+  if (texCache.has(p.src)) return texCache.get(p.src);
+
   const c = document.createElement('canvas');
-  c.width = TW; c.height = TH;
-  p.draw(c.getContext('2d'), TW, TH);
+  c.width = CW; c.height = CH;
+  const ctx = c.getContext('2d');
+  /* The card is drawn before the JPEG arrives, so the canvas starts on the
+     shots' own near-white ground rather than transparent black — otherwise a
+     card entering frame flashes dark before its image lands. */
+  ctx.fillStyle = '#e8eef5';
+  ctx.fillRect(0, 0, CW, CH);
+
   const t = new THREE.CanvasTexture(c);
   if (maxAniso) t.anisotropy = maxAniso;
   t.minFilter = THREE.LinearFilter;
   t.wrapS = t.wrapT = THREE.ClampToEdgeWrapping;
+
+  /* Deferred, not fetched here. The gallery is built during page init but its
+     section is most of a page down, and these are ~250KB each — the story
+     player they came from held them in data-src for the same reason. hydrate()
+     assigns the srcs once the leg is actually approaching. */
+  pending.push(function () {
+    const img = new Image();
+    img.decoding = 'async';
+    img.onload = function () {
+      // cover: crop the long edge rather than squashing a screenshot to fit
+      const s = Math.max(CW / img.width, CH / img.height);
+      const w = img.width * s, h = img.height * s;
+      ctx.drawImage(img, (CW - w) / 2, (CH - h) / 2, w, h);
+      t.needsUpdate = true;
+    };
+    img.src = p.src;
+  });
+
+  texCache.set(p.src, t);
   return t;
+}
+
+/* Runs each deferred fetch exactly once, however many times it is called. */
+function hydrate() {
+  const q = pending;
+  pending = [];
+  q.forEach(function (fn) { fn(); });
 }
 
 export function createGallery(THREE, cards, maxAniso) {
@@ -365,7 +407,7 @@ export function createGallery(THREE, cards, maxAniso) {
     }
   }
 
-  return { rig, wall, screens, place, update, bindDrag, setEntrance,
+  return { rig, wall, screens, place, update, bindDrag, setEntrance, hydrate,
            hoveredIndex: function () { return hovered; },
            dragged: function () { return dragMoved; },
            state: state, PW, PH, STEP };
