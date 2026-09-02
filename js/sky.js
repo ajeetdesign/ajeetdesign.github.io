@@ -137,9 +137,11 @@ import { PROJECTS } from './gallery-assets.js';
   var gallery = createGallery(THREE, PROJECTS,
     Math.min(8, renderer.capabilities.getMaxAnisotropy()));
   window.__gallery = gallery;                       // verification hook
-  /* dropped a little over half a card so the wall clears the line of copy
-     without leaving the frame */
-  gallery.place(K[3].p, K[3].l, camera.fov, 1.25);
+  /* The cards are placed off the camera's sight line, not laid out in the DOM,
+     so the section's sticky centring does not move them — this is what
+     centres them in the viewport. Just under half a card down, which leaves
+     the line sitting above the wall rather than on it. */
+  gallery.place(K[3].p, K[3].l, camera.fov, 0.42);
   gallery.rig.visible = false;
   var galRamp = 0;   // eases the cards in behind the section's line
   scene.add(gallery.rig);

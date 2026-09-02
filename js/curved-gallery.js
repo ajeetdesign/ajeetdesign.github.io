@@ -131,11 +131,15 @@ const fsh = `
     if (alpha < 0.01) discard;
     // brightness = horizontal falloff from the same focus, wider than the bulge,
     // so a card fades smoothly across its own width as it moves away
-    float bright = mix(0.2, 1.0, smoothstep(0.03, 0.85, vB));
+    /* 0.2 was right against the source's near-black page, where an off-focus
+       card fading to a fifth reads as depth. Over a bright sky the same value
+       reads as dirty, so the floor comes up — the falloff still shapes the
+       wall, it just no longer sinks the outer cards into mud. */
+    float bright = mix(0.62, 1.0, smoothstep(0.03, 0.85, vB));
     bright = min(bright + uHover * 0.12, 1.05);
     vec3 col = tex.rgb * bright;
     col *= 1.0 - vPress * 0.14;           // soft shadow inside the press dent
-    col *= 1.0 - 0.15 * length(vUv - 0.5);
+    col *= 1.0 - 0.06 * length(vUv - 0.5);   // vignette eased for the same reason
     gl_FragColor = vec4(col, alpha * uFade);
   }
 `;

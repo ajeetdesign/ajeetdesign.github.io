@@ -660,8 +660,18 @@
   /* The camera pitches up here, so the header sits against deep blue and the
      warm band and cloud deck fall to the lower frame where the cards go —
      light ink, like the other two sections that sit on a dark sky. */
-  #s-cloudline { display: block; padding: 26vh 5vw 20vh; color: var(--ink-light); }
-  #s-cloudline .wrap { max-width: 1060px; margin: 0 auto; }
+  /* Tall, with the content pinned to the middle of the viewport for the whole
+     of it. Two things needed this. The leg had 73px of settled sky before the
+     storm transition began — the section was so short that the next leg
+     started almost the moment it arrived — and the content sat high rather
+     than centred. A sticky block inside a tall section fixes both: the sky
+     holds blue for a viewport and a half, and the line and cards stay put in
+     the middle while it does. */
+  #s-cloudline { display: block; min-height: 235vh; padding: 0 5vw; color: var(--ink-light); }
+  #s-cloudline .wrap {
+    position: sticky; top: 50vh; transform: translateY(-50%);
+    max-width: 1060px; margin: 0 auto;
+  }
   #s-cloudline header { text-align: center; }
   #s-cloudline .label { color: #bcdcff; }  /* cool, now that the sun is gone */
   #s-cloudline h2 {
@@ -680,7 +690,9 @@
      through — and is the surface the gallery is dragged on, since the sky
      canvas sits behind the page and never sees the pointer. */
   #s-cloudline .stage {
-    min-height: 52vh; cursor: grab; touch-action: pan-y;
+    /* covers where the cards actually are, so the drag surface sits over them;
+       its height also balances the sticky block around the line */
+    min-height: 62vh; cursor: grab; touch-action: pan-y;
   }
   #s-cloudline .stage:active { cursor: grabbing; }
   #s-ai { display: block; padding: 26vh 5vw 20vh; color: var(--ink-light); }
@@ -1709,7 +1721,7 @@
       .add({ duration: 1500, complete: finish });
   })();
 </script>
-<script type="module" src="js/sky.js?v=92"></script>
+<script type="module" src="js/sky.js?v=95"></script>
 <script>
   /* nav active state — rect-based like the reveals (IO never fires in captures) */
   (function () {
