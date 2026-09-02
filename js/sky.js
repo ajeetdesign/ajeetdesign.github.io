@@ -38,7 +38,13 @@ import { PROJECTS } from './gallery-assets.js';
     var cores = navigator.hardwareConcurrency || 4;
     var mem = navigator.deviceMemory || 4;
     if ((coarse && narrow) || cores <= 4 || mem <= 3) return 'low';
-    if (coarse || cores <= 8 || devicePixelRatio > 2.5) return 'medium';
+    /* `cores <= 8` used to sit here and it was the wrong proxy: every
+       M-series Mac reports exactly 8, so all of them rendered at 1.5x and
+       had it upscaled onto a 2x screen. That 25% linear deficit is what
+       reads as a pixelated scene. Capability is now measured rather than
+       guessed — see the adaptive resolution below — so this only has to
+       catch the genuinely small stuff. */
+    if (coarse || cores <= 6 || devicePixelRatio > 2.5) return 'medium';
     return 'high';
   })();
   // Tuft counts are deliberately TINY. A dense instanced field reads as
@@ -51,7 +57,32 @@ import { PROJECTS } from './gallery-assets.js';
     low:    { dpr: 1,   tufts: 9,  shadow: 0 }
   }[QUALITY];
   window.__adQ = QUALITY; // verification hook
-  renderer.setPixelRatio(Math.min(devicePixelRatio, Q.dpr));
+  /* ── adaptive resolution ──────────────────────────────────────────────
+     Start at the full ratio the tier allows and let measured frame time
+     decide whether to give any of it back. A device that can hold the
+     frame keeps every pixel; one that cannot steps down within a second or
+     two, which is strictly better than deciding up front from core count
+     and being wrong in both directions. Steps down only, so it can never
+     oscillate between two ratios. */
+  var dprNow = Math.min(devicePixelRatio, Q.dpr);
+  renderer.setPixelRatio(dprNow);
+  window.__adDPR = dprNow;   // verification hook
+  var perfAcc = 0, perfFrames = 0, perfSettled = false;
+  function considerDPR(dt, T) {
+    if (perfSettled || dprNow <= 1 || T < 2.5) return;  // skip warm-up/compile
+    perfAcc += dt; perfFrames++;
+    if (perfFrames < 80) return;
+    var avg = perfAcc / perfFrames;
+    perfAcc = 0; perfFrames = 0;
+    if (avg > 0.021) {                    // sustained under ~48fps
+      dprNow = Math.max(1, dprNow - 0.25);
+      renderer.setPixelRatio(dprNow);
+      window.__adDPR = dprNow;
+      resize();
+    } else {
+      perfSettled = true;                 // comfortable — stop watching
+    }
+  }
   if ('outputColorSpace' in renderer) renderer.outputColorSpace = THREE.SRGBColorSpace;
   if ('toneMapping' in renderer) {
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -200,6 +231,30 @@ import { PROJECTS } from './gallery-assets.js';
   // ── cloud sprites ───────────────────────────────────────────────────────
   // Wide cumulus texture: sunlit puff tops, shaded blue-grey underbellies,
   // flattened base — reads as a real cloud instead of a soft blob.
+  /* Sprite quads are rectangles. If a cloud map still carries alpha when it
+     reaches the canvas edge, that rectangle shows up in the scene as a hard
+     seam — visible as blocky steps across the storm bank once the resolution
+     went up enough to see them. Every map is feathered to nothing before it
+     gets to the border. The two passes multiply, so corners fade twice and
+     the quad's own shape can never register. */
+  function featherEdges(g, w, h) {
+    var prev = g.globalCompositeOperation;
+    g.globalCompositeOperation = 'destination-in';
+    var lx = g.createLinearGradient(0, 0, w, 0);
+    lx.addColorStop(0, 'rgba(255,255,255,0)');
+    lx.addColorStop(0.07, 'rgba(255,255,255,1)');
+    lx.addColorStop(0.93, 'rgba(255,255,255,1)');
+    lx.addColorStop(1, 'rgba(255,255,255,0)');
+    g.fillStyle = lx; g.fillRect(0, 0, w, h);
+    var ly = g.createLinearGradient(0, 0, 0, h);
+    ly.addColorStop(0, 'rgba(255,255,255,0)');
+    ly.addColorStop(0.11, 'rgba(255,255,255,1)');
+    ly.addColorStop(0.89, 'rgba(255,255,255,1)');
+    ly.addColorStop(1, 'rgba(255,255,255,0)');
+    g.fillStyle = ly; g.fillRect(0, 0, w, h);
+    g.globalCompositeOperation = prev;
+  }
+
   function cloudTexture() {
     var c = document.createElement('canvas'); c.width = 1536; c.height = 768;
     var g = c.getContext('2d');
@@ -279,6 +334,7 @@ import { PROJECTS } from './gallery-assets.js';
     fade.addColorStop(1, 'rgba(0,0,0,1)');
     g.fillStyle = fade; g.fillRect(0, baseY + 10, 1536, 768 - baseY - 10);
     g.globalCompositeOperation = 'source-over';
+    featherEdges(g, c.width, c.height);
     var t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace;
     t.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy());
     t.needsUpdate = true; return t;
@@ -311,7 +367,12 @@ import { PROJECTS } from './gallery-assets.js';
   // whole leg is shifted forward along the flight path). Soft-blob textures,
   // not the crisp cauliflower ones — crisp sprites read as separate puffs;
   // the storm should fuse into one continuous churning mass
-  var stormTexs = [softCloudTexture(), softCloudTexture(), null]; // null → crisp, set below
+  /* Two thirds crisp now, not one third. The soft map is a stack of radial
+     gradients — it has no structure to resolve at any resolution, and with
+     two of every three sprites carrying it the bank read as mush. The crisp
+     cauliflower maps are 1536x768 and actually hold billows; the soft ones
+     stay in the mix to fuse the gaps between them. */
+  var stormTexs = [softCloudTexture(), null, null]; // null → crisp, set below
   /* A CEILING, which means every sprite has to be ahead of the camera and
      above it. This cluster used to be centred ON the storm keyframe — the
      camera stood at [30,106,-370] and the sprites spanned y 88..136,
@@ -351,11 +412,17 @@ import { PROJECTS } from './gallery-assets.js';
   // dusky cloud blanket (the crisp cauliflower deck reads as separate puffs;
   // the reference hero is a dense out-of-focus sea)
   function softCloudTexture() {
-    var c = document.createElement('canvas'); c.width = 768; c.height = 384;
+    /* 1024x512, up from 768x384. These sprites are 80-160 world units wide and
+       the storm bank now sits close enough to span most of the frame, so the
+       old map was being magnified past its own resolution. Every coordinate
+       below is scaled by K, so this is the same artwork at more pixels — the
+       hero's fog sea, which shares this map, is untouched. */
+    var K = 4 / 3;
+    var c = document.createElement('canvas'); c.width = 768 * K; c.height = 384 * K;
     var g = c.getContext('2d');
     for (var i = 0; i < 18; i++) {
-      var px = 110 + Math.random() * 548, py = 150 + Math.random() * 138;
-      var pr = 78 + Math.random() * 118;
+      var px = (110 + Math.random() * 548) * K, py = (150 + Math.random() * 138) * K;
+      var pr = (78 + Math.random() * 118) * K;
       var rad = g.createRadialGradient(px, py - 14, 0, px, py, pr);
       rad.addColorStop(0, 'rgba(255,255,255,0.85)');
       rad.addColorStop(0.55, 'rgba(255,255,255,0.38)');
@@ -363,11 +430,12 @@ import { PROJECTS } from './gallery-assets.js';
       g.fillStyle = rad;
       g.fillRect(px - pr, py - pr, pr * 2, pr * 2);
     }
-    var glow = g.createLinearGradient(0, 0, 768, 90);
+    var glow = g.createLinearGradient(0, 0, 768 * K, 90 * K);
     glow.addColorStop(0, 'rgba(255,255,255,0)');
     glow.addColorStop(1, 'rgba(255,228,196,0.2)');
     g.globalCompositeOperation = 'source-atop';
-    g.fillStyle = glow; g.fillRect(0, 0, 768, 384);
+    g.fillStyle = glow; g.fillRect(0, 0, 768 * K, 384 * K);
+    featherEdges(g, c.width, c.height);
     var t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace;
     t.needsUpdate = true; return t;
   }
@@ -1549,6 +1617,7 @@ import { PROJECTS } from './gallery-assets.js';
     if (hidden) return;
     var dt = Math.min(clock.getDelta(), 0.05);
     var T = clock.elapsedTime;
+    considerDPR(dt, T);
 
     var tgt = targetS();
     // critically-damped-ish follow: fast enough to track the wheel (laggy
