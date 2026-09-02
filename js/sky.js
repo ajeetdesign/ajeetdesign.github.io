@@ -111,7 +111,11 @@ import { PROJECTS } from './gallery-assets.js';
     birdOp: [0.7, 0, 0.8, 0, 0, 0], // needs to run high — silhouettes wash out over white clouds
     jetOp: [0, 0, 0.9, 0, 0, 0.85], // distant airliner + contrail: work sky and meadow finale
     sparkOp: [0, 0, 0, 0, 0.9, 0],     // firefly lights in the night leg
-    roll: [0.035, -0.05, 0.075, -0.06, -0.09] // banking per transition
+    /* per-LEG, not per-state like every other row here: one bank per
+       transition, so this list is one shorter than the palettes. The
+       cloudline leg was inserted at 2, which pushed the storm turn and the
+       final descent along one slot each. */
+    roll: [0.035, -0.05, 0.02, 0.075, -0.06]
   };
 
   // camera keyframes (pos, look) per state:
@@ -1396,10 +1400,18 @@ import { PROJECTS } from './gallery-assets.js';
       // and COMPLETES before the section arrives, so content only ever
       // appears in a settled scene
       var a = tops[i] - vh * 1.9, b = tops[i] - vh * 0.75;
-      if (i === sections.length - 1 && b > maxY - 4) {
+      if (i === sections.length - 1) {
+        // the final descent falls 175 world units through the cloud deck —
+        // four times the distance of any other leg. On an equal runway it
+        // reads as a drop rather than a flight, so it gets a longer one.
+        a = tops[i] - vh * 2.85;
+        // ...but never so long that it starts before the previous leg has
+        // landed, or two transitions would advance at once.
+        var prevB = tops[i - 1] - vh * 0.75;
+        if (a < prevB) a = prevB;
         // last zone must finish within reachable scroll or the sunny
         // meadow state is never fully entered
-        b = maxY - 4; a = Math.min(a, b - vh * 1.15);
+        if (b > maxY - 4) { b = maxY - 4; a = Math.min(a, b - vh * 1.15); }
       }
       s += Math.min(1, Math.max(0, (y - a) / (b - a)));
     }
@@ -1525,6 +1537,13 @@ import { PROJECTS } from './gallery-assets.js';
     // leg, faster through the middle — the night falls in one dramatic move.
     // The storm is entered from 3 now that cloudline sits at 3 (was 2).
     if (i === 3) f = smooth(f);
+    /* The descent is the one leg where the world and the camera want
+       different curves. Dawn breaks and the meadow resolves as we come
+       through the deck (fw runs ahead), while the camera keeps falling and
+       flares level last (fc trails). Both still hit 0 and 1 exactly, so the
+       settled states at either end are untouched. */
+    var fc = f;
+    if (i === 4) { fc = 1 - Math.pow(1 - f, 1.35); f = 1 - Math.pow(1 - f, 2); }
 
     // sky, fog, lights
     skyUni.uTop.value.copy(colAt(P.top, i, f, tmpA));
@@ -1555,19 +1574,20 @@ import { PROJECTS } from './gallery-assets.js';
 
     // camera along keyframes + idle drift + parallax + banking roll
     // flying-speed cue: the lens widens mid-transition, settles on arrival
-    var baseFov = 55 + (REDUCED ? 0 : Math.sin(f * Math.PI) * (i === 3 ? 9 : 5));
+    var baseFov = 55 + (REDUCED ? 0 : Math.sin(fc * Math.PI) * (i === 4 ? 12 : i === 3 ? 9 : 5));
     /* LAST, not 4. This clamp still named the old final state, so once the
        cloudline leg made the meadow K[5] the camera lerped K[4] -> K[4] and
        the meadow was flown with the STORM's camera — a hillside at close
        range instead of the wide vista. */
-    tmpPos.lerpVectors(K[i].p, K[Math.min(i + 1, LAST)].p, f);
-    tmpLook.lerpVectors(K[i].l, K[Math.min(i + 1, LAST)].l, f);
-    // final descent: nose pitches down toward the earth mid-dive, then
-    // flares level over the grass
-    if (i === 4) tmpLook.y -= Math.sin(f * Math.PI) * 30;
+    tmpPos.lerpVectors(K[i].p, K[Math.min(i + 1, LAST)].p, fc);
+    tmpLook.lerpVectors(K[i].l, K[Math.min(i + 1, LAST)].l, fc);
+    // final descent: the nose pitches down early and holds through the dive,
+    // so the long back half of the leg is one continuous flare into level
+    // flight over the grass rather than a symmetric bob
+    if (i === 4) tmpLook.y -= Math.sin(Math.pow(fc, 0.72) * Math.PI) * 34;
     // storm approach: dive under the advancing cloud front, then flare
     // level as the night settles. The storm is entered from 3 now, not 2.
-    if (i === 3) { tmpPos.y -= Math.sin(f * Math.PI) * 9; tmpLook.y -= Math.sin(f * Math.PI) * 13; }
+    if (i === 3) { tmpPos.y -= Math.sin(fc * Math.PI) * 9; tmpLook.y -= Math.sin(fc * Math.PI) * 13; }
     if (!REDUCED) {
       tmpPos.x += Math.sin(T * 0.13) * 0.7 + mx * 1.4;
       tmpPos.y += Math.sin(T * 0.17) * 0.5 - my * 1.0;
@@ -1581,7 +1601,7 @@ import { PROJECTS } from './gallery-assets.js';
     camera.updateProjectionMatrix();
     camera.position.copy(tmpPos);
     camera.lookAt(tmpLook);
-    camera.rotation.z += (REDUCED ? 0 : Math.sin(f * Math.PI) * P.roll[i]);
+    camera.rotation.z += (REDUCED ? 0 : Math.sin(fc * Math.PI) * P.roll[i]);
     dome.position.copy(camera.position);
     // dome glow anchor: the hero/approach sunset corner, then the work
     // scene's sunset sun, then the meadow sun — blended so it never jumps
