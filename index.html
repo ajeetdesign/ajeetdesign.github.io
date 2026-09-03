@@ -10,10 +10,11 @@
 <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap">
 <style>
   :root {
-    --font: 'Sora', -apple-system, sans-serif;
+    --font: 'Plus Jakarta Sans', -apple-system, sans-serif;
+    --font-serif: 'Instrument Serif', Georgia, 'Times New Roman', serif;
     --ink-dark: #1c2b3a;
     --ink-soft: rgba(28, 43, 58, 0.72);
     --ink-light: #f4f8fc;
@@ -157,14 +158,26 @@
     background: rgba(255,255,255,0.32); border: 1px solid rgba(255,255,255,0.55);
     backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
   }
-  #s-hero h1 {
-    font-size: clamp(30px, 4.6vw, 56px); font-weight: 700; letter-spacing: -0.024em;
-    line-height: 1.18; margin: 0 0 16px;
+  /* Two display lines at the SAME ink, both carrying weight — the greeting is
+     bold sans, the role is Instrument Serif italic about 1.35x its size. The
+     serif runs larger because it only ships one weight: size, not weight, is
+     the only lever it has, and matching the sans point-for-point would let the
+     bold line win the first read. */
+  #s-hero h1 { margin: 0 0 22px; font-weight: 400; }
+  #s-hero h1 .h1-greet {
+    display: block;
+    font-size: clamp(30px, 3.7vw, 55px); font-weight: 700; letter-spacing: -0.024em;
+    line-height: 1.12; color: var(--ink-dark);
   }
-  #s-hero h1 .h1-role { font-weight: 600; color: var(--ink-dark); opacity: 0.92; }
+  #s-hero h1 .h1-role {
+    display: block;
+    font-family: var(--font-serif); font-style: italic; font-weight: 400;
+    font-size: clamp(38px, 5vw, 76px); letter-spacing: -0.01em;
+    line-height: 1.14; color: var(--ink-dark);
+  }
   #s-hero .role {
-    font-size: clamp(15px, 1.6vw, 19px); font-weight: 400; color: var(--ink-soft);
-    line-height: 1.6; margin: 0 auto; max-width: 44ch;
+    font-size: clamp(16px, 1.75vw, 21px); font-weight: 400; color: var(--ink-soft);
+    line-height: 1.6; margin: 0 auto; max-width: 40ch;
   }
   #s-hero .role strong { font-weight: 600; color: var(--ink-dark); }
   .scroll-cue {
@@ -865,8 +878,8 @@
         <span class="meta-chip">Bangalore</span>
         <span class="meta-chip">5+ years</span>
       </div>
-      <h1 class="reveal d1">Hey, I’m Ajeet<br><span class="h1-role">Senior Product Designer</span></h1>
-      <p class="role reveal d2">Designing products for <strong>millions across borders</strong><br>and shipping ideas with <strong>Claude</strong></p>
+      <h1 class="reveal d1"><span class="h1-greet">Hey, I’m Ajeet</span><span class="h1-role">Senior Product Designer</span></h1>
+      <p class="role reveal d2">Designing products for <strong>millions across borders</strong> and shipping ideas with <strong>Claude</strong></p>
       <!-- anchors only: the glyphs you see here live in #gflight -->
       <div class="gf-row reveal d3" aria-hidden="true">
         <i class="gf-slot"></i><i class="gf-slot"></i><i class="gf-slot"></i>
