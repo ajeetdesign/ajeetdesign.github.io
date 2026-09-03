@@ -17,18 +17,14 @@
    Keys must match the data-case attribute on the card in index.html and the
    ?id= parameter case.html reads:
      porter               — internal, renders from cases.enc.json
-     porter-uae-earnings  — no internal study exists
-     porter-uae-cash      — no internal study exists
-     juspay               — internal, renders from cases.enc.json
+     porter-uae-earnings  — external, password-gated Link Lock page
+     porter-uae-cash      — external, password-gated Link Lock page
+     juspay               — external, password-gated Link Lock page
 
-   WARNING while this table is empty: the two porter-uae cards point at ids that
-   cases.enc.json does not carry, and case.html falls back to the Porter study
-   for an id it does not recognise. So until their URLs are filled in below,
-   clicking card 02 or 03 opens the Porter case study. Adding their lines fixes
-   it — the redirect fires before the fallback is ever reached. */
+   All four project cards now resolve here or internally — no fallback
+   warnings pending. */
 window.CASE_LINKS = {
-  /* Awaiting the live URLs. Add as:
-       'porter-uae-earnings': 'https://…',
-       'porter-uae-cash':     'https://…',
-       juspay:                'https://…', */
+  'porter-uae-earnings': 'https://jstrieb.github.io/link-lock/#eyJ2IjoiMC4wLjEiLCJlIjoiZFl1MzhINjFMcDhWMjg5dXFOTVExVVpJOFZKR3ZVRFRwSlY4WjlCM3NGREZtWUZBejJvZlo3T3cxalduSzQzSkdtbGl2MWtMeHlEVHdML2dLS3ZOMDlLT085ZWFjcjk2ZlA1b1dFZUlMKzFuc1d2dDRVOWxDQXV2UnVCRktodkwzWHhxWlpTMTlEZGhTcXJ0UkNVRXplL3RiQjZWRlIxUHY5TXBUdU5LMXBZbGFQQTdTd2l6R0orN1N3cCtDdG5VK21kc1psUGQ1U0FJZldxOURUMWpyVk1INEdLT3oxUkMwQjF3MDc3TGd0WWRhcEVWYVl6ZThOaGp4QnRlVkR5OGUzYlZEdDZZdVMzQ2JhYldUSm80N3RtOTd6SWlIeldLVUFMMXdhTy8iLCJzIjoiK0k3ZG1HZjN1YVQ5RUt4L2tON1hLQT09IiwiaSI6Iit0QUZ1ZFNZeTRjaFhIZFEifQ==',
+  'porter-uae-cash': 'https://jstrieb.github.io/link-lock/#eyJ2IjoiMC4wLjEiLCJlIjoiaXF0SStlLzBOUzE2OHUvSmxkRDR5b3RMTkcyWEh1Ulc5cDc2aXZXV1dXbEU1Vko3Qk1YRDNld1RnUWxDT044WkdlWFpzZXd5dzV5MG5aVU5nU1Vlcm5wZUdsdzBGdDBSWHBERy8zTlhlR2FHajlzZXBGWmZ3VTYzM1lVVEN4UXQ2Wk9IYVQ1UTAyTUFuTzFkRFRESTZiT3JZV0FkcEJzQmRYNmM5OFY4UlJpTVJCdCtJZDNRVjhIT1lHblhtbjdVeGNPWHlTZDNHYjRaMmJ1dzMwMGJaTzc2ck82cVY0N1NFZUt3cXNvRXpJWndmSDlmUzNpK2Mya3lJMSsvT3ZibnY3Y1NTN2oxb1pUOG9WQjV0SkpZc2ZoUzVEanFaTjM1IiwicyI6IkFGL0hYL20wZWlweFpqa3dtVVF3eUE9PSIsImkiOiI0VEozNW1JVm1zTjVKZll0In0=',
+  juspay: 'https://jstrieb.github.io/link-lock/#eyJ2IjoiMC4wLjEiLCJlIjoiN285UzNzQWx5OUNBZ055UTcwaXRVWVZoTkJDTFpaTmZ3L1hGblBnOTl5Z0paenp5QlBqcklUU0tiK1k0ZmR3TkFZaFVOYTZKRXFwdUYwZW5LSzJ1OEs2YVlUakJFQVBlSEtmRGxMcWpUcnZQWWcyakJqMmpqSWFCdlRZQ2JaWDFsaWtPVm5tRUViSmEzeWp0Yzk5VExtaHpZYVR1MVpUeFRLVVBpZTl2MWdFQlYwN1ZNcUhHNk5jczk4MlhXQnVIVFJRNWVjL0RNN2hqWTFxNzlnVXRTMlRucTA1ZWhDRlJKaXNpam0vZGtrVjJUZmdYNjJ1Z3F0d2xlSzYvTWtiWUp2T01KT2dWYUZtWWdsQ0M5VkJENlhoVTdGUT0iLCJzIjoiR3RkRXR0bWY4NXhVQ0pVYVlOWXhvZz09IiwiaSI6IkJqN1pPOTBHeXNtR09pY3kifQ==',
 };
