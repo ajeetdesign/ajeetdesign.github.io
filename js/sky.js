@@ -1178,102 +1178,25 @@ import { PROJECTS } from './gallery-assets.js';
     t.needsUpdate = true; return t;
   }
   var goreTex = goreTexture();
-  // the hero craft flies close to camera, so it gets its own ornate envelope:
-  // solid deep red, subtle gore seams, a draped rigging net and gold trim
-  // flourishes (the work-scene ships keep the bold cream stripes)
-  function heroEnvTexture() {
-    var c = document.createElement('canvas'); c.width = 512; c.height = 128;
-    var g = c.getContext('2d');
-    var gr = g.createLinearGradient(0, 0, 0, 128);
-    gr.addColorStop(0, '#b23440'); gr.addColorStop(0.5, '#a2242f'); gr.addColorStop(1, '#8c1f28');
-    g.fillStyle = gr; g.fillRect(0, 0, 512, 128);
-    var hl = g.createRadialGradient(390, 28, 8, 390, 28, 210);
-    hl.addColorStop(0, 'rgba(255,210,172,0.34)');
-    hl.addColorStop(0.38, 'rgba(255,188,144,0.16)');
-    hl.addColorStop(1, 'rgba(255,188,144,0)');
-    g.fillStyle = hl; g.fillRect(0, 0, 512, 128);
-    var shade = g.createLinearGradient(0, 0, 512, 0);
-    shade.addColorStop(0, 'rgba(35,0,8,0.24)');
-    shade.addColorStop(0.42, 'rgba(35,0,8,0)');
-    shade.addColorStop(1, 'rgba(255,224,180,0.1)');
-    g.fillStyle = shade; g.fillRect(0, 0, 512, 128);
-    g.strokeStyle = 'rgba(58,10,16,0.3)'; g.lineWidth = 2;
-    for (var x = 0; x <= 512; x += 64) { g.beginPath(); g.moveTo(x, 0); g.lineTo(x, 128); g.stroke(); }
-    g.strokeStyle = 'rgba(52,12,16,0.16)'; g.lineWidth = 1;
-    for (x = -128; x < 512; x += 24) {
-      g.beginPath(); g.moveTo(x, 0); g.lineTo(x + 96, 128); g.stroke();
-      g.beginPath(); g.moveTo(x + 96, 0); g.lineTo(x, 128); g.stroke();
-    }
-    // gold trim runs nose-to-tail (canvas y is the ship's long axis)
-    [128, 384].forEach(function (fx) {
-      g.strokeStyle = 'rgba(226,186,118,0.95)'; g.lineWidth = 2;
-      g.beginPath(); g.moveTo(fx - 14, 20); g.lineTo(fx - 14, 108); g.stroke();
-      g.beginPath(); g.moveTo(fx + 14, 20); g.lineTo(fx + 14, 108); g.stroke();
-      g.lineWidth = 1.6; g.strokeStyle = 'rgba(238,206,142,0.95)';
-      g.beginPath(); g.moveTo(fx, 34);
-      for (var sy = 34; sy < 94; sy += 12)
-        g.bezierCurveTo(fx + 8, sy + 3, fx - 8, sy + 9, fx, sy + 12);
-      g.stroke();
-    });
-    // tiny rivets and panel ticks keep it crisp when the hero craft is close
-    g.fillStyle = 'rgba(246,204,132,0.72)';
-    for (x = 32; x < 512; x += 32) {
-      for (var ry = 24; ry <= 104; ry += 40) {
-        g.beginPath(); g.arc(x, ry, 1.3, 0, Math.PI * 2); g.fill();
-      }
-    }
-    var t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace;
-    t.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy());
-    return t;
-  }
-  function basketTexture() {
-    var c = document.createElement('canvas'); c.width = 64; c.height = 64;
-    var g = c.getContext('2d');
-    g.fillStyle = '#8a6438'; g.fillRect(0, 0, 64, 64);
-    g.fillStyle = 'rgba(48,30,12,0.55)';
-    for (var y = 2; y < 64; y += 9) g.fillRect(0, y, 64, 3);
-    g.fillStyle = 'rgba(232,198,138,0.25)';
-    for (var x = 0; x < 64; x += 11) g.fillRect(x, 0, 4, 64);
-    var t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace;
-    return t;
-  }
-  var heroEnvTex = heroEnvTexture(), basketTex = basketTexture();
-  function airship(scale, hero) {
+  function airship(scale) {
     var g = new THREE.Group(), mats = [];
     var envMat = new THREE.MeshStandardMaterial({
-      map: hero ? heroEnvTex : goreTex,
-      roughness: hero ? 0.38 : 0.5,
-      metalness: hero ? 0.03 : 0,
+      map: goreTex,
+      roughness: 0.5,
+      metalness: 0,
       transparent: true,
       opacity: 0
     });
     var envGeo = new THREE.SphereGeometry(1, 28, 20);
-    if (hero) {
-      // teardrop hull: squeeze the +y pole (it lands on -x — the tail —
-      // after the rotation below) so the envelope tapers like the reference
-      var vp = envGeo.attributes.position, vy, tq, shrink;
-      for (var vi = 0; vi < vp.count; vi++) {
-        vy = vp.getY(vi);
-        if (vy > 0.15) {
-          tq = (vy - 0.15) / 0.85;
-          shrink = 1 - tq * tq * 0.45;
-          vp.setX(vi, vp.getX(vi) * shrink);
-          vp.setZ(vi, vp.getZ(vi) * shrink);
-        }
-      }
-      envGeo.computeVertexNormals();
-    }
     var env = new THREE.Mesh(envGeo, envMat);
     // poles onto the x axis: the gore stripes wrap nose-to-tail like panels
     env.rotation.z = Math.PI / 2;
     env.scale.set(1, 1.75, 1);
     g.add(env); mats.push(envMat);
-    var basketMat = new THREE.MeshStandardMaterial(hero
-      ? { map: basketTex, roughness: 0.95, transparent: true, opacity: 0 }
-      : { color: '#7c5a33', roughness: 0.9, transparent: true, opacity: 0 });
-    var basket = new THREE.Mesh(new THREE.BoxGeometry(
-      hero ? 0.8 : 0.62, hero ? 0.5 : 0.4, hero ? 0.5 : 0.42), basketMat);
-    basket.position.y = hero ? -1.58 : -1.42;
+    var basketMat = new THREE.MeshStandardMaterial(
+      { color: '#7c5a33', roughness: 0.9, transparent: true, opacity: 0 });
+    var basket = new THREE.Mesh(new THREE.BoxGeometry(0.62, 0.4, 0.42), basketMat);
+    basket.position.y = -1.42;
     g.add(basket); mats.push(basketMat);
     var ropeMat = new THREE.LineBasicMaterial({ color: 0x4a3624, transparent: true, opacity: 0 });
     var ropePts = [
@@ -1282,30 +1205,26 @@ import { PROJECTS } from './gallery-assets.js';
       new THREE.Vector3(-0.55, -0.8, 0), new THREE.Vector3(-0.28, -1.24, -0.18),
       new THREE.Vector3(0.55, -0.8, 0), new THREE.Vector3(0.28, -1.24, -0.18)
     ];
-    if (hero) {
-      // denser rope fan up close, plus a little supply crate trailing the tail
-      ropePts.push(
-        new THREE.Vector3(-0.95, -0.55, 0), new THREE.Vector3(-0.38, -1.34, 0),
-        new THREE.Vector3(0.95, -0.55, 0), new THREE.Vector3(0.38, -1.34, 0),
-        new THREE.Vector3(-1.45, -0.35, 0), new THREE.Vector3(-0.4, -1.32, 0.12),
-        new THREE.Vector3(1.45, -0.35, 0), new THREE.Vector3(0.4, -1.32, 0.12),
-        new THREE.Vector3(-1.72, -0.12, 0), new THREE.Vector3(-2.18, -0.22, 0));
-      var podMat = new THREE.MeshStandardMaterial({
-        color: '#6d4b2c', roughness: 0.9, transparent: true, opacity: 0 });
-      var pod = new THREE.Mesh(new THREE.BoxGeometry(0.34, 0.3, 0.3), podMat);
-      pod.position.set(-2.3, -0.28, 0);
-      g.add(pod); mats.push(podMat);
-    }
     var ropes = new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints(ropePts), ropeMat);
     g.add(ropes); mats.push(ropeMat);
     g.scale.setScalar(scale);
     g.userData.mats = mats;
     scene.add(g); return g;
   }
-  // airships[0] is the hero's lone craft (heroBalOp); the others fly the
-  // work scene (balOp)
-  var airships = [[-42, 82, -64, 4.8], [46, 88, -380, 4.2], [92, 92, -445, 5.4]].map(function (b, bi) {
-    var a = airship(b[3], bi === 0);
+  // airships[0] flies the hero alone (heroBalOp); the other two fly the work
+  // scene (balOp). All three are now the SAME craft — the hero used to get an
+  // ornate one-off envelope because it passes close to camera, but one balloon
+  // across the whole journey reads as one balloon seen again, which is the
+  // better story. balloonFar over the meadow was always this model too.
+  // The hero craft flies at y 92, not 82. At 82 its screen path ran from y 222
+  // to 360 in a 900px viewport — the envelope cleared the copy but the basket
+  // and rigging cut through the BANGALORE / 5+ YEARS chips (~282) and into the
+  // first line of the h1 (~345). Screen height here is independent of x, since
+  // the camera has no roll and its pitch is only ~4deg, so lifting y0 raises the
+  // whole drift uniformly rather than tilting it: the path now runs 113 -> 250,
+  // above the chips with room to spare and still below the nav pill (ends ~72).
+  var airships = [[-42, 92, -64, 4.8], [46, 88, -380, 4.2], [92, 92, -445, 5.4]].map(function (b, bi) {
+    var a = airship(b[3]);
     a.position.set(b[0], b[1], b[2]);
     a.rotation.y = -0.35 + bi * 0.3; // slight heading variety
     if (bi === 0) a.rotation.z = 0.05; // hero craft rides nose-up, seen from just below
