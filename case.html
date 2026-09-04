@@ -20,7 +20,7 @@
     --ink-faint: rgba(28, 43, 58, 0.5);
     --accent: #2f7fd4;
     --rule: rgba(28, 43, 58, 0.12);
-    --page: #f7f9fc;
+    --page: #faf9f6;
   }
   * { box-sizing: border-box; }
   html { scroll-behavior: smooth; }
@@ -46,10 +46,17 @@
   .cs-close svg { width: 17px; height: 17px; }
 
   /* ── hero: eyebrow → title → intro | meta rail → feature banner ────────── */
-  .cs-hero { padding: clamp(96px, 12vh, 132px) 0 clamp(36px, 5.5vh, 56px); }
+  .cs-hero { padding: clamp(52px, 7vh, 84px) 0 clamp(36px, 5.5vh, 56px); }
+  .cs-eyebrow {
+    display: flex; align-items: center; gap: 9px; margin: 0 0 18px;
+    font-size: 11px; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--accent);
+  }
+  .cs-eyebrow .dot { width: 6px; height: 6px; border-radius: 999px; background: var(--accent); flex: none; }
   .cs-hero h1 {
-    font-size: clamp(30px, 4vw, 50px); font-weight: 800; letter-spacing: -0.035em;
-    line-height: 1.1; margin: 0 0 clamp(20px, 2.6vw, 30px); max-width: 21ch;
+    font-family: var(--font-serif); font-weight: 400; letter-spacing: -0.015em;
+    font-size: clamp(34px, 4.6vw, 58px); line-height: 1.06;
+    margin: 0 0 clamp(20px, 2.6vw, 30px); max-width: 17ch;
   }
   .cs-hero .sub { font-size: clamp(14px, 1.5vw, 17px); line-height: 1.7; color: var(--ink-soft); margin: 0; max-width: 58ch; }
   .hero-banner {
@@ -69,7 +76,6 @@
   }
   .cs-meta { margin: 0; }
   .cs-meta > div { padding: 11px 0; border-top: 1px solid var(--rule); }
-  .cs-meta > div:first-child { border-top: 0; padding-top: 0; }
   .cs-meta dt { font-size: 10px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink-faint); margin: 0 0 5px; }
   .cs-meta dd { margin: 0; font-size: 13px; font-weight: 600; line-height: 1.5; }
 
@@ -91,18 +97,19 @@
   .g4 { background: linear-gradient(135deg, #e8d5ff, #b98cf5 55%, #8a6bf7); }
   .g5 { background: linear-gradient(135deg, #cfe0f2, #8fa9c6 55%, #5b7796); }
 
-  /* ── section nav: sticks under the top bar, underline marks the section ── */
+  /* ── section nav: pinned at the very top of the page, above the hero,
+       underline marks the section currently in view ──────────────────────── */
   .secnav {
     position: sticky; z-index: 15; top: 0;
-    background: rgba(247, 249, 252, 0.88);
+    background: rgba(250, 249, 246, 0.92);
     backdrop-filter: blur(14px) saturate(1.3);
     -webkit-backdrop-filter: blur(14px) saturate(1.3);
-    padding-top: 16px;
+    padding-top: 22px;
   }
   .secnav .wrap { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: clamp(16px, 3vw, 40px); }
   .secnav a {
     display: block; min-width: 0; text-decoration: none; color: var(--ink-dark);
-    padding-bottom: 14px; border-bottom: 3px solid var(--rule);
+    padding-bottom: 14px; border-bottom: 1px solid var(--rule);
     transition: border-color .35s ease;
   }
   .secnav a b { display: block; font-size: 14px; font-weight: 700; letter-spacing: -0.01em; }
@@ -111,20 +118,26 @@
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   }
   .secnav a:hover { border-bottom-color: var(--ink-faint); }
-  .secnav a.on { border-bottom-color: var(--ink-dark); }
+  .secnav a.on { border-bottom: 2px solid var(--accent); padding-bottom: 13px; }
   /* below this the .wrap is wide enough to run under the fixed cross */
   @media (max-width: 1240px) { .secnav .wrap { padding-right: 54px; } }
-  #cs section { scroll-margin-top: 104px; }
+  #cs section { scroll-margin-top: 70px; }
 
   /* ── sections ──────────────────────────────────────────────────────────── */
   section { padding: clamp(60px, 9vh, 104px) 0; }
+  /* every section opens on a number + label, then a full-width rule before
+     the heading — the rule is what gives each beat a hard start */
   .kicker {
+    display: flex; align-items: baseline; gap: 10px;
     font-size: 11px; font-weight: 700; letter-spacing: 0.22em; text-transform: uppercase;
-    color: var(--accent); margin: 0 0 14px;
+    color: var(--ink-faint); margin: 0 0 18px;
   }
+  .kicker .kn { color: var(--accent); }
+  .kicker-rule { border: 0; border-top: 1px solid var(--rule); margin: 0 0 32px; }
   h2 {
-    font-size: clamp(24px, 3vw, 34px); font-weight: 800; letter-spacing: -0.035em;
-    line-height: 1.16; margin: 0 0 18px; max-width: 24ch;
+    font-family: var(--font-serif); font-weight: 400; letter-spacing: -0.01em;
+    font-size: clamp(28px, 3.4vw, 40px);
+    line-height: 1.12; margin: 0 0 18px; max-width: 22ch;
   }
   h3 { font-size: clamp(18px, 1.9vw, 22px); font-weight: 700; letter-spacing: -0.025em; margin: 0 0 10px; }
   p { font-size: clamp(14px, 1.45vw, 16px); line-height: 1.7; color: var(--ink-soft); margin: 0 0 16px; }
@@ -142,6 +155,23 @@
   .ch-split .shot { flex: 1; aspect-ratio: auto; min-height: 320px; }
   .wide-copy { max-width: 760px; }
   .wide-copy--rest { margin-top: clamp(18px, 2.4vw, 28px); }
+  /* the opening beat of a wide section: heading left, its first paragraph
+     right, rather than stacked — the image still runs full-width below */
+  .wide-copy--head {
+    display: grid; grid-template-columns: 1fr 1.05fr;
+    gap: clamp(24px, 4vw, 56px); align-items: start; max-width: none;
+  }
+  .wide-copy--head h2, .wide-copy--head p { margin: 0; max-width: none; }
+  @media (max-width: 860px) { .wide-copy--head { grid-template-columns: 1fr; } }
+  /* a paragraph that is bold start-to-finish is a closing statement, not a
+     sentence — it gets its own centred serif line instead of running with
+     the rest of the copy */
+  .pull-quote {
+    font-family: var(--font-serif); font-weight: 400; font-style: normal;
+    font-size: clamp(22px, 2.7vw, 32px); line-height: 1.32; letter-spacing: -0.01em;
+    color: var(--ink-dark); text-align: center; max-width: 32ch;
+    margin: clamp(30px, 4.5vw, 52px) auto;
+  }
   .figure figcaption { font-size: 13px; color: var(--ink-faint); margin-top: 12px; text-align: center; }
   /* figures do not react to hover — they are artwork, not controls */
 
@@ -159,15 +189,42 @@
   .ap-outro { max-width: 720px; margin-top: clamp(22px, 2.8vw, 32px); }
   .ap-outro p { font-size: 14px; font-weight: 400; line-height: 1.7; }
 
-  /* problem walkthroughs inside the approach */
-  .prob { margin-top: clamp(64px, 8vw, 100px); }
-  .prob-h {
-    font-size: clamp(20px, 2.4vw, 27px); font-weight: 800; letter-spacing: -0.03em;
-    margin: 0 0 16px;
+  /* problem walkthroughs inside the approach — a sticky left rail carries the
+     number, the heading and the result; the narrative scrolls past it on the
+     right, so the stat that closes a problem is visible the whole time you're
+     reading toward it, not just at the very bottom */
+  .prob {
+    margin-top: clamp(64px, 8vw, 100px);
+    display: grid; grid-template-columns: minmax(160px, 210px) minmax(0, 1fr);
+    gap: clamp(28px, 4vw, 64px); align-items: start;
   }
-  .prob-h span {
-    display: block; font-size: 11px; font-weight: 700; letter-spacing: 0.2em;
-    text-transform: uppercase; color: var(--accent); margin: 0 0 8px;
+  .prob-rail { position: sticky; top: 100px; }
+  .prob-k {
+    font-size: 11px; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--accent); margin: 0 0 10px;
+  }
+  .prob-h {
+    font-family: var(--font-serif); font-weight: 400; letter-spacing: -0.01em;
+    font-size: clamp(24px, 2.6vw, 30px); line-height: 1.12;
+    margin: 0 0 20px; padding-bottom: 20px; border-bottom: 1px solid var(--rule);
+  }
+  .prob-result-k {
+    font-size: 10px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--ink-faint); margin: 0 0 8px;
+  }
+  .prob-stat {
+    font-family: var(--font-serif); font-weight: 400; letter-spacing: -0.01em;
+    font-size: clamp(32px, 3.2vw, 42px); line-height: 1; color: var(--accent);
+    margin: 0 0 8px;
+  }
+  .prob-result-p { font-size: 13px; line-height: 1.6; color: var(--ink-soft); margin: 0; }
+  .prob-result-list { list-style: none; margin: 0; padding: 0; }
+  .prob-result-list li {
+    font-size: 14px; font-weight: 700; color: var(--ink-dark); margin: 0 0 6px;
+  }
+  @media (max-width: 860px) {
+    .prob { grid-template-columns: 1fr; }
+    .prob-rail { position: static; }
   }
 
   /* ── solution blocks: copy, image rows, insight + result callouts ───────── */
@@ -336,25 +393,25 @@
 
   .insight {
     max-width: 720px; margin: clamp(20px, 2.6vw, 28px) 0;
-    border-left: 3px solid var(--rule); background: #fff;
+    border-left: 3px solid var(--accent); background: #eef0fb;
     border-radius: 0 16px 16px 0;
     padding: clamp(16px, 2vw, 22px) clamp(18px, 2.4vw, 26px);
     font-size: clamp(15px, 1.7vw, 18px); line-height: 1.55; color: var(--ink-soft);
-    box-shadow: 0 18px 40px -30px rgba(15, 30, 50, 0.35);
   }
   .insight strong { color: var(--ink-dark); font-weight: 700; }
   .bq {
     max-width: 700px; margin: clamp(18px, 2.4vw, 26px) 0;
     padding: 2px 0 2px 20px; border-left: 3px solid var(--rule);
-    font-style: italic; color: var(--ink-soft);
-    font-size: clamp(15px, 1.6vw, 17px); line-height: 1.65;
+    font-family: var(--font-serif); font-style: italic; color: var(--ink-soft);
+    font-size: clamp(18px, 2vw, 22px); line-height: 1.5;
   }
   .bq cite { display: block; margin-top: 8px; font-style: normal; font-size: 12px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-faint); }
   .blist { max-width: 720px; margin: 0 0 16px; padding-left: 22px; color: var(--ink-soft); font-size: clamp(14px, 1.45vw, 16px); line-height: 1.7; }
   .blist li { margin-bottom: 6px; }
   .blist li::marker { color: var(--accent); }
   .sub-h {
-    font-size: clamp(18px, 2.1vw, 24px); font-weight: 800; letter-spacing: -0.03em;
+    font-family: var(--font-serif); font-weight: 400; letter-spacing: -0.01em;
+    font-size: clamp(22px, 2.5vw, 28px);
     margin: clamp(36px, 4.5vw, 56px) 0 12px;
   }
   .outcomes.rv { margin-bottom: clamp(22px, 2.8vw, 32px); }
@@ -400,7 +457,10 @@
     transition: transform .4s cubic-bezier(.2,.9,.25,1), box-shadow .4s ease;
   }
   .outcome:hover { transform: translateY(-4px); box-shadow: 0 24px 50px -30px rgba(15, 30, 50, 0.5); }
-  .outcome .stat { font-size: clamp(24px, 2.6vw, 32px); font-weight: 800; letter-spacing: -0.03em; margin: 0 0 10px; }
+  .outcome .stat {
+    font-family: var(--font-serif); font-weight: 400; letter-spacing: -0.01em;
+    font-size: clamp(32px, 3.4vw, 44px); color: var(--accent); margin: 0 0 10px;
+  }
   .outcome h3 { font-size: 16px; margin: 0 0 6px; }
   .outcome p { font-size: 14px; line-height: 1.6; margin: 0; }
 
@@ -820,7 +880,9 @@ function demo(d) {
 
 /* sections number themselves — cases can skip any of them */
 var secNum = 0;
-function kick(label) { return '0' + (++secNum) + ' — ' + label; }
+function kickHtml(label) {
+  return '<p class="kicker rv"><span class="kn">0' + (++secNum) + '</span> ' + label + '</p><hr class="kicker-rule rv">';
+}
 
 var h = '';
 
@@ -828,6 +890,7 @@ var h = '';
 h += '<section class="cs-hero"><div class="wrap">' +
   '<div class="hero-grid">' +
   '<div class="hero-main">' +
+  (c.proj ? '<p class="cs-eyebrow rv"><span class="dot"></span>Case study &mdash; ' + c.proj + '</p>' : '') +
   '<h1 class="rv">' + c.title + '</h1>' +
   '<p class="sub rv">' + c.sub + '</p>' +
   '</div>' +
@@ -840,15 +903,23 @@ h += '<section class="cs-hero"><div class="wrap">' +
     : shot([c.banner[0] || 'Cover', ''], c.grad, 'banner')) + '</figure>' : '') +
   '</div></section>';
 
+/* A paragraph that is bold start-to-finish is a closing statement, not a
+   sentence in the flow — render it as a centred pull-quote instead, so it
+   doesn't need a duplicate copy in a separate field just to be styled apart. */
+function renderP(p) {
+  var m = /^\s*<strong>([\s\S]*)<\/strong>\s*$/.exec(p);
+  return m ? '<p class="pull-quote rv">' + m[1] + '</p>' : '<p class="rv">' + p + '</p>';
+}
+
 /* challenge + problem share one renderer; split = copy left, image right */
 function textSection(sec, fallbackK) {
   var open = '<section' + (sec.nav ? ' data-nav="' + sec.nav + '"' : '') + '>';
-  var head = '<p class="kicker rv">' + kick(sec.k || fallbackK) + '</p>';
+  var head = kickHtml(sec.k || fallbackK);
   if (sec.blocks) {
     return open + '<div class="wrap">' + head + '<h2 class="rv">' + sec.h + '</h2>' + blocksHtml(sec.blocks) + '</div></section>';
   }
   var body = '<h2 class="rv">' + sec.h + '</h2>' +
-    sec.p.map(function (p) { return '<p class="rv">' + p + '</p>'; }).join('');
+    sec.p.map(renderP).join('');
   var fig = sec.shot
     ? '<figure class="figure rv">' + shot(sec.shot, c.grad, 'bleed') +
       caption(sec.shot[0]) + '</figure>'
@@ -860,10 +931,12 @@ function textSection(sec, fallbackK) {
   if (sec.wide) {
     var at = fig ? (FIG_AFTER[id] || {})[sec.nav] : null;
     if (at != null && sec.p) {
-      /* interleave: copy through paragraph N, then the image, then the rest */
-      var ps = sec.p.map(function (p) { return '<p class="rv">' + p + '</p>'; });
+      /* interleave: copy through paragraph N, then the image, then the rest.
+         The opening beat (heading + first paragraph) runs as a head-split —
+         heading left, paragraph right — via wide-copy--head. */
+      var ps = sec.p.map(renderP);
       return open + '<div class="wrap">' + head +
-        '<div class="wide-copy"><h2 class="rv">' + sec.h + '</h2>' + ps.slice(0, at + 1).join('') + '</div>' +
+        '<div class="wide-copy wide-copy--head"><h2 class="rv">' + sec.h + '</h2>' + ps.slice(0, at + 1).join('') + '</div>' +
         fig +
         (ps.length > at + 1 ? '<div class="wide-copy wide-copy--rest">' + ps.slice(at + 1).join('') + '</div>' : '') +
         '</div></section>';
@@ -899,7 +972,7 @@ function blocksHtml(blocks) {
       continue;
     }
 
-    if (b.p) bh += '<div class="wide-copy"><p class="rv">' + b.p + '</p></div>';
+    if (b.p) bh += '<div class="wide-copy">' + renderP(b.p) + '</div>';
     else if (b.quote) bh += '<blockquote class="bq rv">&ldquo;' + b.quote + '&rdquo;' +
       (b.cite ? '<cite>' + b.cite + '</cite>' : '') + '</blockquote>';
     else if (b.list) bh += '<ul class="blist rv">' + b.list.map(function (li) { return '<li>' + li + '</li>'; }).join('') + '</ul>';
@@ -955,7 +1028,7 @@ if (c.problem) h += textSection(c.problem, 'The challenge');
 
 /* approach — header aligns with the card row when one is present */
 h += '<section' + (c.approachNav ? ' data-nav="' + c.approachNav + '"' : '') + '>' +
-  '<div class="' + (c.approachCards ? 'wrap' : 'narrow') + '"><p class="kicker rv">' + kick('The approach') + '</p>' +
+  '<div class="' + (c.approachCards ? 'wrap' : 'narrow') + '">' + kickHtml('The approach') +
   '<h2 class="rv">' + (c.approachH || 'How we got there') + '</h2>' +
   (c.approachIntro ? '<p class="rv">' + c.approachIntro + '</p>' : '') + '</div>';
 if (c.approachCards) {
@@ -969,11 +1042,35 @@ if (c.approachOutro) {
     return '<p class="rv">' + p + '</p>';
   }).join('') + '</div></div>';
 }
-/* problem walkthroughs — the approach, one problem at a time */
+/* the stat a problem closes on renders in the sticky rail beside its
+   heading, not at the bottom of the column that scrolled past it */
+function resultRailHtml(result) {
+  var inner;
+  if (Array.isArray(result)) {
+    inner = '<ul class="prob-result-list">' + result.map(function (r) { return '<li>' + r + '</li>'; }).join('') + '</ul>';
+  } else if (typeof result === 'object') {
+    inner = '<p class="prob-stat">' + result.stat + '</p><p class="prob-result-p">' + result.p + '</p>';
+  } else {
+    inner = '<p class="prob-result-p">' + result + '</p>';
+  }
+  return '<div class="rv"><p class="prob-result-k">Result</p>' + inner + '</div>';
+}
+
+/* problem walkthroughs — the approach, one problem at a time. A sticky left
+   rail carries the number, heading and result; the narrative scrolls past
+   it on the right. */
 (c.problems || []).forEach(function (pr, i) {
+  var blocks = pr.blocks.slice();
+  var last = blocks[blocks.length - 1];
+  var result = (last && last.result) ? blocks.pop().result : null;
   h += '<div class="wrap prob">' +
-    '<h3 class="prob-h rv"><span>Problem 0' + (i + 1) + '</span>' + pr.h + '</h3>' +
-    blocksHtml(pr.blocks) + '</div>';
+    '<div class="prob-rail">' +
+      '<p class="prob-k rv">Problem 0' + (i + 1) + '</p>' +
+      '<h3 class="prob-h rv">' + pr.h + '</h3>' +
+      (result ? resultRailHtml(result) : '') +
+    '</div>' +
+    '<div class="prob-body">' + blocksHtml(blocks) + '</div>' +
+  '</div>';
 });
 (c.approach || []).forEach(function (a) {
   h += '<div class="step"><div class="narrow"><h3 class="rv">' + a.h + '</h3>' +
@@ -997,7 +1094,7 @@ h += '</section>';
 /* breakthrough */
 if (c.breakthrough) {
   h += '<section><div class="narrow">' +
-    '<p class="kicker rv">' + kick('The breakthrough') + '</p>' +
+    kickHtml('The breakthrough') +
     '<h2 class="rv">' + c.breakthrough.h + '</h2>' +
     '<p class="rv">' + c.breakthrough.p + '</p>' +
     '</div><div class="wrap"><figure class="figure rv">' + shot(c.breakthrough.shot, c.grad, 'bleed') +
@@ -1012,7 +1109,7 @@ if (c.quote) {
 
 /* results: flow + outcomes */
 if (c.flow || c.outcomes) {
-  h += '<section><div class="narrow"><p class="kicker rv">' + kick('The results') + '</p>' +
+  h += '<section><div class="narrow">' + kickHtml('The results') +
     '<h2 class="rv">What shipped, and what it moved</h2></div>' +
     '<div class="wrap">' +
     (c.flow ? '<div class="flow rv">' + c.flow.map(function (f, i) {
@@ -1031,7 +1128,7 @@ h += '<footer class="cs-foot"><div class="wrap">' +
 
 document.getElementById('cs').innerHTML = h;
 
-/* section nav — built from the rendered kickers, sticks under the top bar */
+/* section nav — built from the rendered kickers, pinned above the hero */
 var navSecs = [].slice.call(document.querySelectorAll('#cs section')).filter(function (s) { return s.querySelector('.kicker'); });
 if (navSecs.length > 1) {
   var secnav = document.createElement('nav');
@@ -1039,11 +1136,11 @@ if (navSecs.length > 1) {
   secnav.setAttribute('aria-label', 'Case study sections');
   secnav.innerHTML = '<div class="wrap">' + navSecs.map(function (s, i) {
     s.id = 'sec' + (i + 1);
-    var label = s.querySelector('.kicker').textContent.replace(/^\d+\s*—\s*/, '');
+    var label = s.querySelector('.kicker').textContent.replace(/^\d+\s*/, '');
     var sub = s.getAttribute('data-nav') || (s.querySelector('h2') ? s.querySelector('h2').textContent : '');
     return '<a href="#sec' + (i + 1) + '"><b>' + label + '</b><span>' + sub + '</span></a>';
   }).join('') + '</div>';
-  document.getElementById('cs').insertBefore(secnav, navSecs[0]);
+  document.getElementById('cs').insertBefore(secnav, document.getElementById('cs').firstChild);
   var navLinks = [].slice.call(secnav.querySelectorAll('a'));
   var navTick = function () {
     var edge = secnav.getBoundingClientRect().bottom + 80;
