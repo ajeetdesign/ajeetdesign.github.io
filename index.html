@@ -126,8 +126,7 @@
     filter: blur(0);
   }
   #s-hero .reveal.d1 { transition-delay: .22s; }
-  #s-hero .reveal.d2 { transition-delay: .46s; }
-  #s-hero .reveal.d3 { transition-delay: .70s; }   /* the glyph row closes the cadence */
+  #s-hero .reveal.d2 { transition-delay: .46s; }   /* the glyph row closes the cadence */
   .sky-booting #s-hero .scroll-cue { opacity: 0; transform: translate(-50%, 10px); }
   #s-hero .scroll-cue { transition: opacity 1.2s ease, transform 1.2s ease; }
 
@@ -158,28 +157,74 @@
     background: rgba(255,255,255,0.32); border: 1px solid rgba(255,255,255,0.55);
     backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
   }
-  /* Two display lines at the SAME ink, both carrying weight — the greeting is
-     bold sans, the role is Instrument Serif italic about 1.35x its size. The
-     serif runs larger because it only ships one weight: size, not weight, is
-     the only lever it has, and matching the sans point-for-point would let the
-     bold line win the first read. */
-  #s-hero h1 { margin: 0 0 22px; font-weight: 400; }
-  #s-hero h1 .h1-greet {
-    display: block;
-    font-size: clamp(30px, 3.7vw, 55px); font-weight: 700; letter-spacing: -0.024em;
-    line-height: 1.12; color: var(--ink-dark);
+  /* ONE sentence, four voices. The hero was a bold greeting, a serif-italic
+     role on its own line, and a separate grey paragraph underneath that said
+     the same two things again — "products for millions across borders" and
+     "shipping ideas with Claude" appeared in both. It is a single spoken line
+     now, and the emphasis does the work the three blocks were doing:
+       · regular sans  — the connective tissue, most of the line, and Claude
+       · bold sans     — the two things worth naming: who and what
+       · bold serif italic — the two phrases about the WORK, set apart in
+                         both voice and weight, so they read as a change of tone
+       · the chip      — the name, and only the name
+     Everything stays one ink. Nothing here is louder than anything else by
+     colour, which is what lets four treatments live in one sentence. */
+  #s-hero h1 {
+    /* 880 is load-bearing, not a round number. `text-wrap: balance` equalises
+       the three lines and broke after "Designer"; plain wrapping at 940 fit
+       "and shipping" on line two and split the italic phrase across the break.
+       At 880 line one still takes "…building" (820px) and "shipping" (927px)
+       no longer fits after "and", so each serif phrase stays whole:
+         I'm Ajeet — a Product Designer building
+         products for millions across borders, and
+         shipping ideas with Claude. */
+    margin: 0 auto 22px; max-width: 880px;
+    font-size: clamp(24px, 3.1vw, 46px); font-weight: 400;
+    letter-spacing: -0.018em; line-height: 1.34;
+    color: var(--ink-dark);
   }
-  #s-hero h1 .h1-role {
-    display: block;
-    font-family: var(--font-serif); font-style: italic; font-weight: 400;
-    font-size: clamp(38px, 5vw, 76px); letter-spacing: -0.01em;
-    line-height: 1.14; color: var(--ink-dark);
+  /* `nowrap` on both emphasised roles. On a phone the line broke as
+     "Product / Designer" and "products for / millions" — an emphasised phrase
+     split across a line reads as two fragments rather than one unit, which is
+     the whole point of setting it apart. Each moves to the next line intact
+     instead. Safe at every width: the longest of them is ~222px at the 24px
+     floor, inside a 288px column at 320px wide. */
+  #s-hero h1 b { font-weight: 700; letter-spacing: -0.024em; white-space: nowrap; }
+  /* Instrument Serif ships one printed weight, so 700 here is the browser's
+     synthetic bold — the face has no bold master to switch to. It still
+     needs a little more size to sit level with the sans beside it — 1.06em,
+     not the 1.35x the serif needed when it had a display line to itself.
+     Tracking back to 0: the sans is tightened, this face is not drawn to be. */
+  #s-hero h1 i {
+    font-family: var(--font-serif); font-style: italic; font-weight: 700;
+    font-size: 1.06em; letter-spacing: 0; white-space: nowrap;
   }
-  #s-hero .role {
-    font-size: clamp(16px, 1.75vw, 21px); font-weight: 400; color: var(--ink-soft);
-    line-height: 1.6; margin: 0 auto; max-width: 40ch;
+  /* The name, SELECTED — a design-tool selection frame rather than a rounded
+     chip: square corners, a hairline, and four corner handles. Same warm ink it
+     already had; only the effect changes.
+     The handles are two full-width strips, each carrying a dot at either end
+     via a pair of radial gradients — four handles out of two pseudo-elements
+     and no extra markup. Every value is in em, so the frame and its handles
+     track the type from 46px down to the 24px floor without retuning. The
+     1px in the offsets is the border itself, so each dot sits centred ON the
+     corner it marks instead of just inside it. */
+  #s-hero h1 .nm {
+    position: relative;
+    padding: 0.04em 0.26em 0.1em; border-radius: 0;
+    background: rgba(206, 170, 112, 0.26);
+    border: 1px solid rgba(168, 132, 78, 0.45);
   }
-  #s-hero .role strong { font-weight: 600; color: var(--ink-dark); }
+  #s-hero h1 .nm::before,
+  #s-hero h1 .nm::after {
+    content: ''; position: absolute; pointer-events: none;
+    left: calc(-0.085em - 1px); right: calc(-0.085em - 1px); height: 0.17em;
+    background:
+      radial-gradient(circle at 0.085em 50%, rgba(168, 132, 78, 0.95) 0.072em, transparent 0.078em),
+      radial-gradient(circle at calc(100% - 0.085em) 50%, rgba(168, 132, 78, 0.95) 0.072em, transparent 0.078em);
+    background-repeat: no-repeat;
+  }
+  #s-hero h1 .nm::before { top: calc(-0.085em - 1px); }
+  #s-hero h1 .nm::after  { bottom: calc(-0.085em - 1px); }
   .scroll-cue {
     position: absolute; bottom: 4.5vh; left: 50%; transform: translateX(-50%);
     display: flex; flex-direction: column; align-items: center; gap: 8px;
@@ -716,18 +761,40 @@
   .vg-tok { display: flex; align-items: center; gap: 8px; padding: 6px 9px; }
   .vg-sw { width: 13px; height: 13px; border-radius: 4px; flex: none; border: 1px solid rgba(255,255,255,0.2); }
   .vg-tok b { margin-left: auto; font-weight: 600; font-variant-numeric: tabular-nums; color: rgba(214, 226, 248, 0.62); }
+
+  /* 5 · a small white search pill bleeding off the card's right edge — a
+     real animated GIF asset (images/atlas-search.gif), not a live DOM
+     typing effect. Sitting outside the vignette's own top padding and
+     clipped by .t-shot's overflow:hidden is what gives it the cropped,
+     "runs off the card" look. */
+  .vg-atlas { position: relative; height: 100%; }
+  .vg-search-gif {
+    position: absolute; top: 12px; right: -26px; width: 257px; height: auto;
+    border-radius: 999px;
+    box-shadow: 0 14px 26px -12px rgba(0, 6, 20, 0.5);
+  }
+
   /* the wide one reads side-by-side, the rest stack image over copy */
-  .tile.big { grid-column: span 4; min-height: 260px; flex-direction: row; align-items: stretch; }
+  /* big's own min-height is deliberately short — it's a copy-led card with a
+     small floating asset, not an image-led one, so it shouldn't try to match
+     tall's height on its own. The tall Velia card (a portrait screenshot)
+     sets row 1 + row 2's combined height regardless; keeping big short here
+     just means less of that leftover stretch lands on it, and more on sm
+     below, which has visual content that can actually use it. */
+  .tile.big { grid-column: span 4; min-height: 190px; flex-direction: row; align-items: stretch; }
   .tile.big .t-copy { flex: 1; justify-content: center; }
   .tile.big .t-shot { flex: 0 0 44%; min-height: 0; }
-  .tile.big h3 { font-size: clamp(20px, 2.1vw, 26px); }
-  .tile.big p { font-size: 14px; }
   .tile.tall { grid-column: span 2; grid-row: span 2; }
   .tile.tall .t-shot { min-height: 200px; }
-  /* fixed aspect + bottom-anchored copy, so the two half-cards' images line up
-     even though their copy blocks differ in height */
-  .tile.sm { grid-column: span 2; min-height: 250px; }
-  .tile.sm .t-shot { flex: 0 0 auto; aspect-ratio: 16 / 10; min-height: 0; }
+  /* raised from 250: absorbs the row-2 stretch that used to sit empty inside
+     big instead. The vignette now flexes to fill it (was a fixed 16:10 box),
+     and its panels centre in that taller box rather than pinning to the top
+     — so the extra height shows up as breathing room around the artwork,
+     not a gap underneath it. Copy still bottom-anchored so both half-cards'
+     images line up even though their copy blocks differ in height. */
+  .tile.sm { grid-column: span 2; min-height: 320px; }
+  .tile.sm .t-shot { flex: 1 1 auto; min-height: 120px; }
+  .tile.sm .t-shot > .vg { justify-content: center; }
   .tile.sm .t-copy { margin-top: auto; }
 
   /* ── 4 · contact (sunny meadow) ─────────────────────────────────────── */
@@ -878,10 +945,9 @@
         <span class="meta-chip">Bangalore</span>
         <span class="meta-chip">5+ years</span>
       </div>
-      <h1 class="reveal d1"><span class="h1-greet">Hey, I’m Ajeet</span><span class="h1-role">Senior Product Designer</span></h1>
-      <p class="role reveal d2">Designing products for <strong>millions across borders</strong> and shipping ideas with <strong>Claude</strong></p>
+      <h1 class="reveal d1">I&rsquo;m <b class="nm">Ajeet</b> &mdash; a <b>Product Designer</b> building <i>products for millions</i> across borders, and <i>shipping ideas</i> with Claude.</h1>
       <!-- anchors only: the glyphs you see here live in #gflight -->
-      <div class="gf-row reveal d3" aria-hidden="true">
+      <div class="gf-row reveal d2" aria-hidden="true">
         <i class="gf-slot"></i><i class="gf-slot"></i><i class="gf-slot"></i>
       </div>
     </div>
@@ -894,8 +960,8 @@
       <div class="intro-top">
         <div class="intro-pitch">
           <p class="label reveal">01 — At a glance</p>
-          <h2 class="reveal d1">Five years of designing products that move millions.</h2>
-          <p class="lede reveal d2">Across logistics, fintech and AI, working with incredible teams to solve real problems at scale.</p>
+          <h2 class="reveal d1">So, what have I been doing for the last five years?</h2>
+          <p class="lede reveal d2">Mostly figuring out why things work the way they do — then trying to make them work a little better.</p>
         </div>
 
         <ul class="xp reveal d2">
@@ -1066,11 +1132,18 @@
              source order decides which side each lands on. -->
         <button type="button" class="tile glass-dark big reveal d1">
           <div class="t-copy">
-            <h3>Design tokens that write themselves</h3>
-            <p>Tokens generated from real usage, documented and shipped without hand-kept tables.</p>
+            <h3>Built Porter Atlas</h3>
+            <p>A searchable library where teams can find and explore Porter’s product screens across different use cases</p>
           </div>
           <!-- vignettes use div/span only: the modal reads tile.querySelector('p')
                for its body copy, so a <p> in here would hijack it -->
+          <div class="t-shot art-c" aria-hidden="true">
+            <div class="vg vg-atlas">
+              <img class="vg-search-gif" src="images/atlas-search.gif" alt="" width="257" height="62" loading="lazy">
+            </div>
+          </div>
+        </button>
+        <button type="button" class="tile glass-dark sm reveal d2">
           <div class="t-shot art-d" aria-hidden="true">
             <div class="vg">
               <div class="vg-panel vg-tok"><i class="vg-sw" style="background:#2f7fd4"></i><span>color.accent</span><b>#2F7FD4</b></div>
@@ -1079,48 +1152,26 @@
               <div class="vg-panel vg-tok"><i class="vg-sw" style="background:rgba(143,183,255,0.35)"></i><span>radius.card</span><b>24px</b></div>
             </div>
           </div>
-        </button>
-        <button type="button" class="tile glass-dark sm reveal d2">
-          <div class="t-shot art-c" aria-hidden="true">
-            <div class="vg">
-              <div class="vg-panel vg-src">
-                <div class="vg-row vg-mute"><span>P04 · transcript</span></div>
-                <div class="vg-line" style="--w:92%"></div>
-                <div class="vg-line" style="--w:74%"></div>
-                <div class="vg-line" style="--w:83%"></div>
-              </div>
-              <div class="vg-join">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M6 13l6 6 6-6"/></svg>
-              </div>
-              <div class="vg-panel vg-cluster"><span>Onboarding friction</span><span class="vg-count">12</span></div>
-              <div class="vg-panel vg-cluster"><span>Trust in payouts</span><span class="vg-count">8</span></div>
-            </div>
-          </div>
           <div class="t-copy">
-            <h3>Agentic research synthesis</h3>
-            <p>Interview transcripts → clustered insights → testable hypotheses, overnight.</p>
+            <h3>Design system token with AI</h3>
+            <p>Generate, organise, and document design tokens with AI.</p>
           </div>
         </button>
         <!-- vignette before copy: .tile.sm stacks, with the copy pushed to the
              bottom so both half-cards' images line up -->
         <button type="button" class="tile glass-dark sm reveal d3">
-          <div class="t-shot art-a" aria-hidden="true">
-            <div class="vg">
-              <div class="vg-ask">Make the earnings card show a weekly trend</div>
-              <div class="vg-panel vg-built">
-                <div class="vg-built-h"><span>Weekly earnings</span><span class="vg-accent">+18%</span></div>
-                <div class="vg-chart">
-                  <i style="--h:34%"></i><i style="--h:58%"></i><i style="--h:41%"></i>
-                  <i style="--h:72%"></i><i style="--h:53%"></i><i style="--h:88%"></i>
-                  <i style="--h:64%"></i>
-                </div>
-                <div class="vg-row vg-mute"><span>Mon</span><span style="margin-left:auto">Sun</span></div>
-              </div>
-            </div>
+          <!-- an exported render (Three.js scene, lit and shadowed, not a
+               screenshot of a real device) — kept as an asset like ai-velia.png
+               rather than a live vignette, since that lighting/shadow can't be
+               redrawn in CSS. GIF (not JPG) because the on-screen marquee
+               ticker scrolls — 16 rendered frames, one loop. -->
+          <div class="t-shot art-a is-media" aria-hidden="true">
+            <img class="t-media" src="images/crt-experiment.gif" alt="" loading="lazy" decoding="async"
+                 width="576" height="473">
           </div>
           <div class="t-copy">
-            <h3>Prompt → prototype in hours, not weeks</h3>
-            <p>Design intent expressed in words, iterated in code, validated on real users the same day.</p>
+            <h3>Just to see if I could</h3>
+            <p>Small web experiments built with AI, mostly driven by curiosity</p>
           </div>
         </button>
       </div>
