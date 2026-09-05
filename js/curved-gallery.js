@@ -123,8 +123,15 @@ const fsh = `
   void main(){
     // slow ken-burns drift so screens feel "live"
     float t = uTime * 0.05 + uSeed * 10.0;
-    vec2 uv = (vUv - 0.5) * (0.965 + 0.02 * sin(t)) + 0.5;
-    uv += vec2(sin(t * 0.7), cos(t * 0.9)) * 0.006;
+    vec2 kbUv = (vUv - 0.5) * (0.965 + 0.02 * sin(t)) + 0.5;
+    kbUv += vec2(sin(t * 0.7), cos(t * 0.9)) * 0.006;
+    /* The baked heading/arrow live in the bottom ~20% of the texture (below
+       the scrim). Panning that band with the rest of the shot would drift the
+       chrome around, and every card runs its own uSeed phase, so the same
+       fixed-pixel padding would land at a visibly different spot card to
+       card at any given instant. Hold that band to the raw, unpanned uv. */
+    float kbAmt = smoothstep(0.14, 0.22, vUv.y);
+    vec2 uv = mix(vUv, kbUv, kbAmt);
     vec4 tex = texture2D(uMap, uv);
     // rounded corners (SDF in plane units)
     vec2 p = (vUv - 0.5) * uAspect;
@@ -135,11 +142,12 @@ const fsh = `
     if (alpha < 0.01) discard;
     // brightness = horizontal falloff from the same focus, wider than the bulge,
     // so a card fades smoothly across its own width as it moves away
-    /* Two separate things were making these read dull, and only one of them
-       was the falloff. The floor was 0.2, right against the source's
-       near-black page where an off-focus card fading to a fifth reads as
-       depth; over a bright sky it reads as dirt, so it comes up again. */
-    float bright = mix(0.84, 1.0, smoothstep(0.03, 0.85, vB));
+    /* Three separate things were making these read dull. The floor was 0.84,
+       tuned back when the falloff alone made an off-focus card fade to a
+       fifth against a near-black reference page — over the bright sky and a
+       real UI screenshot that same floor just reads as a haze over the shot,
+       so it comes up again to keep depth cueing without muddying the asset. */
+    float bright = mix(0.94, 1.0, smoothstep(0.03, 0.85, vB));
     bright = min(bright + uHover * 0.12, 1.05);
     /* No gamma lift any more. It was here because the reference's artwork was
        drawn for a dark page — black rooms and midnight scenes that only went
@@ -148,7 +156,7 @@ const fsh = `
        background and costs the 11px labels their contrast. */
     vec3 col = tex.rgb * bright;
     col *= 1.0 - vPress * 0.14;           // soft shadow inside the press dent
-    col *= 1.0 - 0.06 * length(vUv - 0.5);   // vignette eased for the same reason
+    col *= 1.0 - 0.03 * length(vUv - 0.5);   // vignette eased for the same reason
     gl_FragColor = vec4(col, alpha * uFade);
   }
 `;
@@ -159,22 +167,92 @@ const fsh = `
 const texCache = new Map();
 let pending = [];
 
+/* Baked onto every card, bottom-left title and bottom-right arrow, so the
+   glyph rides the texture instead of a DOM node that would have to track a
+   plane bulging and curving in 3D every frame. */
+function drawCardOverlay(ctx, title) {
+  if (!title) return;
+  /* The vertex shader's "curl" pulls each card horizontally toward the fixed
+     lens focus at the left of the wall, so the card nearest that focus gets
+     its left edge visually compressed toward centre — the same fixed pixel
+     padding then reads tighter on that card than on ones further from the
+     focus. The arrow sits at the right, away from the focus, so it doesn't
+     need the same cushion. */
+  const padX = 56, padTextL = 104, padB = 96;
+  const grad = ctx.createLinearGradient(0, CH * 0.8, 0, CH);
+  grad.addColorStop(0, 'rgba(8, 14, 22, 0)');
+  grad.addColorStop(1, 'rgba(8, 14, 22, 0.3)');
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, CH * 0.8, CW, CH * 0.2);
+
+  ctx.font = '600 34px "Plus Jakarta Sans", -apple-system, sans-serif';
+  ctx.textBaseline = 'alphabetic';
+  ctx.shadowColor = 'rgba(0, 0, 0, 0.4)';
+  ctx.shadowBlur = 16;
+  ctx.fillStyle = '#fff';
+  ctx.fillText(title, padTextL, CH - padB + 6);
+  ctx.shadowBlur = 0;
+
+  const r = 42, cx = CW - padX - r, cy = CH - padB - r + 8;
+  ctx.beginPath();
+  ctx.arc(cx, cy, r, 0, Math.PI * 2);
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.16)';
+  ctx.fill();
+  ctx.lineWidth = 2;
+  ctx.strokeStyle = 'rgba(255, 255, 255, 0.55)';
+  ctx.stroke();
+
+  ctx.strokeStyle = '#fff';
+  ctx.lineWidth = 3.4;
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+  ctx.beginPath();
+  ctx.moveTo(cx - 13, cy);
+  ctx.lineTo(cx + 13, cy);
+  ctx.moveTo(cx + 3, cy - 11);
+  ctx.lineTo(cx + 13, cy);
+  ctx.lineTo(cx + 3, cy + 11);
+  ctx.stroke();
+}
+
 function makeTexture(THREE, p, maxAniso) {
   if (texCache.has(p.src)) return texCache.get(p.src);
 
   const c = document.createElement('canvas');
   c.width = CW; c.height = CH;
   const ctx = c.getContext('2d');
-  /* The card is drawn before the JPEG arrives, so the canvas starts on the
-     shots' own near-white ground rather than transparent black — otherwise a
-     card entering frame flashes dark before its image lands. */
-  ctx.fillStyle = '#e8eef5';
-  ctx.fillRect(0, 0, CW, CH);
 
   const t = new THREE.CanvasTexture(c);
   if (maxAniso) t.anisotropy = maxAniso;
-  t.minFilter = THREE.LinearFilter;
+  /* The reference this was lifted from drew low-frequency procedural art, where
+     a mip-less LinearFilter was a cheap, invisible shortcut. These textures are
+     screenshots with small real UI text, viewed at an angle on a curved wall —
+     without mipmaps the anisotropy setting above is inert (it only kicks in
+     under a *MipmapLinearFilter), so oblique cards lost the minified text to
+     bilinear mush instead of being sharpened by it. */
+  t.minFilter = THREE.LinearMipmapLinearFilter;
   t.wrapS = t.wrapT = THREE.ClampToEdgeWrapping;
+
+  let loadedImg = null;
+
+  /* Redrawn (not just overlaid) so a late font swap — document.fonts.ready
+     can resolve after the image has already landed — never stacks a second
+     scrim and title on top of the first. */
+  function paint() {
+    /* The card is drawn before the JPEG arrives, so the canvas starts on the
+       shots' own near-white ground rather than transparent black — otherwise
+       a card entering frame flashes dark before its image lands. */
+    ctx.fillStyle = '#e8eef5';
+    ctx.fillRect(0, 0, CW, CH);
+    if (loadedImg) {
+      // cover: crop the long edge rather than squashing a screenshot to fit
+      const s = Math.max(CW / loadedImg.width, CH / loadedImg.height);
+      const w = loadedImg.width * s, h = loadedImg.height * s;
+      ctx.drawImage(loadedImg, (CW - w) / 2, (CH - h) / 2, w, h);
+    }
+    drawCardOverlay(ctx, p.title);
+    t.needsUpdate = true;
+  }
 
   /* Deferred, not fetched here. The gallery is built during page init but its
      section is most of a page down, and these are ~250KB each — the story
@@ -183,15 +261,11 @@ function makeTexture(THREE, p, maxAniso) {
   pending.push(function () {
     const img = new Image();
     img.decoding = 'async';
-    img.onload = function () {
-      // cover: crop the long edge rather than squashing a screenshot to fit
-      const s = Math.max(CW / img.width, CH / img.height);
-      const w = img.width * s, h = img.height * s;
-      ctx.drawImage(img, (CW - w) / 2, (CH - h) / 2, w, h);
-      t.needsUpdate = true;
-    };
+    img.onload = function () { loadedImg = img; paint(); };
     img.src = p.src;
   });
+
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(paint);
 
   texCache.set(p.src, t);
   return t;
@@ -292,17 +366,29 @@ export function createGallery(THREE, cards, maxAniso) {
   /* Not in the source, which is driven only by wheel and drag: the wall here
      creeps on its own and gives way the moment a card is hovered, so the
      reader can stop it simply by looking at one. */
-  const AUTO = 0.30;           // cards per second
+  const AUTO = 0.20;           // cards per second
 
   /* --- motion state (verbatim) --- */
   const state = { scroll: -1.3, mid: -1.3, target: -FOCUS_LOCAL[0] / STEP, vel: 0 };
   const bend = { p: 0, v: 0 };        // spring state for the elastic whip
   let hovered = null, isDragging = false, dragMoved = 0, lastX = 0;
   let throwFrom = 0, throwTo = 0, throwT = 1, throwDur = 1.7;
+  let lastCamera = null;         // for pick(), which fires outside the frame loop
 
   const mouse = new THREE.Vector2(-2, -2);
   const raycaster = new THREE.Raycaster();
   const hitUV = new THREE.Vector2(0.5, 0.5);
+
+  /* A one-off raycast at a click/tap point, independent of the continuously
+     updated hover state above — hover is mouse-only and can be stale or
+     unset for a touch tap that never fired a pointermove first. */
+  function pick(clientX, clientY) {
+    if (!lastCamera) return null;
+    const nx = (clientX / innerWidth) * 2 - 1, ny = -(clientY / innerHeight) * 2 + 1;
+    raycaster.setFromCamera({ x: nx, y: ny }, lastCamera);
+    const hits = raycaster.intersectObjects(screens.filter(function (s) { return s.visible; }));
+    return hits.length ? hits[0].object.userData.index : null;
+  }
 
   /* the original's release is gsap.to(..., 1.7s, 'expo.out'); this is that
      curve written out, so the throw feels the same without the dependency */
@@ -339,6 +425,7 @@ export function createGallery(THREE, cards, maxAniso) {
   }, { passive: true });
 
   function update(time, dtMs, fade, camera) {
+    lastCamera = camera;
     rig.visible = fade > 0.005;
     if (!rig.visible) return;
 
@@ -379,6 +466,10 @@ export function createGallery(THREE, cards, maxAniso) {
       m.rotation.y = theta;
       m.rotation.z = theta * 0.07;   // slight roll grows toward the edges
       m.visible = Math.abs(theta) < 1.5;
+      /* Scale is on the same lens as the bulge/brightness: full size at the
+         centre, easing down toward the edges so a card visibly grows into
+         focus as it arrives and shrinks again as it's carried off. */
+      m.userData.focusScale = 0.8 + 0.2 * Math.exp(-(theta * theta) / (0.62 * 0.62));
       const u = m.material.uniforms;
       u.uVel.value = velU;
       u.uWave.value = waveU;
@@ -399,6 +490,11 @@ export function createGallery(THREE, cards, maxAniso) {
       const u = m.material.uniforms;
       u.uHover.value += (on - u.uHover.value) * 0.12;
       u.uPress.value += (on - u.uPress.value) * 0.12;
+      // a little lift on hover, same ease as the brightness/press above
+      const target = 1 + on * 0.06;
+      const cur = m.userData.hoverScale || 1;
+      m.userData.hoverScale = cur + (target - cur) * 0.12;
+      m.scale.setScalar(m.userData.hoverScale * m.userData.focusScale);
     });
     // the press point glides after the cursor -> "pressed on movement"
     if (hovered !== null && hitPoint) {
@@ -407,7 +503,7 @@ export function createGallery(THREE, cards, maxAniso) {
     }
   }
 
-  return { rig, wall, screens, place, update, bindDrag, setEntrance, hydrate,
+  return { rig, wall, screens, place, update, bindDrag, setEntrance, hydrate, pick,
            hoveredIndex: function () { return hovered; },
            dragged: function () { return dragMoved; },
            state: state, PW, PH, STEP };

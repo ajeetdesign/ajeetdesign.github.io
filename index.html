@@ -465,6 +465,112 @@
     .aim-copy { justify-content: flex-start; }
   }
 
+  /* ── quick-bite detail: a centred card floating over a dark stage, with the
+     prev/next cards peeking in scaled down at the edges — not another
+     full-bleed layer like the AI modal, this one reads as a deck. ───────── */
+  .bitm-open, .bitm-open body { overflow: hidden; }
+  .bitm-open main, .bitm-open .sky-nav { visibility: hidden; pointer-events: none; }
+  #bite-modal {
+    position: fixed; inset: 0; z-index: 42;
+    overflow: hidden;
+    background: #0a1524;
+    opacity: 0; visibility: hidden; pointer-events: none;
+    transform: translateY(22px) scale(0.985);
+    transition: opacity .45s ease, transform .6s cubic-bezier(.2,.9,.25,1), visibility 0s linear .45s;
+  }
+  #bite-modal.on {
+    opacity: 1; visibility: visible; transform: none; pointer-events: auto;
+    transition: opacity .45s ease, transform .6s cubic-bezier(.2,.9,.25,1), visibility 0s;
+  }
+  .bitm-stage { position: absolute; inset: 0; display: grid; place-items: center; }
+  /* both the current card and the two peeks share this footprint — the peeks
+     are the same box, just scaled down and slid sideways, so they read as
+     the same deck rather than a different-shaped preview */
+  .bitm-panel, .bitm-peek {
+    width: min(1440px, 92vw); height: min(860px, 88vh); border-radius: 24px;
+  }
+  .bitm-panel {
+    position: relative; z-index: 2;
+    background: #fbfdff;
+    display: grid; grid-template-columns: 1fr 1.15fr; align-items: center;
+    gap: clamp(24px, 3vw, 56px); padding: clamp(26px, 3.6vw, 60px);
+    overflow: hidden;
+    box-shadow: 0 60px 140px -40px rgba(0, 0, 0, 0.6);
+  }
+  .bitm-copy { display: flex; flex-direction: column; justify-content: center; gap: 16px; min-height: 0; min-width: 0; max-width: 44ch; }
+  .bitm-copy h3 {
+    font-size: clamp(22px, 2.6vw, 36px); font-weight: 800; letter-spacing: -0.03em;
+    line-height: 1.15; margin: 0; color: var(--ink-dark);
+  }
+  .bitm-copy p { font-size: clamp(14px, 1.3vw, 16px); line-height: 1.65; color: rgba(28, 43, 58, 0.68); margin: 0; }
+  .bitm-shot {
+    border-radius: 18px; min-height: 0; height: 100%; align-self: stretch;
+    border: 1px solid rgba(20, 40, 70, 0.1);
+    overflow: hidden; background: #fbfdff;
+    display: grid; place-items: center;
+  }
+  .bitm-shot img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  /* peeks: blank cards pinned at the stage's own edges, not the panel's —
+     each sits mostly off past the viewport edge so only a sliver of its
+     rounded corner shows, with open backdrop between that sliver and the
+     panel. No preview content, just a hint that another card is there. */
+  .bitm-peek {
+    position: absolute; top: 50%; z-index: 1;
+    width: 220px; height: min(620px, 66vh);
+    border: 0; padding: 0; cursor: pointer; border-radius: 24px;
+    background: #48484c;
+    transition: background .25s ease, opacity .3s ease;
+  }
+  .bitm-peek:hover { background: #58585c; }
+  .bitm-peek-prev { left: -188px; transform: translateY(-50%); }
+  .bitm-peek-next { right: -188px; transform: translateY(-50%); }
+  .bitm-peek[hidden] { display: none; }
+  /* Positioned relative to the stage (not the panel) so they hold still
+     while the panel's own box animates. The reference straddles the card's
+     own corner/edge with the button — centred ON the edge, not out in the
+     open backdrop — so these centre on the panel's edge the same way: half
+     the button rides over the card's (empty, padded) corner, half sits
+     past it. A solid dark chip (not theme-matched translucency) is what
+     keeps it legible over both the white card and the dark backdrop it's
+     straddling. */
+  .bitm-close, .bitm-nav {
+    background: rgba(10, 16, 26, 0.86); color: #fff;
+    box-shadow: 0 8px 20px -8px rgba(0, 0, 0, 0.5);
+  }
+  .bitm-close:hover, .bitm-nav:hover { background: rgba(10, 16, 26, 0.96); }
+  .bitm-close {
+    position: absolute; z-index: 3;
+    top: calc(50% - min(430px, 44vh) - 21px);
+    right: calc(50% - min(720px, 46vw) - 21px);
+    width: 42px; height: 42px; border: 0; border-radius: 999px; cursor: pointer;
+    display: grid; place-items: center;
+    transition: transform .35s cubic-bezier(.2,.9,.25,1), background .25s ease;
+  }
+  .bitm-close:hover { transform: rotate(90deg); }
+  .bitm-close:focus:not(:focus-visible) { outline: none; }
+  .bitm-close svg { width: 16px; height: 16px; }
+  .bitm-nav {
+    position: absolute; top: 50%; transform: translateY(-50%); z-index: 3;
+    width: 48px; height: 48px; border: 0; border-radius: 999px; cursor: pointer;
+    display: grid; place-items: center;
+    transition: transform .25s cubic-bezier(.2,.9,.25,1), background .25s ease, opacity .25s ease;
+  }
+  .bitm-nav svg { width: 19px; height: 19px; }
+  .bitm-nav.bitm-prev { left: calc(50% - min(720px, 46vw) - 24px); }
+  .bitm-nav.bitm-next { right: calc(50% - min(720px, 46vw) - 24px); }
+  .bitm-nav.bitm-prev:hover { transform: translateY(-50%) translateX(-3px); }
+  .bitm-nav.bitm-next:hover { transform: translateY(-50%) translateX(3px); }
+  .bitm-nav:disabled { opacity: 0.28; cursor: default; pointer-events: none; }
+  @media (max-width: 760px) {
+    .bitm-panel { width: 92vw; height: 84vh; }
+    .bitm-close { top: calc(50% - 42vh - 21px); right: calc(50% - 46vw - 21px); }
+    .bitm-nav.bitm-prev { left: calc(50% - 46vw - 24px); }
+    .bitm-nav.bitm-next { right: calc(50% - 46vw - 24px); }
+    .bitm-panel { grid-template-columns: 1fr; grid-template-rows: auto 42vh; align-content: center; gap: 20px; }
+    .bitm-shot { min-height: 0; height: 100%; order: 1; }
+    .bitm-copy { justify-content: flex-start; order: 2; }
+  }
+
   /* ── 2 · work (blue sky, stacking deck) ─────────────────────────────── */
   #s-work { display: block; padding: 22vh 5vw 10vh; color: var(--ink-light); }
   #s-work header { text-align: center; margin-bottom: 12vh; text-shadow: 0 2px 24px rgba(10, 40, 80, 0.35); }
@@ -570,7 +676,11 @@
   #s-cloudline { display: block; min-height: 235vh; padding: 0 5vw; color: var(--ink-light); }
   #s-cloudline .wrap {
     position: sticky; top: 50vh; transform: translateY(-50%);
-    max-width: 1060px; margin: 0 auto;
+    /* width:auto on a sticky block shrinks to its content instead of filling
+       the containing block (unlike static/relative) — without an explicit
+       width, .wrap capped at a fraction of max-width, and .stage inherited
+       that same too-narrow box as its drag/click surface. */
+    width: 100%; max-width: 1060px; margin: 0 auto;
   }
   #s-cloudline header { text-align: center; }
   #s-cloudline .label { color: #bcdcff; }  /* cool, now that the sun is gone */
@@ -892,7 +1002,7 @@
   }
   /* #instant mode (reduced motion / capture probes): reveals snap, no tween */
   .sky-instant .reveal { transition: none !important; }
-  .sky-instant #case, .sky-instant #ai-modal,
+  .sky-instant #case, .sky-instant #ai-modal, .sky-instant #bite-modal,
   .sky-instant .aim-panel { transition: none !important; }
 </style>
 </head>
@@ -1269,6 +1379,202 @@
   })();
 </script>
 
+<!-- Quick-bite detail: opened from a click on the curved-gallery cards in
+     js/sky.js (a WebGL scene, not DOM), which dispatches 'bite:open' rather
+     than calling in here directly — the two files don't otherwise know about
+     each other. Content is read from WORK (gallery-assets.js), same one
+     source the cards themselves render from, so prev/next just walks it. -->
+<div id="bite-modal" role="dialog" aria-modal="true" aria-labelledby="bitm-title" aria-hidden="true">
+  <div class="bitm-stage">
+    <button class="bitm-peek bitm-peek-prev" type="button" aria-label="Previous card" hidden></button>
+    <button class="bitm-peek bitm-peek-next" type="button" aria-label="Next card" hidden></button>
+    <!-- Chrome lives outside .bitm-panel on purpose: the panel is what the
+         FLIP transition below moves and scales (into a peek's box and back),
+         and the close/nav controls need to hold still while that happens. -->
+    <button class="bitm-close" type="button" aria-label="Close">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    </button>
+    <button class="bitm-nav bitm-prev" type="button" aria-label="Previous">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>
+    </button>
+    <button class="bitm-nav bitm-next" type="button" aria-label="Next">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg>
+    </button>
+    <div class="bitm-panel">
+      <div class="bitm-copy">
+        <h3 id="bitm-title"></h3>
+        <p id="bitm-body"></p>
+      </div>
+      <div class="bitm-shot"><img id="bitm-img" alt="" decoding="async"></div>
+    </div>
+  </div>
+</div>
+<script type="module">
+  import { WORK } from './js/gallery-assets.js';
+  (function () {
+    var layer = document.getElementById('bite-modal');
+    var panel = layer && layer.querySelector('.bitm-panel');
+    if (!layer) return;
+
+    var img = document.getElementById('bitm-img');
+    var title = document.getElementById('bitm-title');
+    var body = document.getElementById('bitm-body');
+    var copyEl = layer.querySelector('.bitm-copy');
+    var shotEl = layer.querySelector('.bitm-shot');
+    var closeBtn = layer.querySelector('.bitm-close');
+    var prevBtn = layer.querySelector('.bitm-nav.bitm-prev');
+    var nextBtn = layer.querySelector('.bitm-nav.bitm-next');
+    var prevPeek = layer.querySelector('.bitm-peek-prev');
+    var nextPeek = layer.querySelector('.bitm-peek-next');
+    var lastY = 0, current = 0, animating = false, sessionId = 0;
+
+    // a blank hint that a neighbour exists — hidden outright past the ends
+    function setPeek(el, i) {
+      el.hidden = !(i >= 0 && i < WORK.length);
+    }
+    function render(i) {
+      current = i;
+      var card = WORK[i];
+      title.textContent = card.title || '';
+      body.textContent = card.label || '';
+      img.src = card.src;
+      img.alt = card.title || '';
+      prevBtn.disabled = i <= 0;
+      nextBtn.disabled = i >= WORK.length - 1;
+      setPeek(prevPeek, i - 1);
+      setPeek(nextPeek, i + 1);
+    }
+
+    /* The copy fades and rises into place on its own beat, independent of
+       whatever the panel/shot are doing — used both on first open and after
+       every navigate() so a card's text always "arrives" rather than just
+       being there. */
+    function revealCopy() {
+      copyEl.style.transition = 'none';
+      copyEl.style.opacity = '0';
+      copyEl.style.transform = 'translateY(16px)';
+      void copyEl.offsetWidth;
+      requestAnimationFrame(function () {
+        copyEl.style.transition = 'opacity .5s ease .08s, transform .55s cubic-bezier(.2,.9,.25,1) .08s';
+        copyEl.style.opacity = '1';
+        copyEl.style.transform = 'none';
+      });
+    }
+
+    /* FLIP-style swap: the outgoing card shrinks into the peek slot it's
+       heading toward, then — at full size zero, mid-flight — jumps straight
+       to the OTHER peek's slot, swaps its content there while invisible, and
+       grows back out to full size. The shot image rides its own, slower
+       counter-slide the whole time (a parallax layer inside the FLIP) so the
+       screenshot visibly drifts against the card's own motion instead of
+       moving rigidly with it. */
+    function navigate(dir) {
+      var target = current + dir;
+      if (animating || target < 0 || target >= WORK.length) return;
+      var exitPeek = dir < 0 ? nextPeek : prevPeek;   // where the outgoing card recedes to
+      var entryPeek = dir < 0 ? prevPeek : nextPeek;  // where the incoming card grows from
+      // exitPeek reflects the OLD current's neighbour on that side, which is
+      // about to become false (the old card is leaving) — force it visible
+      // for the geometry read; render(target) sets its real final state.
+      exitPeek.hidden = false;
+
+      var base = panel.getBoundingClientRect();
+      var exitR = exitPeek.getBoundingClientRect();
+      var entryR = entryPeek.getBoundingClientRect();
+      function toRect(r) {
+        return 'translate(' + ((r.left + r.width / 2) - (base.left + base.width / 2)) + 'px,'
+          + ((r.top + r.height / 2) - (base.top + base.height / 2)) + 'px) '
+          + 'scale(' + (r.width / base.width) + ',' + (r.height / base.height) + ')';
+      }
+
+      // setTimeout-driven, not transitionend-driven: transitionend can be
+      // missed (tab backgrounded, transition interrupted, a second property
+      // finishing first), and a missed event here means the panel never
+      // recovers because `animating` would stay stuck true forever.
+      // sessionId guards against a close()+reopen() while this timeout is
+      // still pending — a stale callback would otherwise stomp whatever
+      // card the reopened modal is now showing.
+      var DUR = 260, PARALLAX = dir * -34 + 'px';
+      var mySession = sessionId;
+      animating = true;
+      panel.style.transition = 'transform ' + DUR + 'ms cubic-bezier(.4,0,.2,1), opacity 200ms ease';
+      panel.style.transform = toRect(exitR);
+      panel.style.opacity = '0';
+      shotEl.style.transition = 'transform ' + DUR + 'ms cubic-bezier(.2,.7,.3,1)';
+      shotEl.style.transform = 'translateX(' + PARALLAX + ')';
+
+      setTimeout(function () {
+        if (mySession !== sessionId) return;
+        panel.style.transition = 'none';
+        panel.style.transform = toRect(entryR);
+        shotEl.style.transition = 'none';
+        shotEl.style.transform = 'translateX(' + (dir * 34) + 'px)';
+        void panel.offsetWidth; // flush, so the transition change below actually transitions
+        render(target);
+        revealCopy();
+        requestAnimationFrame(function () {
+          if (mySession !== sessionId) return;
+          panel.style.transition = 'transform ' + DUR + 'ms cubic-bezier(.4,0,.2,1), opacity 200ms ease';
+          panel.style.transform = 'none';
+          panel.style.opacity = '1';
+          shotEl.style.transition = 'transform ' + DUR + 'ms cubic-bezier(.2,.7,.3,1)';
+          shotEl.style.transform = 'none';
+        });
+        setTimeout(function () {
+          if (mySession !== sessionId) return;
+          panel.style.transition = '';
+          shotEl.style.transition = '';
+          animating = false;
+        }, DUR + 40);
+      }, DUR);
+    }
+
+    function resetPanel() {
+      sessionId++;   // invalidates any in-flight navigate() callbacks
+      animating = false;
+      panel.style.transition = panel.style.transform = '';
+      panel.style.opacity = '';
+      shotEl.style.transition = shotEl.style.transform = '';
+      copyEl.style.transition = copyEl.style.opacity = copyEl.style.transform = '';
+    }
+    function open(i) {
+      lastY = scrollY;
+      resetPanel();
+      render(i);
+      revealCopy();
+      document.documentElement.classList.add('bitm-open');
+      layer.classList.add('on');
+      layer.setAttribute('aria-hidden', 'false');
+      closeBtn.focus();
+    }
+    function close() {
+      resetPanel();
+      layer.classList.remove('on');
+      layer.setAttribute('aria-hidden', 'true');
+      document.documentElement.classList.remove('bitm-open');
+      scrollTo({ top: lastY, behavior: 'instant' }); // land back on the gallery
+    }
+
+    addEventListener('bite:open', function (e) { open(e.detail.index); });
+    closeBtn.addEventListener('click', close);
+    prevBtn.addEventListener('click', function () { navigate(-1); });
+    nextBtn.addEventListener('click', function () { navigate(1); });
+    prevPeek.addEventListener('click', function () { navigate(-1); });
+    nextPeek.addEventListener('click', function () { navigate(1); });
+    // backdrop click (the dark gaps around the panel and peeks), not clicks
+    // that started on any of the stage's own controls
+    layer.addEventListener('click', function (e) {
+      if (!e.target.closest('.bitm-panel, .bitm-peek, .bitm-close, .bitm-nav')) close();
+    });
+    addEventListener('keydown', function (e) {
+      if (!layer.classList.contains('on')) return;
+      if (e.key === 'Escape') close();
+      else if (e.key === 'ArrowLeft') navigate(-1);
+      else if (e.key === 'ArrowRight') navigate(1);
+    });
+  })();
+</script>
+
 <div id="case" role="dialog" aria-modal="true" aria-label="Case study" aria-hidden="true">
   <iframe id="case-frame" title="Case study" src="about:blank"></iframe>
 </div>
@@ -1413,7 +1719,7 @@
       .add({ duration: 1500, complete: finish });
   })();
 </script>
-<script type="module" src="js/sky.js?v=107"></script>
+<script type="module" src="js/sky.js?v=119"></script>
 <script>
   /* nav active state — rect-based like the reveals (IO never fires in captures) */
   (function () {

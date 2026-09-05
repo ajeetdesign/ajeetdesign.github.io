@@ -16,11 +16,11 @@
    they appear. */
 
 const WORK = [
-  { src: 'images/bite-cash-ledger.jpg',
+  { src: 'images/bite-cash-ledger.jpg', title: 'Cash Ledger',
     label: 'Three phone screens showing a driver cash-balance ledger in green, amber and red states, each with a deposit prompt' },
-  { src: 'images/bite-prompt-logs.jpg',
+  { src: 'images/bite-prompt-logs.jpg', title: 'Prompt Ops',
     label: 'Two views of a prompt-ops console for an airline support agent — a filtered run log with success, failure and pending states, and a trace timeline opened to one span’s input, output and metadata' },
-  { src: 'images/bite-routing-config.jpg',
+  { src: 'images/bite-routing-config.jpg', title: 'Payment Routing',
     label: 'Two payment routing setup screens — a volume-based configuration splitting traffic across Adyen, Stripe and Authorize.net by percentage, and a rule-based builder with conditions and fallback routing' }
 ];
 

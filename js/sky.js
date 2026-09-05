@@ -7,7 +7,7 @@
 */
 import * as THREE from './three.module.min.js';
 import { createGallery } from './curved-gallery.js';
-import { PROJECTS } from './gallery-assets.js';
+import { PROJECTS, WORK } from './gallery-assets.js';
 
 (function () {
   if (window.__adSkyInit) return; window.__adSkyInit = true;
@@ -176,13 +176,33 @@ import { PROJECTS } from './gallery-assets.js';
      so the section's sticky centring does not move them — this is what
      centres them in the viewport. Just under half a card down, which leaves
      the line sitting above the wall rather than on it. */
-  gallery.place(K[3].p, K[3].l, camera.fov, 0.42);
+  gallery.place(K[3].p, K[3].l, camera.fov, 0.34);
   gallery.rig.visible = false;
   var galRamp = 0;   // eases the cards in behind the section's line
   scene.add(gallery.rig);
   (function () {
     var host = document.querySelector('#s-cloudline .stage');
-    if (host) gallery.bindDrag(host);
+    if (!host) return;
+    gallery.bindDrag(host);
+    /* A click that ends a throw is still a click event — bindDrag's own
+       dragMoved counter is the only reliable way to tell "tapped a card"
+       from "flicked the wall and let go over one". pick() re-raycasts at
+       the pointer's own client coords rather than trusting the continuously
+       updated hover state, so a touch tap that never fired a pointermove
+       still resolves to the right card.
+       Listens on the section, not .stage: the wall's bulge and per-card
+       focus-scale push cards outside .stage's own box (sized to the resting
+       layout), so a narrower hit target missed clicks near those edges —
+       pick() only ever resolves true for an actual card hit either way. */
+    document.querySelector('#s-cloudline').addEventListener('click', function (e) {
+      if (gallery.dragged() > 6) return;
+      var idx = gallery.pick(e.clientX, e.clientY);
+      if (idx === null) return;
+      var card = WORK[idx % WORK.length];
+      dispatchEvent(new CustomEvent('bite:open', { detail: {
+        index: idx % WORK.length, title: card.title, body: card.label, src: card.src
+      } }));
+    });
   })();
 
   // ── sky dome (custom gradient shader, follows the camera) ──────────────
