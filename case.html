@@ -97,8 +97,10 @@
   .g4 { background: linear-gradient(135deg, #e8d5ff, #b98cf5 55%, #8a6bf7); }
   .g5 { background: linear-gradient(135deg, #cfe0f2, #8fa9c6 55%, #5b7796); }
 
-  /* ── section nav: pinned at the very top of the page, above the hero,
-       underline marks the section currently in view ──────────────────────── */
+  /* ── section nav: sits in-flow after the hero, so it's off-screen at the
+       top of the page; sticky only locks it to the viewport top once
+       scrolling carries it there, right as Context arrives. Underline
+       marks the section currently in view. ─────────────────────────────── */
   .secnav {
     position: sticky; z-index: 15; top: 0;
     background: rgba(250, 249, 246, 0.92);
@@ -264,15 +266,38 @@
   .pairs--wide-last { grid-template-columns: 1fr 1fr 1.6fr; }
   .pairs--wide-last .shot { aspect-ratio: 5 / 8; }
   .pairs--wide-last .pair:last-child .shot { aspect-ratio: 1 / 1; }
+  /* roomy: 2 columns, each ~50% wider than the default 3-across split, with
+     the odd third item centred on its own row at the same width as the
+     other two rather than stretched to fill it. */
+  .pairs--roomy { grid-template-columns: repeat(2, 1fr); }
+  .pairs--roomy .pair:nth-child(3) { grid-column: 1 / -1; }
+  .pairs--roomy .pair:nth-child(3) .figure {
+    width: calc(50% - clamp(9px, 1.3vw, 18px)); margin-left: auto; margin-right: auto;
+  }
   .pairs p { max-width: none; margin: 0; }
   .pairs strong { color: var(--ink-dark); font-weight: 700; }
   /* tertiary heading: inside a problem the h3 slots are already taken by the
      problem title and .sub-h, so this is an h4 and must read below both */
   .sub-h4 {
-    font-size: clamp(15px, 1.6vw, 17px); font-weight: 700; letter-spacing: -0.01em;
+    font-size: clamp(18px, 2vw, 21px); font-weight: 800; letter-spacing: -0.015em;
     color: var(--ink-dark); margin: clamp(26px, 3.2vw, 38px) 0 10px;
   }
-  .shot-row { display: grid; gap: clamp(12px, 1.6vw, 18px); margin-bottom: clamp(22px, 2.8vw, 32px); }
+  .shot-row { display: grid; gap: clamp(12px, 1.6vw, 18px); margin: clamp(22px, 2.8vw, 32px) 0; }
+  /* back-to-back asset rows (no text between them) don't need the full
+     text-to-image breathing room twice over — the row's own top margin plus
+     .figure's margin-top were stacking into a much bigger gap between two
+     consecutive shots than between any other pair of blocks. Both sides of
+     the pair need the smaller value: adjacent margins collapse to whichever
+     is LARGER, so shrinking only one side (with the other still at 32px)
+     changes nothing. */
+  .shot-row:has(+ .shot-row) { margin-bottom: 10px; }
+  .shot-row + .shot-row { margin-top: 10px; }
+  .shot-row + .shot-row .figure { margin-top: 0; }
+  /* opt-in (b.tight in cases.src.mjs): pulls a shot-row in close under the
+     paragraph introducing it, for the cases where the asset reads as part
+     of that paragraph's own thought rather than a new visual beat. */
+  .shot-row.tight { margin-top: 10px; }
+  .shot-row.tight .figure { margin-top: 0; }
   .shot-row.n2 { grid-template-columns: repeat(2, 1fr); }
   .shot-row.n3 { grid-template-columns: repeat(3, 1fr); }
   .shot-row.n1 .shot { aspect-ratio: 2 / 1; }
@@ -281,7 +306,7 @@
   .shot-bento {
     display: grid; gap: clamp(12px, 1.6vw, 18px);
     grid-template-columns: 1.5fr 1fr; grid-template-rows: repeat(2, 1fr);
-    aspect-ratio: 16 / 10; margin-bottom: clamp(22px, 2.8vw, 32px);
+    aspect-ratio: 16 / 10; margin: clamp(22px, 2.8vw, 32px) 0;
   }
   .shot-bento .figure { margin: 0; min-height: 0; }
   .shot-bento .figure:first-child { grid-row: 1 / span 2; }
@@ -296,7 +321,7 @@
     display: grid; place-items: center; overflow: hidden;
     border-radius: 24px; padding: clamp(22px, 3.2vw, 44px) 0;
     background: linear-gradient(160deg, #eaf1fa, #dce7f5 58%, #cedcee);
-    margin-bottom: clamp(22px, 2.8vw, 32px);
+    margin: clamp(22px, 2.8vw, 32px) 0;
   }
   .proto video {
     display: block; width: auto; height: clamp(340px, 46vw, 540px);
@@ -317,7 +342,7 @@
   .splash-row {
     display: grid; grid-template-columns: repeat(2, 1fr);
     gap: clamp(14px, 2vw, 26px);
-    margin-bottom: clamp(22px, 2.8vw, 32px);
+    margin: clamp(22px, 2.8vw, 32px) 0;
   }
   .splash { margin: 0; }
   .splash-panel {
@@ -728,6 +753,14 @@ var PAIRS_WIDE_LAST = { porter: {
   'Iteration — narrative|Iteration — visuals|Onboarding concepts': true
 } };
 
+/* roomy: 2 columns instead of 3, the odd one out centred on its own row —
+   for real UI screenshots with body text small enough that 3-across (the
+   .pairs default) makes it unreadable, unlike the Iteration set's mostly-
+   graphic mockups. Keyed the same way as PAIRS_WIDE_LAST. */
+var PAIRS_ROOMY = { porter: {
+  'Verification — the ask|Verification — the selfie|Verification — the result': true
+} };
+
 /* wide sections: place the figure after paragraph index N, keyed by case id → section nav */
 var FIG_AFTER = { porter: { 'Why it couldn\'t scale': 0 } };
 
@@ -963,8 +996,10 @@ function blocksHtml(blocks) {
     if (b.shots && b.shots.length > 1 && next && next.cols &&
         next.cols.length === b.shots.length &&
         !(MERGE_SHOTS[id] || {})[b.shots.map(function (s) { return s[0]; }).join('|')]) {
-      var wide = (PAIRS_WIDE_LAST[id] || {})[b.shots.map(function (s) { return s[0]; }).join('|')];
-      bh += '<div class="pairs' + (wide ? ' pairs--wide-last' : '') + '">' + b.shots.map(function (s, k) {
+      var mkey2 = b.shots.map(function (s) { return s[0]; }).join('|');
+      var wide = (PAIRS_WIDE_LAST[id] || {})[mkey2];
+      var roomy = (PAIRS_ROOMY[id] || {})[mkey2];
+      bh += '<div class="pairs' + (wide ? ' pairs--wide-last' : '') + (roomy ? ' pairs--roomy' : '') + '">' + b.shots.map(function (s, k) {
         return '<div class="pair rv"><figure class="figure">' + shot(s, c.grad, 'bleed') +
           '</figure><p>' + next.cols[k] + '</p></div>';
       }).join('') + '</div>';
@@ -1008,7 +1043,7 @@ function blocksHtml(blocks) {
       var mkey = shots.map(function (s) { return s[0]; }).join('|');
       var merged = (MERGE_SHOTS[id] || {})[mkey];
       if (merged) shots = [[merged, '']];
-      bh += '<div class="shot-row n' + shots.length + '">' + shots.map(function (s) {
+      bh += '<div class="shot-row n' + shots.length + (b.tight ? ' tight' : '') + '">' + shots.map(function (s) {
         return '<figure class="figure rv">' + shot(s, c.grad, 'bleed') + caption(s[0]) + '</figure>';
       }).join('') + '</div>';
     }
@@ -1128,7 +1163,7 @@ h += '<footer class="cs-foot"><div class="wrap">' +
 
 document.getElementById('cs').innerHTML = h;
 
-/* section nav — built from the rendered kickers, pinned above the hero */
+/* section nav — built from the rendered kickers, absent through the hero */
 var navSecs = [].slice.call(document.querySelectorAll('#cs section')).filter(function (s) { return s.querySelector('.kicker'); });
 if (navSecs.length > 1) {
   var secnav = document.createElement('nav');
@@ -1140,7 +1175,11 @@ if (navSecs.length > 1) {
     var sub = s.getAttribute('data-nav') || (s.querySelector('h2') ? s.querySelector('h2').textContent : '');
     return '<a href="#sec' + (i + 1) + '"><b>' + label + '</b><span>' + sub + '</span></a>';
   }).join('') + '</div>';
-  document.getElementById('cs').insertBefore(secnav, document.getElementById('cs').firstChild);
+  /* Before the first real section (Context), not #cs's actual first child
+     (the hero) — sticky only pins once its in-flow position reaches the
+     top, so placed here it stays out of the way through the hero and only
+     locks in as the reader is about to arrive at Context. */
+  document.getElementById('cs').insertBefore(secnav, navSecs[0]);
   var navLinks = [].slice.call(secnav.querySelectorAll('a'));
   var navTick = function () {
     var edge = secnav.getBoundingClientRect().bottom + 80;
