@@ -251,6 +251,22 @@
   }
   .col3 p { max-width: none; margin: 0; }
   .col3 strong { color: var(--ink-dark); font-weight: 700; }
+  /* takeaways, two across. Unboxed on purpose: these are prose, and the card
+     chrome .hmw-card carries would make four short paragraphs read as a feature
+     comparison. The column gap is wider than the row gap so the pairs separate
+     left-to-right before they separate top-to-bottom. */
+  .grid2 {
+    display: grid; grid-template-columns: repeat(2, 1fr);
+    gap: clamp(22px, 3vw, 38px) clamp(28px, 4vw, 60px);
+    margin: clamp(18px, 2.2vw, 26px) 0 clamp(22px, 2.8vw, 32px);
+  }
+  .grid2 h4 {
+    font-size: clamp(15px, 1.6vw, 17px); font-weight: 700; letter-spacing: -0.015em;
+    line-height: 1.35; color: var(--ink-dark); margin: 0 0 8px;
+  }
+  .grid2 p { max-width: none; margin: 0; font-size: clamp(13px, 1.4vw, 15px); line-height: 1.65; }
+  .grid2 strong { color: var(--ink-dark); font-weight: 700; }
+  @media (max-width: 700px) { .grid2 { grid-template-columns: 1fr; } }
   /* image + the copy describing it, kept as one unit so they travel together
      when the row collapses to a single column */
   .pairs {
@@ -831,7 +847,9 @@ var DEMOS = { porter: {
   /* The dashboard, in the four states a partner actually meets it in. These
      screens export at 720x1440 rather than the verification set's 391x860, so
      the grid is told its aspect instead of stretching them into the other's.
-     TODO the two step labels and their copy are placeholders — replace. */
+     The note here is a plain lead-in, not a numbered {label,text} pair like the
+     verification demo's: it introduces BOTH categories below rather than
+     describing the clip above it, so the two steps take 01 and 02. */
   'Final dashboard': {
     ratio: '1 / 2',
     video: {
@@ -839,18 +857,18 @@ var DEMOS = { porter: {
       poster: 'images/porter-dashboard-poster.jpg',
       alt: 'A scroll through the finished performance dashboard — the month\'s progress card, the day\'s audits, earnings and audit history, and the tutorials at the bottom'
     },
-    note: 'TODO — the lead-in between the clip and the four states.',
+    note: 'For partners falling short on <strong>performance metrics</strong>, whether it was the number of days or pass percentage, we highlighted the gap upfront along with the <strong>next steps they could take</strong>. For the previous month\'s payout, we also surfaced the <strong>results upfront</strong>, so partners always knew where they stood.',
     steps: [
-      { label: 'TODO — the progress pair',
-        text: 'TODO — what the two at-risk states are doing: naming the shortfall and the action that closes it.',
+      { label: 'Gap and next steps',
+        text: 'Whether a partner was short on days online or on pass percentage, we named the exact gap and the one action that would close it.',
         shots: [
           { src: 'images/porter-dashboard-01-days-short.png',
             alt: 'The dashboard at risk on days online — 15 of 24, telling the partner to go online for four more days and pass verification' },
           { src: 'images/porter-dashboard-02-pass-short.png',
             alt: 'The dashboard at risk on pass rate — 50% against a 60% bar, telling the partner they need six more days of successful verification, with a link to learn how to click the selfie' }
         ] },
-      { label: 'TODO — the earnings pair',
-        text: 'TODO — what the two payout states are doing: closing the month, paid or not, against the same progress card.',
+      { label: 'Results upfront',
+        text: 'We surfaced the previous month\'s payout on the same card — ₹1500 paid, or ₹0 with the reason it fell through.',
         shots: [
           { src: 'images/porter-dashboard-03-payout-paid.png',
             alt: 'The dashboard on track, with June\'s payout of ₹1500 added to the partner\'s wallet' },
@@ -1062,6 +1080,11 @@ function blocksHtml(blocks) {
     else if (b.sub4) bh += '<h4 class="sub-h4 rv">' + b.sub4 + '</h4>';
     else if (b.cols) bh += '<div class="col3 rv">' + b.cols.map(function (col) {
       return '<p>' + col + '</p>';
+    }).join('') + '</div>';
+    /* [heading, body] pairs laid two across — four of them make the 2x2 the
+       reflection uses. No icons: the headings already say what each one is. */
+    else if (b.grid2) bh += '<div class="grid2 rv">' + b.grid2.map(function (g) {
+      return '<div><h4>' + g[0] + '</h4><p>' + g[1] + '</p></div>';
     }).join('') + '</div>';
     else if (b.clips) {
       bh += '<div class="splash-row">' + b.clips.map(function (cl) {
