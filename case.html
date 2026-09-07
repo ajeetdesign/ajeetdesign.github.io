@@ -156,6 +156,13 @@
   .ch-split .figure { margin-top: 0; display: flex; flex-direction: column; }
   .ch-split .shot { flex: 1; aspect-ratio: auto; min-height: 320px; }
   .wide-copy { max-width: 760px; }
+  /* blocksHtml gives every `p` block its own .wide-copy wrapper, so each <p> is
+     an only child and therefore matches `p:last-child { margin-bottom: 0 }`
+     above — which is meant for trailing space inside multi-paragraph cards, but
+     here silently stripped the gap from EVERY paragraph, running consecutive
+     ones together. Restore it on the wrapper, and only between two adjacent
+     copy blocks, so spacing around shots, lists and headings is untouched. */
+  .wide-copy + .wide-copy { margin-top: 16px; }
   .wide-copy--rest { margin-top: clamp(18px, 2.4vw, 28px); }
   /* the opening beat of a wide section: heading left, its first paragraph
      right, rather than stacked — the image still runs full-width below */
@@ -200,6 +207,10 @@
     display: grid; grid-template-columns: minmax(160px, 210px) minmax(0, 1fr);
     gap: clamp(28px, 4vw, 64px); align-items: start;
   }
+  /* space, not a rule, between one problem and the next. The extra top padding
+     lands on every problem but the first, which already opens the approach
+     section cleanly on its own. */
+  .prob--sep { padding-top: clamp(56px, 7vw, 88px); }
   .prob-rail { position: sticky; top: 100px; }
   .prob-k {
     font-size: 11px; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase;
@@ -269,7 +280,7 @@
   /* roomy: 2 columns, each ~50% wider than the default 3-across split, with
      the odd third item centred on its own row at the same width as the
      other two rather than stretched to fill it. */
-  .pairs--roomy { grid-template-columns: repeat(2, 1fr); }
+  .pairs--roomy { grid-template-columns: repeat(2, 1fr); text-align: center; }
   .pairs--roomy .pair:nth-child(3) { grid-column: 1 / -1; }
   .pairs--roomy .pair:nth-child(3) .figure {
     width: calc(50% - clamp(9px, 1.3vw, 18px)); margin-left: auto; margin-right: auto;
@@ -321,7 +332,10 @@
     display: grid; place-items: center; overflow: hidden;
     border-radius: 24px; padding: clamp(22px, 3.2vw, 44px) 0;
     background: linear-gradient(160deg, #eaf1fa, #dce7f5 58%, #cedcee);
-    margin: clamp(22px, 2.8vw, 32px) 0;
+    /* tight underneath: the note that follows (asset 01) describes THIS clip,
+       so it has to read as attached to it. The air goes below that note
+       instead — see .proto-note — which is where the step sequence begins. */
+    margin: clamp(22px, 2.8vw, 32px) 0 clamp(14px, 1.8vw, 20px);
   }
   .proto video {
     display: block; width: auto; height: clamp(340px, 46vw, 540px);
@@ -371,7 +385,9 @@
      makes them read as one set; the widths differ because the devices do. */
   .vgrid {
     display: grid; grid-template-columns: repeat(4, 1fr); align-items: end;
-    gap: clamp(14px, 1.8vw, 24px) clamp(10px, 1.4vw, 20px);
+    /* the row gap is wide because it is the only thing separating the screens
+       from their step labels now — there is no rule between them */
+    gap: clamp(26px, 3.4vw, 44px) clamp(10px, 1.4vw, 20px);
     margin-bottom: clamp(22px, 2.8vw, 32px);
     --screen: 391 / 860;
   }
@@ -391,19 +407,26 @@
     box-shadow: 0 0 0 5px #1b1f26, 0 0 0 6px #454b55,
                 0 16px 30px -20px rgba(15, 30, 50, 0.45);
   }
-  .vgrid .lbl {
-    grid-column: span 2; margin: 0;
-    padding-top: 12px; border-top: 1px solid var(--rule);
-  }
-  .vgrid .lbl .t {
+  /* unscoped (not ".vgrid .lbl") so a numbered {label,text} note can reuse
+     the exact same look outside the grid, as "asset 01" ahead of the steps.
+     No rule or top padding — space alone separates a label from what's above it */
+  .lbl { grid-column: span 2; margin: 0; }
+  /* the grid's align-items: end (which sits the four screens on a common
+     baseline) would otherwise drop the shorter step's block to the bottom of
+     the row — hang both step labels from the top instead so their numbers and
+     first lines line up regardless of how many lines of copy each carries */
+  .vgrid .lbl { align-self: start; }
+  .lbl .t {
     display: flex; align-items: baseline; gap: 9px; margin: 0 0 6px;
     font-size: clamp(13px, 1.45vw, 15px); font-weight: 700;
     letter-spacing: -0.01em; color: var(--ink-dark);
   }
-  .vgrid .lbl .n { font-size: 10px; letter-spacing: 0.18em; color: var(--accent); flex: none; }
-  .vgrid .lbl .d { margin: 0; font-size: clamp(13px, 1.35vw, 14px); line-height: 1.6; max-width: 48ch; }
-  /* the lead-in between the clip and the four screens */
-  .proto-note { max-width: 760px; margin: 0 0 clamp(18px, 2.4vw, 26px); }
+  .lbl .n { font-size: 10px; letter-spacing: 0.18em; color: var(--accent); flex: none; }
+  .lbl .d { margin: 0; font-size: clamp(13px, 1.35vw, 14px); line-height: 1.6; max-width: 48ch; }
+  /* the lead-in between the clip and the four screens. It belongs to the clip
+     above it (tight margin on .proto), so the break between the two halves of
+     the demo lands here, under it, rather than above. */
+  .proto-note { max-width: 760px; margin: 0 0 clamp(48px, 6vw, 76px); }
   /* four across gets too small on a phone — two per row, each step's label
      still directly under its own pair rather than both sinking to the end */
   @media (max-width: 700px) {
@@ -434,6 +457,9 @@
   .blist { max-width: 720px; margin: 0 0 16px; padding-left: 22px; color: var(--ink-soft); font-size: clamp(14px, 1.45vw, 16px); line-height: 1.7; }
   .blist li { margin-bottom: 6px; }
   .blist li::marker { color: var(--accent); }
+  /* a number is wider than a bullet, so the ordered variant needs the room */
+  ol.blist { padding-left: 28px; }
+  ol.blist li::marker { font-weight: 700; }
   .sub-h {
     font-family: var(--font-serif); font-weight: 400; letter-spacing: -0.01em;
     font-size: clamp(22px, 2.5vw, 28px);
@@ -781,18 +807,19 @@ var DEMOS = { porter: {
       poster: 'images/porter-verification-nudge-poster.jpg',
       alt: 'The redesigned verification prompt, showing a partner what a valid selfie looks like before they take it'
     },
-    note: 'The prompt does the teaching before the camera opens. What follows is the flow a partner actually moves through — two screens to take the photo, two to answer it.',
+    note: { label: 'Increasing comprehension',
+      text: 'We used a Lottie animation to guide partners on what\'s important to click, and to highlight it.' },
     steps: [
-      { label: 'Guided capture',
-        text: 'The countdown and the requirement stay on screen while the photo is being taken, and the capture comes back for review before it is sent.',
+      { label: 'Visibility of timer',
+        text: 'We added a timer to give a better sense of how much time is left to complete the task, along with a preview and the option to retake.',
         shots: [
           { src: 'images/porter-verify-01-capture.jpg',
             alt: 'The capture screen, counting down and showing what has to be in frame' },
           { src: 'images/porter-verify-02-review.jpg',
             alt: 'The captured selfie with retake and submit, before anything is sent' }
         ] },
-      { label: 'Instant result',
-        text: 'The model answers at the point of capture rather than the next day — a pass, or a failure that names what was wrong with the photo.',
+      { label: 'Reason for failure',
+        text: 'With the results, we focused on highlighting the reason it failed.',
         shots: [
           { src: 'images/porter-verify-03-pass.jpg',
             alt: 'Audit passed, confirmed at the point of capture' },
@@ -897,14 +924,26 @@ function demo(d) {
     ' autoplay muted loop playsinline preload="metadata" disablepictureinpicture' +
     ' aria-label="' + d.video.alt + '"></video></div>' : '';
   /* every mockup first, then the labels — the grid puts each label back under
-     its own pair, and this order is what the phone breakpoint reshuffles */
-  if (d.note) h += '<p class="proto-note rv">' + d.note + '</p>';
+     its own pair, and this order is what the phone breakpoint reshuffles.
+     A note can be a plain lead-in string, or — like a step — a numbered
+     {label, text} pair; the latter takes 01 and pushes the steps after it
+     to 02, 03…, so the whole demo reads as one numbered sequence. */
+  var stepStart = 1;
+  if (d.note) {
+    if (typeof d.note === 'object') {
+      h += '<div class="lbl proto-note rv"><p class="t"><span class="n">01</span>' +
+        d.note.label + '</p>' + (d.note.text ? '<p class="d">' + d.note.text + '</p>' : '') + '</div>';
+      stepStart = 2;
+    } else {
+      h += '<p class="proto-note rv">' + d.note + '</p>';
+    }
+  }
   var shots = '', labels = '';
   (d.steps || []).forEach(function (st, i) {
     shots += st.shots.map(function (s) {
       return '<img src="' + s.src + '" alt="' + s.alt + '" loading="lazy" decoding="async">';
     }).join('');
-    labels += '<div class="lbl"><p class="t"><span class="n">0' + (i + 1) + '</span>' +
+    labels += '<div class="lbl"><p class="t"><span class="n">0' + (i + stepStart) + '</span>' +
       st.label + '</p>' + (st.text ? '<p class="d">' + st.text + '</p>' : '') + '</div>';
   });
   var ratio = d.ratio ? ' style="--screen:' + d.ratio + '"' : '';
@@ -1011,6 +1050,10 @@ function blocksHtml(blocks) {
     else if (b.quote) bh += '<blockquote class="bq rv">&ldquo;' + b.quote + '&rdquo;' +
       (b.cite ? '<cite>' + b.cite + '</cite>' : '') + '</blockquote>';
     else if (b.list) bh += '<ul class="blist rv">' + b.list.map(function (li) { return '<li>' + li + '</li>'; }).join('') + '</ul>';
+    /* ordered twin of `list`, for items the copy has already counted ("two
+       areas", "three steps") — there the numbers carry meaning the bullets
+       would throw away. Same .blist styling; ::marker colours a number too. */
+    else if (b.olist) bh += '<ol class="blist rv">' + b.olist.map(function (li) { return '<li>' + li + '</li>'; }).join('') + '</ol>';
     else if (b.insight) bh += '<aside class="insight rv">' + b.insight + '</aside>';
     else if (b.metrics) bh += '<div class="outcomes rv">' + b.metrics.map(function (m) {
       return '<div class="outcome"><p class="stat">' + m[0] + '</p><h3>' + m[1] + '</h3>' + (m[2] ? '<p>' + m[2] + '</p>' : '') + '</div>';
@@ -1098,7 +1141,7 @@ function resultRailHtml(result) {
   var blocks = pr.blocks.slice();
   var last = blocks[blocks.length - 1];
   var result = (last && last.result) ? blocks.pop().result : null;
-  h += '<div class="wrap prob">' +
+  h += '<div class="wrap prob' + (i > 0 ? ' prob--sep' : '') + '">' +
     '<div class="prob-rail">' +
       '<p class="prob-k rv">Problem 0' + (i + 1) + '</p>' +
       '<h3 class="prob-h rv">' + pr.h + '</h3>' +
