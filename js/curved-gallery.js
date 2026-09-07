@@ -31,14 +31,18 @@
       CDN on every page load, so the throw is written out below. The easing is
       the same curve.                                                        */
 
-/* The card's own aspect, not the reference's canvas size. The procedural art
-   was drawn at 1152x712 (1.62) onto a 1.70 card and quietly stretched to fit;
-   a photograph of real UI cannot absorb that, so the backing canvas matches
-   the card and the shot is cover-cropped into it instead. */
-const CW = 1600, CH = Math.round(CW * 3.3 / 5.6);
+/* The card and texture share the supplied screenshot ratio. Keeping both at
+   16:9 means product UI is never stretched or silently cover-cropped.
+
+   2048 rather than 1600: a card's on-screen size is pinned to the viewport
+   HEIGHT, not its width (the wall sits at a fixed distance under a fixed fov,
+   so `card ≈ 0.71 * viewport height` in CSS px). At DPR 2 a 1600 texture is
+   already being magnified on any window taller than ~1130px, which is most of
+   a maximised laptop. 2048 covers up to ~1450px tall before it upscales. */
+const CW = 2048, CH = Math.round(CW * 9 / 16);
 
 /* --- layout constants (verbatim) --- */
-const PW = 5.6, PH = 3.3, GAP = 0.28, STEP = PW + GAP;
+const PW = 5.6, PH = PW * 9 / 16, GAP = 0.28, STEP = PW + GAP;
 const RADIUS = 19;                  // gentle arc — cards enter/exit at a shallow angle
 
 /* --- the fixed "lens": a spherical bulge left of centre (verbatim) --- */
@@ -113,25 +117,24 @@ const fsh = `
   uniform sampler2D uMap;
   uniform vec2  uAspect;
   uniform float uHover;
-  uniform float uTime;
-  uniform float uSeed;
   uniform float uFade;
+  /* uTime/uSeed used to live here to phase the ken-burns pan. The vertex stage
+     still needs uTime for the ripple, so it stays in the shared uniforms object
+     — it just has nothing to do in this stage any more. */
   varying vec2  vUv;
   varying float vF;
   varying float vB;
   varying float vPress;
   void main(){
-    // slow ken-burns drift so screens feel "live"
-    float t = uTime * 0.05 + uSeed * 10.0;
-    vec2 kbUv = (vUv - 0.5) * (0.965 + 0.02 * sin(t)) + 0.5;
-    kbUv += vec2(sin(t * 0.7), cos(t * 0.9)) * 0.006;
-    /* The baked heading/arrow live in the bottom ~20% of the texture (below
-       the scrim). Panning that band with the rest of the shot would drift the
-       chrome around, and every card runs its own uSeed phase, so the same
-       fixed-pixel padding would land at a visibly different spot card to
-       card at any given instant. Hold that band to the raw, unpanned uv. */
-    float kbAmt = smoothstep(0.14, 0.22, vUv.y);
-    vec2 uv = mix(vUv, kbUv, kbAmt);
+    /* No ken-burns pan. The reference drifted its uv (scale 0.965 + a sine)
+       to make procedural artwork feel "live" — but that scale is a permanent
+       3–6% MAGNIFICATION, and the drift moves the sample point by a fraction
+       of a texel every frame. Low-frequency artwork absorbs both; a screenshot
+       of real UI does not, and 1px strokes and 12px labels smeared into
+       permanent mush. This was the single largest cause of the cards reading
+       soft. The wall already has plenty of motion of its own — the drift,
+       the bulge, the whip — so the shot itself holds still and stays sharp. */
+    vec2 uv = vUv;
     vec4 tex = texture2D(uMap, uv);
     // rounded corners (SDF in plane units)
     vec2 p = (vUv - 0.5) * uAspect;
@@ -142,21 +145,25 @@ const fsh = `
     if (alpha < 0.01) discard;
     // brightness = horizontal falloff from the same focus, wider than the bulge,
     // so a card fades smoothly across its own width as it moves away
-    /* Three separate things were making these read dull. The floor was 0.84,
-       tuned back when the falloff alone made an off-focus card fade to a
-       fifth against a near-black reference page — over the bright sky and a
-       real UI screenshot that same floor just reads as a haze over the shot,
-       so it comes up again to keep depth cueing without muddying the asset. */
-    float bright = mix(0.94, 1.0, smoothstep(0.03, 0.85, vB));
-    bright = min(bright + uHover * 0.12, 1.05);
+    /* The floor was 0.84, tuned back when the falloff alone made an off-focus
+       card fade to a fifth against a near-black reference page. Over a bright
+       sky and a real UI screenshot that reads as haze over the shot, so it has
+       come up twice — 0.94, now 0.985. Depth is already cued by the focus
+       scale and the bulge; dimming the artwork to say the same thing again
+       only costs it contrast. */
+    float bright = mix(0.985, 1.0, smoothstep(0.03, 0.85, vB));
+    bright = min(bright + uHover * 0.10, 1.09);
     /* No gamma lift any more. It was here because the reference's artwork was
        drawn for a dark page — black rooms and midnight scenes that only went
        muddy when scaled. These are bright shots of real UI on near-white
        ground, where lifting the midtones just flattens them against the
        background and costs the 11px labels their contrast. */
     vec3 col = tex.rgb * bright;
-    col *= 1.0 - vPress * 0.14;           // soft shadow inside the press dent
-    col *= 1.0 - 0.03 * length(vUv - 0.5);   // vignette eased for the same reason
+    col *= 1.0 - vPress * 0.10;           // soft shadow inside the press dent
+    /* No vignette. It was 0.03 and looked harmless in isolation, but it is a
+       full-frame darkening over artwork that is already sitting behind a
+       brightness falloff and a scrim — the same stacking that made the whole
+       scene read dull once before (a #vignette overlay was removed then too). */
     gl_FragColor = vec4(col, alpha * uFade);
   }
 `;
@@ -170,48 +177,61 @@ let pending = [];
 /* Baked onto every card, bottom-left title and bottom-right arrow, so the
    glyph rides the texture instead of a DOM node that would have to track a
    plane bulging and curving in 3D every frame. */
+function pill(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.arcTo(x + w, y, x + w, y + h, r);
+  ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r);
+  ctx.arcTo(x, y, x + w, y, r);
+  ctx.closePath();
+}
+
 function drawCardOverlay(ctx, title) {
   if (!title) return;
-  /* The vertex shader's "curl" pulls each card horizontally toward the fixed
-     lens focus at the left of the wall, so the card nearest that focus gets
-     its left edge visually compressed toward centre — the same fixed pixel
-     padding then reads tighter on that card than on ones further from the
-     focus. The arrow sits at the right, away from the focus, so it doesn't
-     need the same cushion. */
-  const padX = 56, padTextL = 104, padB = 96;
-  const grad = ctx.createLinearGradient(0, CH * 0.8, 0, CH);
-  grad.addColorStop(0, 'rgba(8, 14, 22, 0)');
-  grad.addColorStop(1, 'rgba(8, 14, 22, 0.3)');
-  ctx.fillStyle = grad;
-  ctx.fillRect(0, CH * 0.8, CW, CH * 0.2);
+  /* A pill behind the title, not the full-width gradient this started as.
+     That gradient laid 30% black across the bottom fifth of every card. It was
+     unobtrusive over artwork that had nothing there, but the shots are now
+     cropped tight to their UI, so the band fell across real content — and a
+     permanent dark wash over a fifth of the wall was part of what made the
+     cards read dull. A pill darkens only its own footprint.
 
-  ctx.font = '600 34px "Plus Jakarta Sans", -apple-system, sans-serif';
-  ctx.textBaseline = 'alphabetic';
-  ctx.shadowColor = 'rgba(0, 0, 0, 0.4)';
-  ctx.shadowBlur = 16;
-  ctx.fillStyle = '#fff';
-  ctx.fillText(title, padTextL, CH - padB + 6);
-  ctx.shadowBlur = 0;
+     Sizes are expressed against the resolution they were tuned at, so the
+     chrome keeps its proportions if the texture size changes again. */
+  const u = CW / 1600;
+  const padX = 48 * u, padB = 44 * u, fs = 34 * u;
 
-  const r = 42, cx = CW - padX - r, cy = CH - padB - r + 8;
-  ctx.beginPath();
-  ctx.arc(cx, cy, r, 0, Math.PI * 2);
-  ctx.fillStyle = 'rgba(255, 255, 255, 0.16)';
+  ctx.font = '600 ' + fs.toFixed(1) + 'px "Plus Jakarta Sans", -apple-system, sans-serif';
+  ctx.textBaseline = 'middle';
+  const h = 68 * u, r = h / 2;
+  const w = ctx.measureText(title).width + r * 2 + 8 * u;
+  const x = padX, y = CH - padB - h;
+
+  ctx.fillStyle = 'rgba(8, 14, 22, 0.55)';
+  pill(ctx, x, y, w, h, r);
   ctx.fill();
-  ctx.lineWidth = 2;
-  ctx.strokeStyle = 'rgba(255, 255, 255, 0.55)';
-  ctx.stroke();
+  ctx.fillStyle = '#fff';
+  ctx.fillText(title, x + r + 4 * u, y + h / 2 + 1 * u);
+
+  /* The arrow keeps its own chip so it reads as an affordance rather than a
+     mark printed on the shot — and so it stays legible over a pale UI, which
+     the old translucent-white circle did not. */
+  const ar = 34 * u, cx = CW - padX - ar, cy = CH - padB - ar;
+  ctx.beginPath();
+  ctx.arc(cx, cy, ar, 0, Math.PI * 2);
+  ctx.fillStyle = 'rgba(8, 14, 22, 0.55)';
+  ctx.fill();
 
   ctx.strokeStyle = '#fff';
-  ctx.lineWidth = 3.4;
+  ctx.lineWidth = 3.4 * u;
   ctx.lineCap = 'round';
   ctx.lineJoin = 'round';
   ctx.beginPath();
-  ctx.moveTo(cx - 13, cy);
-  ctx.lineTo(cx + 13, cy);
-  ctx.moveTo(cx + 3, cy - 11);
-  ctx.lineTo(cx + 13, cy);
-  ctx.lineTo(cx + 3, cy + 11);
+  ctx.moveTo(cx - 12 * u, cy);
+  ctx.lineTo(cx + 12 * u, cy);
+  ctx.moveTo(cx + 3 * u, cy - 10 * u);
+  ctx.lineTo(cx + 12 * u, cy);
+  ctx.lineTo(cx + 3 * u, cy + 10 * u);
   ctx.stroke();
 }
 
@@ -326,7 +346,6 @@ export function createGallery(THREE, cards, maxAniso) {
         uMouse: { value: new THREE.Vector2(0.5, 0.5) },
         uHover: { value: 0 },
         uTime: { value: 0 },
-        uSeed: { value: i / N },
         uFade: { value: 0 },
         uAspect: { value: new THREE.Vector2(PW, PH) }
       }
@@ -488,12 +507,17 @@ export function createGallery(THREE, cards, maxAniso) {
     screens.forEach(function (m, i) {
       const on = i === hovered ? 1 : 0;
       const u = m.material.uniforms;
-      u.uHover.value += (on - u.uHover.value) * 0.12;
-      u.uPress.value += (on - u.uPress.value) * 0.12;
-      // a little lift on hover, same ease as the brightness/press above
-      const target = 1 + on * 0.06;
+      u.uHover.value += (on - u.uHover.value) * 0.14;
+      u.uPress.value += (on - u.uPress.value) * 0.14;
+      /* A real lift on hover, not the 6% this had — at that size the card
+         barely acknowledged the cursor, which on a wall that drifts on its own
+         read as nothing happening at all. The hovered card also halts the
+         drift (see AUTO above), so the scale is what says why it stopped. */
+      const target = 1 + on * 0.18;
       const cur = m.userData.hoverScale || 1;
-      m.userData.hoverScale = cur + (target - cur) * 0.12;
+      /* Eases in faster than it settles back, so picking a card feels
+         immediate while letting go feels unhurried. */
+      m.userData.hoverScale = cur + (target - cur) * (on ? 0.18 : 0.10);
       m.scale.setScalar(m.userData.hoverScale * m.userData.focusScale);
     });
     // the press point glides after the cursor -> "pressed on movement"

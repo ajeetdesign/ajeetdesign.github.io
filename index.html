@@ -23,6 +23,9 @@
     --storm-accent: #8fb7ff;
     --meadow-ink: #17301f;
     --meadow-soft: rgba(23, 48, 31, 0.74);
+    /* Shared by the WebGL carousel and its detail view. Keep new Quick Bites
+       exports at 16:9 so product UI is shown without a crop. */
+    --quick-bite-ratio: 16 / 9;
     /* one size for the three pillar glyphs, in the hero and on the card alike.
        The flight interpolates between those two ends, so they must not drift. */
     --glyph: clamp(38px, 3.4vw, 48px);
@@ -486,37 +489,47 @@
   /* both the current card and the two peeks share this footprint — the peeks
      are the same box, just scaled down and slid sideways, so they read as
      the same deck rather than a different-shaped preview */
+  /* Height trimmed from 860 once the shot grew: a 16:9 asset in a two-thirds
+     column stands ~482px, and the taller box left nearly 300px of empty panel
+     under it. The close/nav offsets below are half of these two numbers — they
+     have to move together or the chrome drifts off the panel's corners. */
   .bitm-panel, .bitm-peek {
-    width: min(1440px, 92vw); height: min(860px, 88vh); border-radius: 24px;
+    width: min(1440px, 92vw); height: min(740px, 84vh); border-radius: 24px;
   }
+  /* The shot carries roughly two thirds of the width. At the old 1fr 1.15fr
+     the asset column came out ~676px, and a 16:9 box in it stands only ~380px
+     tall inside a ~740px content area — over a third of the panel was empty
+     while the artwork it exists to show sat small. The copy is a short title
+     and two lines; it does not need parity with the thing being described. */
   .bitm-panel {
     position: relative; z-index: 2;
     background: #fbfdff;
-    display: grid; grid-template-columns: 1fr 1.15fr; align-items: center;
-    gap: clamp(24px, 3vw, 56px); padding: clamp(26px, 3.6vw, 60px);
+    display: grid; grid-template-columns: 1fr 1.9fr; align-items: center;
+    gap: clamp(20px, 2.6vw, 44px); padding: clamp(22px, 2.8vw, 44px);
     overflow: hidden;
     box-shadow: 0 60px 140px -40px rgba(0, 0, 0, 0.6);
   }
-  .bitm-copy { display: flex; flex-direction: column; justify-content: center; gap: 16px; min-height: 0; min-width: 0; max-width: 44ch; }
+  .bitm-copy { display: flex; flex-direction: column; justify-content: center; gap: 16px; min-height: 0; min-width: 0; max-width: 38ch; }
   .bitm-copy h3 {
     font-size: clamp(22px, 2.6vw, 36px); font-weight: 800; letter-spacing: -0.03em;
     line-height: 1.15; margin: 0; color: var(--ink-dark);
   }
   .bitm-copy p { font-size: clamp(14px, 1.3vw, 16px); line-height: 1.65; color: rgba(28, 43, 58, 0.68); margin: 0; }
   .bitm-shot {
-    border-radius: 18px; min-height: 0; height: 100%; align-self: stretch;
+    aspect-ratio: var(--quick-bite-ratio); border-radius: 18px;
+    min-height: 0; width: 100%; max-height: 100%; align-self: center;
     border: 1px solid rgba(20, 40, 70, 0.1);
     overflow: hidden; background: #fbfdff;
     display: grid; place-items: center;
   }
-  .bitm-shot img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .bitm-shot img { width: 100%; height: 100%; object-fit: contain; display: block; }
   /* peeks: blank cards pinned at the stage's own edges, not the panel's —
      each sits mostly off past the viewport edge so only a sliver of its
      rounded corner shows, with open backdrop between that sliver and the
      panel. No preview content, just a hint that another card is there. */
   .bitm-peek {
     position: absolute; top: 50%; z-index: 1;
-    width: 220px; height: min(620px, 66vh);
+    width: 220px; height: min(530px, 63vh);   /* same ~72% of the panel's height as before it was trimmed */
     border: 0; padding: 0; cursor: pointer; border-radius: 24px;
     background: #48484c;
     transition: background .25s ease, opacity .3s ease;
@@ -540,7 +553,7 @@
   .bitm-close:hover, .bitm-nav:hover { background: rgba(10, 16, 26, 0.96); }
   .bitm-close {
     position: absolute; z-index: 3;
-    top: calc(50% - min(430px, 44vh) - 21px);
+    top: calc(50% - min(370px, 42vh) - 21px);
     right: calc(50% - min(720px, 46vw) - 21px);
     width: 42px; height: 42px; border: 0; border-radius: 999px; cursor: pointer;
     display: grid; place-items: center;
@@ -566,8 +579,8 @@
     .bitm-close { top: calc(50% - 42vh - 21px); right: calc(50% - 46vw - 21px); }
     .bitm-nav.bitm-prev { left: calc(50% - 46vw - 24px); }
     .bitm-nav.bitm-next { right: calc(50% - 46vw - 24px); }
-    .bitm-panel { grid-template-columns: 1fr; grid-template-rows: auto 42vh; align-content: center; gap: 20px; }
-    .bitm-shot { min-height: 0; height: 100%; order: 1; }
+    .bitm-panel { grid-template-columns: 1fr; grid-template-rows: auto auto; align-content: center; gap: 20px; }
+    .bitm-shot { min-height: 0; order: 1; }
     .bitm-copy { justify-content: flex-start; order: 2; }
   }
 
@@ -1205,9 +1218,14 @@
            work did not become decorative when it moved onto the carousel, so
            the descriptions come with it. -->
       <ul class="sr-only">
-        <li>Three phone screens showing a driver cash-balance ledger in green, amber and red states, each with a deposit prompt.</li>
-        <li>Two views of a prompt-ops console for an airline support agent &mdash; a filtered run log with success, failure and pending states, and a trace timeline opened to one span&rsquo;s input, output and metadata.</li>
-        <li>Two payment routing setup screens &mdash; a volume-based configuration splitting traffic across Adyen, Stripe and Authorize.net by percentage, and a rule-based builder with conditions and fallback routing.</li>
+        <li>A prompt-ops console for an airline support agent &mdash; a run log filtered down to success, failure and pending states, beside a trace timeline opened to one span&rsquo;s input, output and metadata.</li>
+        <li>Three screens from a logistics booking flow &mdash; vehicle categories and rewards on the home screen, a picker comparing capacity, price and pickup time, and a review step carrying loading help and proof-of-delivery add-ons.</li>
+        <li>A call-audit template builder &mdash; the violations a template watches for, scoring rules for non-critical and not-applicable answers, the escalation each violation triggers, and the teams it applies to.</li>
+        <li>Three screens from an in-app lending journey &mdash; the offer splash naming its participating lenders, a bank-statement step offering account-aggregator consent instead of a manual upload, and three EMI offers compared side by side.</li>
+        <li>A lending console for lead distribution &mdash; active lenders ranked by drag with their share of leads, the inactive ones waiting to be switched on, and a primer on what a soft integration changes before it is turned on.</li>
+        <li>Three screens turning earned coins into gift cards &mdash; a catalogue browsable by category, a purchase sheet with preset and custom amounts against a coin balance, and the redeemed card with its code and PIN.</li>
+        <li>A four-step wizard for connecting a payment processor &mdash; credentials, webhooks, payment methods and a summary &mdash; with each field explained at the point it is asked for.</li>
+        <li>A drop-in checkout in two themes &mdash; a light sheet grouping card entry, wallets, pay-later and crypto by type, and a dark variant leading with express wallets above the shopper&rsquo;s saved cards.</li>
       </ul>
     </div>
   </section>
@@ -1410,7 +1428,7 @@
   </div>
 </div>
 <script type="module">
-  import { WORK } from './js/gallery-assets.js';
+  import { WORK } from './js/gallery-assets.js?v=4';
   (function () {
     var layer = document.getElementById('bite-modal');
     var panel = layer && layer.querySelector('.bitm-panel');
@@ -1437,7 +1455,9 @@
       var card = WORK[i];
       title.textContent = card.title || '';
       body.textContent = card.label || '';
-      img.src = card.src;
+      /* the crop, not the composition the carousel card shows — see the header
+         of gallery-assets.js. Falls back so a card without one still renders. */
+      img.src = card.detail || card.src;
       img.alt = card.title || '';
       prevBtn.disabled = i <= 0;
       nextBtn.disabled = i >= WORK.length - 1;
@@ -1719,7 +1739,7 @@
       .add({ duration: 1500, complete: finish });
   })();
 </script>
-<script type="module" src="js/sky.js?v=119"></script>
+<script type="module" src="js/sky.js?v=122"></script>
 <script>
   /* nav active state — rect-based like the reveals (IO never fires in captures) */
   (function () {

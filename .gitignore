@@ -15,6 +15,7 @@ debug-anchor.html
 __e2e.html
 __skydebug.html
 __skyprobe.html
+__caseprobe.html
 
 # Hand-made snapshots taken before risky passes over the scene, plus the
 # stylesheet from the quality pass that was reverted. Kept locally until the

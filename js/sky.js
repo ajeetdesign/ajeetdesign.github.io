@@ -6,8 +6,13 @@
   fog, lights and cloud groups all interpolate along it.
 */
 import * as THREE from './three.module.min.js';
-import { createGallery } from './curved-gallery.js';
-import { PROJECTS, WORK } from './gallery-assets.js';
+/* Versioned like the entry tag in index.html: bumping only sky.js?v= re-fetches
+   this file but leaves its imports on their own unversioned URLs, so a changed
+   card list or card geometry could stay cached behind a fresh sky.js. The query
+   must match index.html's own import of gallery-assets, or the two resolve to
+   different URLs and the module is instantiated twice. */
+import { createGallery } from './curved-gallery.js?v=3';
+import { PROJECTS, WORK } from './gallery-assets.js?v=4';
 
 (function () {
   if (window.__adSkyInit) return; window.__adSkyInit = true;
