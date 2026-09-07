@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="sky-booting">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>About — Ajeet</title>
-<meta name="description" content="Ajeet — product designer in Bangalore. Curiosity, travel, photography, swimming, anime, and the way all of it feeds back into the work.">
+<meta name="description" content="Ajeet — product designer in Bangalore. Curiosity, travel, photography, swimming, fitness, and the way all of it feeds back into the work.">
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="icon" type="image/png" sizes="32x32" href="images/favicon-32.png">
 <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
@@ -15,170 +15,211 @@
   :root {
     --font: 'Plus Jakarta Sans', -apple-system, sans-serif;
     --font-serif: 'Instrument Serif', Georgia, 'Times New Roman', serif;
+
+    /* Ink for the SKY half of the page — which now opens BLUE and only turns
+       to cream and peach on the way down, and that changes what these can be.
+
+       A daylight blue sits around 0.30 relative luminance: the awkward middle.
+       Dark type on it tops out near 5:1 no matter how dark the type gets, so
+       there is no room underneath for a second, LIGHTER ink. At the 0.74 this
+       page carried while its background was cream, the lede and every body
+       paragraph measured 3.3:1 over the opening sky — the only contrast
+       failure on the page, and on its first screen.
+
+       0.86 measures 4.9:1 on the opening blue and 8.6:1 over the meadow. The
+       consequence is deliberate and worth naming: colour is no longer carrying
+       hierarchy here. `soft` and `dark` are a hair apart now, and the
+       separation between a heading and the prose under it is done entirely by
+       SIZE and WEIGHT — which is how it should have been carried at these
+       sizes anyway. */
     --ink-dark: #1c2b3a;
-    --ink-soft: rgba(28, 43, 58, 0.72);
+    --ink-soft: rgba(22, 35, 49, 0.86);
+
+    /* Ink for the MEADOW half. Borrowed verbatim from index.html's contact
+       scene, because it IS index.html's contact scene — the two pages land in
+       the same grass under the same light, so they cannot be ranging over two
+       different greens. */
+    --meadow-ink: #17301f;
+    --meadow-soft: rgba(23, 48, 31, 0.76);
+
     --accent: #2f7fd4;
-    /* #2f7fd4 is 3.05:1 on the sand end of the background — fine as an outline
-       or a rule, too light to be read as text. This is the same blue taken down
-       to 4.79:1 so a label can use it. */
-    --accent-text: #1f5fa8;
-    --sand: #eddcbc;
+    /* The focus ring only — never text. It is 3.05:1 on the warm end of the
+       sky, which is fine for a 2px outline and nowhere near enough for a word.
 
-    /* ── type scale ──────────────────────────────────────────────────────────
-       Every size on the page came from its own clamp() before this, so curves
-       crossed and landed on 17 distinct sizes — eight of them inside a 4px band
-       at tablet width, plus 54/52, 22/21 and 18/17 pairs that no reader could
-       tell apart. Eight steps now, each at least ~1.15x its neighbour where the
-       roles sit next to each other.
+       `--accent-text` was #1f5fa8, chosen against a cream page where it
+       measured 4.79:1. Over the opening BLUE it collapses to 2.15:1 — a mid
+       blue label on a mid blue sky, which is the worst thing on the page and
+       the least obvious, because it still looks like a considered colour.
+       Taken down to a deep navy that clears 4.5:1 on the blue and still reads
+       as a blue accent next to the near-black ink beside it. */
+    --accent-text: #0d2c52;
 
-       The bottom two converge on small screens on purpose: below ~15px there is
-       no room left for size to carry meaning, so meta separates from body by
-       weight and tracking instead. */
-    --t-display: clamp(40px, 5.4vw, 68px);   /* h1                            */
-    --t-xxl:     clamp(30px, 4.2vw, 52px);   /* pull quote, closing h2        */
-    --t-xl:      clamp(24px, 3.3vw, 40px);   /* section h2, the big stat      */
-    --t-lg:      clamp(20px, 2.5vw, 30px);   /* principle headings            */
-    --t-md:      clamp(17px, 1.9vw, 23px);   /* h3, company name, mail CTA    */
-    --t-lead:    clamp(16px, 1.7vw, 20px);   /* ledes and interest tags       */
-    --t-body:    clamp(14.5px, 1.45vw, 17px);/* paragraphs                    */
-    --t-meta:    clamp(13px, 1.1vw, 13.5px); /* credentials line, captions    */
+    /* ── type scale ────────────────────────────────────────────────────────
+       Eight steps, each at least ~1.15x its neighbour where the roles sit next
+       to each other. The bottom two converge on small screens on purpose:
+       below ~15px there is no room left for size to carry meaning, so meta
+       separates from body by weight and tracking instead. */
+    --t-display: clamp(42px, 6.2vw, 82px);   /* h1                           */
+    --t-xxl:     clamp(30px, 4.0vw, 48px);   /* the closing serif line       */
+    --t-xl:      clamp(27px, 3.4vw, 46px);   /* section h2                   */
+    --t-lg:      clamp(21px, 2.4vw, 30px);   /* the closing statement        */
+    --t-lead:    clamp(16px, 1.6vw, 20px);   /* ledes                        */
+    --t-body:    clamp(15px, 1.4vw, 17px);   /* paragraphs                   */
+    --t-meta:    clamp(13px, 1.1vw, 13.5px); /* credentials, back link       */
 
-    /* ONE measure. The page carried five (720 / 803 / 860 / 871 / 1000), which
-       is why nothing read as ranked: every block was a wide centred column of
-       almost the same width, so none of them could be the exception. Every
-       block hangs off this now. The pull quote is the only thing allowed to
-       leave it, which is what makes it the peak. */
-    /* TWO widths, both flush to the same left edge. One measure for everything
-       was the fix for five CENTRED measures, but it overcorrected: every block
-       exactly 720px wide is its own monotony, and prose and display type do not
-       want the same width. The spine is the LEFT edge — how far right a block
-       runs is now a decision. Display type and the rail get --measure-wide;
-       running prose is capped at --measure, which is where 17px Sora lands
-       around 55 characters. */
-    /* 520, not 560. Centred text has no fixed left edge to return to, so the
-       eye has to re-find the start of every line — the comfortable measure is
-       shorter than it is flush-left. ~63 characters here against the ~70 that
-       reads fine when the lines all start in the same place. */
-    --measure:      520px;   /* running prose — ~63 characters, centred      */
-    --measure-wide: 880px;   /* headings, the rail, the closing statement    */
-
-    /* NOTE ON `ch`: do not size measure in ch on this page. `1ch` is the width
-       of the ZERO glyph, and Sora's zero is about 1.5x its average lowercase
-       character — so `max-width: 54ch` delivered ~80 real characters, not 54.
-       Every cap here was set in ch and every one of them ran long: body 80,
-       coda 80, resolve 79, credentials 89, against a 75 ceiling. Measured by
-       walking Ranges over the rendered text, not computed from the box. All
-       caps are px now, chosen from that character count. */
+    /* Two widths. Display type and running prose do not want the same measure:
+       a heading may take the full column, a paragraph may not. That difference
+       IS the structure — it is what a heading and a paragraph look like when
+       the page knows which is which. 520 lands 17px Jakarta at ~63 characters,
+       which is the comfortable measure for CENTRED text (shorter than the ~70
+       that reads fine when every line starts on the same left edge). */
+    --measure:      520px;
+    --measure-wide: 900px;
+    --page:        1120px;
   }
 
-  /* The page draws its own focus ring everywhere, not just on the deck: a
-     keyboard user landing on the close button or the mail link was getting the
-     browser's default outline, which belongs to no design system on the page. */
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+
+  /* The page draws its own focus ring everywhere: a keyboard user landing on
+     the close button, the deck or the mail link was otherwise getting the
+     browser's default outline, which belongs to no design system here. */
   a:focus-visible, button:focus-visible, [tabindex]:focus-visible {
     outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 6px;
   }
-  * { box-sizing: border-box; }
-  html { scroll-behavior: smooth; }
-  /* The journey's arc, held still: cool sky overhead falling into the warm
-     cloud-sea underfoot. Fixed, so the page moves through it while scrolling. */
+
   body {
     margin: 0; font-family: var(--font); color: var(--ink-dark);
     -webkit-font-smoothing: antialiased; overflow-x: hidden;
-    background:
-      radial-gradient(115% 65% at 50% -8%, #c8dcf3 0%, rgba(226, 236, 247, 0.72) 40%, rgba(240, 240, 240, 0) 72%),
-      linear-gradient(180deg, #eef2f7 0%, #f4efe6 48%, var(--sand) 100%);
+    /* Fallback sky, and only that. The real sky is the WebGL dome behind the
+       page; this gradient is the same three colours the dome's shader opens on
+       (uTop / uMid / uBot of palette row 0), so a browser with no WebGL — or
+       the half-second before the context is up — still shows golden hour
+       rather than a white flash. Fixed, so it cannot scroll out from under. */
+    background: linear-gradient(180deg, #aacfd1 0%, #f0e2ba 52%, #eec092 100%);
     background-attachment: fixed;
-    background-repeat: no-repeat;
   }
   ::selection { background: rgba(47, 127, 212, 0.22); color: var(--ink-dark); }
 
-  /* ── the cross: the only chrome on the page ────────────────────────────── */
+  /* ── the scene layer ─────────────────────────────────────────────────── */
+  #sky-canvas { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 0; }
+  main { position: relative; z-index: 3; }
+
+  /* ── the cross: the only chrome on the page ───────────────────────────── */
   .x-close {
     position: fixed; top: 18px; right: 18px; z-index: 30;
     width: 46px; height: 46px; border-radius: 999px;
     display: grid; place-items: center; color: var(--ink-dark);
-    /* 0.62 let body text ghost through the blur as it scrolled under the button
-       — on a 390px column the text runs right up to it at every scroll position.
-       At 0.86 the glass still reads (the backdrop blur and saturation are doing
-       that work) but what passes behind it is hidden cleanly instead of smeared. */
+    /* 0.86, not 0.62: on a 390px column the body text runs right up to this
+       button at every scroll position, and a live WebGL sky behind it as well.
+       At 0.86 the glass still reads — the blur and saturation do that work —
+       but what passes behind is hidden cleanly instead of smeared. */
     background: rgba(255, 255, 255, 0.86);
-    border: 1px solid rgba(255, 255, 255, 0.72);
+    border: 1px solid rgba(255, 255, 255, 0.9);
     backdrop-filter: blur(12px) saturate(1.4);
     -webkit-backdrop-filter: blur(12px) saturate(1.4);
     /* No shadow. A 1px hairline under a wide diffuse blur is the generated-UI
        tell — commit to one, and for a frosted pill the defined edge IS the
-       material. The border carries a touch more ink now to hold that job on
-       its own over the light gradient and over the deck's photographs. */
-    border-color: rgba(255, 255, 255, 0.9);
+       material. */
     transition: transform .35s cubic-bezier(.2,.9,.25,1), background .25s ease;
   }
   .x-close:hover { background: #fff; transform: rotate(90deg); }
   .x-close svg { width: 18px; height: 18px; }
 
-  /* This gap is now the only thing separating one section from the next, so it
-     has to do the work the 56px of panel padding plus the plate edge used to do
-     between them — hence the jump from 32 to ~104. */
-  /* One gap repeated eight times gave every block equal weight — spacing that
-     encodes nothing. The gap is the TIGHT interval now, and blocks that need
-     separation buy it with their own margin. What that buys: the closer stays
-     tight to the section it concludes (it reads as that passage's payoff rather
-     than a ninth floating block), while the pull quote gets air on both sides
-     that nothing else on the page gets. */
-  .page { display: flex; flex-direction: column; align-items: center; padding: 11vh 5vw 12vh; gap: clamp(40px, 4.4vw, 64px); }
-  .panel { margin-top: clamp(14px, 2.2vw, 38px); }
-  .quote { margin: clamp(26px, 3.8vw, 60px) 0; }
-  /* the section after the quote must not add its own margin on top of the
-     quote's, or the peak sits off-centre in its own silence — 118px of air
-     before it and 150px after */
-  .quote + .panel { margin-top: 0; }
-  .foot  { margin-top: clamp(22px, 3vw, 46px); }
-
-  /* ── hero ──────────────────────────────────────────────────────────────── */
-  /* Left, not centred. Six of the page's nine blocks used to be centred, which
-     is the same as none of them being centred: with no fixed left edge for the
-     eye to return to, nothing can read as exceptional. The page has one spine
-     now and the pull quote is the only element that leaves it. */
-  /* Centred, per Ajeet. The trade is real and worth naming: nothing can be
-     exceptional by ALIGNMENT any more — the pull quote used to be the only
-     centred block on the page, which is what made it read as the peak. It has
-     to earn that on size, weight, isolation and its own entrance instead, so
-     the air around it and its 52px/700 are now load-bearing rather than
-     decorative. Everything below hangs off ONE centreline the way it used to
-     hang off one left edge; a centred page still needs a single axis. */
-  .head { padding: 3vh 0 1vh; }
-  .head h1 {
-    font-size: var(--t-display); font-weight: 800; letter-spacing: -0.04em;
-    line-height: 1.04; margin: 0 0 18px;
+  /* ── the column ──────────────────────────────────────────────────────── */
+  .page {
+    display: flex; flex-direction: column; align-items: center;
+    width: 100%; max-width: var(--page); margin: 0 auto;
+    padding: 12vh 5vw 0;
   }
-  .head .lede { font-size: var(--t-lead); color: var(--ink-soft); line-height: 1.6; margin: 0 auto; max-width: 560px; text-wrap: pretty; }
-  /* Credentials, demoted but scannable. `.sub` used to sit between this and the
-     lede — three consecutive grey paragraphs, 83 words, before the page had said
-     anything. It is gone; this stays because it is the only place the page
-     carries role, city and employers, and those were previously its SMALLEST
-     type. Still meta size, because this is metadata and not prose, but the four
-     proper nouns come up to full ink so the line can be taken in one pass.
-     Deliberately after the h1 and the sentence, never above them as an eyebrow. */
+  /* The meadow footer leaves the reading column. Everything above it is
+     writing and belongs inside 1120px; the footer is a SCENE, and index.html
+     centres the same block on the whole viewport, so it is bled here to
+     compose identically.
+
+     `align-self` and a width, with NO negative margin: the usual
+     `margin-left: calc(50% - 50vw)` bleed assumes a block in normal flow. As
+     a flex child of a centring column the item is ALREADY centred at 100vw,
+     and the margin then shifts it a second time — which is how an earlier cut
+     of this put the whole finale ~230px left of the page's axis. */
+  .meadow { align-self: center; width: 100vw; }
+  .head, .panel { width: 100%; }
+
+  /* ── the opening: empty sky, nothing but the sentence ─────────────────── */
+  .head { text-align: center; padding: 2vh 0 0; }
+  .head h1 {
+    font-size: var(--t-display); font-weight: 800; letter-spacing: -0.048em;
+    line-height: 1.0; margin: 0 0 24px;
+  }
+  /* 400, not the 300 carried over from the reference. Jakarta's 300 is a
+     genuinely thin face, and it was being asked to hold up over a live sky
+     rather than the flat cream page the reference sets it on — thin strokes
+     are the first thing a moving background eats. */
+  .head .lede {
+    font-size: var(--t-lead); font-weight: 400; line-height: 1.66;
+    color: var(--ink-soft); margin: 0 auto; max-width: 620px; text-wrap: pretty;
+  }
+  .head .lede b { font-weight: 600; color: var(--ink-dark); }
+  /* Credentials: metadata, not prose, so it sits BELOW the sentence rather
+     than above it as an eyebrow — but the four proper nouns come up to full
+     ink so the line can be taken in one pass. This is the only place the page
+     carries role, city and employers. */
   .head .creds {
-    margin: 22px auto 0; max-width: 470px; text-wrap: balance;
+    margin: 26px auto 0; max-width: 480px; text-wrap: balance;
     font-size: var(--t-meta); font-weight: 500; line-height: 1.7;
     letter-spacing: 0.01em; color: var(--ink-soft);
   }
   .head .creds b { font-weight: 700; color: var(--ink-dark); }
 
   /* ── deck: lands as a stack, holds, then fans open ─────────────────────
-     Geometry all derives from --cw. The fan itself is painted frame-by-frame
-     in JS; CSS only owns the settle once the reveal has handed over. */
+     The one element carried over unchanged from the previous build, and the
+     reason this page does not use the reference's static five-card arc: that
+     arc is a picture of a deck, this one is a deck. Geometry all derives from
+     --cw; the fan itself is painted frame-by-frame in JS, and CSS only owns
+     the settle once the reveal has handed over. */
   .deck {
-    --cw: clamp(118px, 17.1vw, 268px);
+    /* `min(17.1vw, 28vh)`, not `17.1vw`. Card size drove the deck's height but
+       was measured only against viewport WIDTH, so on a short wide window —
+       1358x711, a laptop with the browser chrome open — the deck came out
+       680px tall in a 711px viewport: 96% of the screen. There is no scroll
+       position that shows all of it, so the top cards were always cut by the
+       window edge, which reads as a broken layout rather than as scrolling.
+
+       Capped against height as well, the deck can never exceed ~77vh. The vh
+       term only wins on short viewports: at 1440x900 and on every phone the
+       vw term is still smaller, so those sizes render exactly as before. */
+    --cw: clamp(118px, min(17.1vw, 28vh), 268px);
     --ch: calc(var(--cw) / 0.546);
     --card-r: calc(var(--cw) * 0.105);
     --deck-ease: cubic-bezier(.16, 1, .3, 1);
     --deck-dur: 640ms;
     position: relative;
-    width: min(100%, 1180px);
-    height: calc(var(--ch) * 1.6);
-    margin: clamp(2px, 1vw, 14px) 0 clamp(6px, 1.4vw, 20px);
-    overflow: hidden;              /* outer cards bleed off on narrow screens */
+    /* Wide enough for the fan's real footprint. The cards are ROTATED — the
+       outermost sit at 18 degrees — and a rotated rectangle's bounding box is
+       much wider than the card: 4.48x the card width across the whole fan,
+       against the 3.96x the untilted geometry suggests. Inside the 1120px
+       reading column that left ~976px for a 1103px fan, so the two end cards
+       were sliced down their outside edges at every desktop width. This leaves
+       the column deliberately — the deck is a band of pictures, not a
+       paragraph — and `align-self` centres it without the negative margin that
+       double-shifts a flex child. */
+    align-self: center;
+    width: min(100vw - 40px, 1240px);
+    /* 1.54, down from 1.6, and the exact figure is derived rather than
+       eyeballed. The binding constraint is the OUTERMOST card, which sits at
+       18 degrees — a rotated rectangle's bounding box is taller than the card
+       itself, (cw*sin18 + ch*cos18) / 2 = 0.56ch as a half-height against the
+       0.5ch an untilted card would need. Add the fan's own drop of 0.29ch at
+       that seat and the box has to clear 1.52ch.
+
+       1.56, not the 1.52 that geometry alone asks for, because HOVER moves the
+       cards too: pointing at one pushes every other away from it, and the
+       push adds up to 9px of extra drop on the seat furthest from the cursor.
+       At 1.54 that was enough to shave the outer card's bottom corner the
+       moment you reached for the middle of the deck. */
+    height: calc(var(--ch) * 1.56);
+    margin: clamp(16px, 3vw, 40px) 0 clamp(6px, 1.4vw, 20px);
+    overflow: hidden;              /* the fan still bleeds off below ~1240px */
     touch-action: pan-y;           /* horizontal drag, vertical scroll */
     -webkit-user-select: none; user-select: none;
   }
@@ -186,7 +227,12 @@
   .deck.grabbing { cursor: grabbing; }
   .deck:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; border-radius: 20px; }
   .card {
-    position: absolute; left: 50%; top: 42%;
+    /* 43% of the 1.56x box above. Not independent of that number: together
+       they put the centre card's top edge at 0.171ch — clear of the hover lift
+       (0.073ch) and the hover scale's own growth (0.037ch) — while leaving
+       0.038ch under the outermost card's rotated bottom corner, which is what
+       absorbs the hover push. Change the height and re-derive this with it. */
+    position: absolute; left: 50%; top: 43%;
     width: var(--cw); height: var(--ch);
     margin-left: calc(var(--cw) / -2);
     margin-top: calc(var(--ch) / -2);
@@ -209,282 +255,219 @@
     letter-spacing: 0.18em; text-transform: uppercase; color: rgba(255, 255, 255, 0.85);
   }
 
-  /* ── sections: on the surface, not on plates ───────────────────────────────
-     The quote and the passage after it were always staged straight onto the
-     gradient — the notes below them call the alternative a "headless box" — and
-     they read as the best-composed part of the page. Six frosted plates were
-     hiding that same background behind them and turning the page into a stack
-     of containers, one of which held another container.
+  /* ── the three movements ─────────────────────────────────────────────────
+     Staged straight onto the sky, on no plate of any kind. The scene behind
+     is the material — putting frosted boxes over it would hide the one thing
+     the page is built to show, and turn a descent into a stack of containers. */
+  .panel { display: grid; align-items: center; gap: clamp(30px, 5vw, 60px); }
+  .panel { margin-top: clamp(88px, 17vh, 210px); }
+  .panel.split { grid-template-columns: minmax(0, 1fr) minmax(300px, 380px); }
+  .panel.split.flip { grid-template-columns: minmax(300px, 400px) minmax(0, 1fr); }
+  .panel.split.flip .copy { order: 2; }
+  .panel.centre { justify-items: center; text-align: center; }
 
-     What separated the sections was the plate edge; what separates them now is
-     the gap in .page and the hairline rules .tl and .princ were already built
-     on. Nothing else changes: no copy, no order, no internal layout.
+  .eyebrow {
+    display: block; margin-bottom: 18px;
+    font-size: 10.5px; font-weight: 600; line-height: 1;
+    letter-spacing: 0.24em; text-transform: uppercase; color: var(--accent-text);
+  }
+  .panel h2 {
+    font-size: var(--t-xl); font-weight: 700; letter-spacing: -0.04em;
+    line-height: 1.1; margin: 0 0 18px; text-wrap: balance;
+  }
+  /* 400 — see the note on .head .lede. Body copy is the one role on this page
+     that has to survive whatever is passing behind it. */
+  .panel p {
+    font-size: var(--t-body); font-weight: 400; line-height: 1.78;
+    color: var(--ink-soft); margin: 0; max-width: var(--measure);
+  }
+  .panel.centre h2 { max-width: 700px; margin-inline: auto; }
+  .panel.centre p { margin-inline: auto; max-width: 600px; }
+  .panel p + p { margin-top: 14px; }
 
-     Width drops 900 → 720 because the padding went with the plate. The panel's
-     inner measure was ~788px, which ran body copy past the 75ch ceiling once
-     the box stopped visually holding it; 720 lands it back inside the band. */
-  /* One measure for every section now. The .wide variant went with the
-     restructure: the photo wall was the only thing that wanted more room, and
-     it takes the whole viewport instead — see .bleed. */
-  /* `width: min(94vw, N)` on a flex child of a 5vw-padded column meant the body
-     sections sat a few px OUTSIDE the left edge the header and footer held — the
-     unnameable wrongness of three different left margins. `width:100%` lets the
-     page's own padding be the only gutter, so every block starts on one line. */
-  .head, .panel, .closer, .foot { width: 100%; max-width: var(--measure-wide); text-align: center; }
-  /* Running prose stops well short of the container it sits in. The heading may
-     use the full width; the paragraph under it may not. That difference IS the
-     structure — it is what a heading and a paragraph look like when the page
-     knows which is which. */
-  /* `max-width` alone would pin a narrow paragraph to the LEFT of a wide
-     centred block, which is the classic way a centred layout comes apart — the
-     headings would centre and the prose under them would not. Everything that
-     carries a measure re-centres inside its block. */
-  p, .resolve { max-width: var(--measure); margin-inline: auto; }
-  /* Every display role on this page was 800, so size was carrying the entire
-     hierarchy on its own and the page read as one monolithic voice at four
-     scales. Weight is a second axis now: 800 belongs to the h1 alone.
-     These headings are also SENTENCES, and hedged ones — "It probably starts",
-     "Maybe that's also why". At 800 and -0.038em the type was declaiming copy
-     that is thinking out loud. 600 and looser tracking lets them sound the way
-     they read; 40px against 17px body is a 2.35x step, so size alone already
-     marks them as headings without help from weight. */
-  h2 {
-    font-size: var(--t-xl); font-weight: 600; letter-spacing: -0.026em;
-    /* 800, not 700: at the narrower cap `text-wrap: balance` broke the middle
-       heading into THREE centred lines while its neighbours took one and two,
-       so the three headings — which are one continuous thought — arrived as
-       three different shapes. At 800 they balance to 1 / 2 / 2. */
-    line-height: 1.2; margin: 0 auto 20px; max-width: 800px; text-wrap: balance;
+  /* ── placeholder frames ──────────────────────────────────────────────────
+     Struck through with a diagonal weave rather than filled with a rich
+     gradient, because a gradient reads as a designed surface and these are
+     holes: the moment Ajeet's own frames land, the stripes and the label go
+     and an <img> takes the same box. The label is what each hole is FOR, set
+     in ink at 62% on the light end of the weave (7.1:1) — the previous build
+     had these captions at 1.76:1 in white, the only measured contrast failure
+     on the page. */
+  .shot {
+    position: absolute; border-radius: 18px;
+    display: grid; place-items: start start;
+    border: 1px solid rgba(255, 255, 255, 0.72);
+    box-shadow: 0 18px 34px rgba(28, 43, 58, 0.16);
   }
-  /* `margin: 0 auto 16px`, not `0 0 16px`: this shorthand sits BELOW the
-     `p, .resolve { margin-inline: auto }` rule and was resetting it, so every
-     section paragraph rendered pinned to the left edge of a centred block
-     (measured mid=540 against the page's 720 centreline). */
-  p { font-size: var(--t-body); line-height: 1.72; color: var(--ink-soft); margin: 0 auto 16px; }
-  p:last-child { margin-bottom: 0; }
-  p strong { font-weight: 600; color: var(--ink-dark); }
-  /* `.lede` is a HEADER role now. Inside a section it set the FIRST paragraph
-     larger than the ones after it — and in the curiosity section that first
-     paragraph is the longest block on the page, 52 words. The longest passage
-     being the biggest was hierarchy pointing the wrong way, and it added a
-     fourth prose size to a page that needs fewer. Sections are h2 + body. */
-  .head .lede { font-size: var(--t-lead); }
+  /* Top-left, not centred. These frames overlap by design, and a centred label
+     lands under the frame stacked on top of it — the first cut rendered
+     "street" as "STR". Every cluster steps right and down, so each frame's own
+     top-left corner is the one part of it that is always uncovered. */
+  /* 0.85, not 0.62. Ten-pixel type has no contrast to spare, and 0.62 over
+     the lighter stripe measured 3.91:1 — under the 4.5 it needs. The previous
+     build of this page had the same labels in WHITE at 1.76:1, so this is the
+     second time the same caption has been the least legible thing here; at
+     0.85 it is 7.5:1 and still visibly quieter than the copy around it. */
+  .shot span {
+    padding: 13px 15px;
+    font-size: 10px; font-weight: 700; line-height: 1;
+    letter-spacing: 0.16em; text-transform: uppercase; color: rgba(28, 43, 58, 0.85);
+  }
+  .w-cool { background: repeating-linear-gradient(135deg, #dee6ee 0 8px, #e9eef4 8px 16px); }
+  .w-warm { background: repeating-linear-gradient(135deg, #e5ded0 0 8px, #eee9de 8px 16px); }
+  .w-blue { background: repeating-linear-gradient(135deg, #d6e1ee 0 8px, #e3eaf3 8px 16px); }
 
-  /* ── the quote: no panel, straight onto the sky — the page's first peak ── */
-  .quote {
-    width: 100%; max-width: 1000px; text-align: center;
-    padding: clamp(20px, 4vw, 48px) clamp(16px, 4vw, 60px);
-  }
-  /* -0.042em was past the -0.04em tracking floor, and at 800 this was the same
-     voice as the h1 one step down. It is a thought, not a proclamation: 700
-     holds it at 52px while leaving the h1 the only 800 on the page, and the
-     tracking comes back inside the floor where a lighter weight wants it. */
-  .quote p {
-    max-width: none;
-    font-size: var(--t-xxl); font-weight: 700; letter-spacing: -0.032em;
-    line-height: 1.1; color: var(--ink-dark); margin: 0;
-    text-wrap: balance;
-  }
-  /* the page's one authored entrance — the quote resolves out of the sky
-     instead of sliding up like everything else */
-  .quote.rv { transform: none; filter: blur(14px); opacity: 0; transition: opacity 1s ease, filter 1.1s cubic-bezier(.2,.7,.2,1); }
-  .quote.rv.in { filter: blur(0); opacity: 1; }
+  /* Clusters are absolutely positioned inside a sized box, which is the only
+     way overlapping tilted frames can be composed to the pixel. Each cluster
+     therefore carries its own height, and each collapses to a flow layout
+     below 860 where there is no width left to overlap into. */
+  .cluster { position: relative; width: 100%; }
+  .cl-tall { height: 340px; }
+  .cl-wide { height: 330px; }
+  .cl-trio { height: 300px; width: min(100%, 560px); margin-top: clamp(30px, 4vw, 46px); }
 
-  /* ── the pair ────────────────────────────────────────────────────────────────
-     Movement 2 sets one thing that slows you down against one that pushes you
-     forward, then reconciles them. It ran as two side-by-side columns, which
-     sounds right and measured wrong: 334px each at 1440 put running prose at
-     25 characters a line, well under the 45 a reader needs to keep a rhythm.
-     It then ran as two rows with the subject in a rail on the left — but a
-     hanging rail is a FLUSH-LEFT device: it works by giving the eye a second
-     fixed edge to read down, and on a centred axis there is no first one, so
-     the subject and its sentence would drift apart with nothing holding them.
-     The subject sits centred DIRECTLY above its own sentence now. The
-     opposition survives the same way it always did — two parallel rows, one
-     under the other, parted by a hairline — and the sentence still runs on
-     from its subject, unbroken. */
-  .pair { margin-top: clamp(24px, 3vw, 34px); }
-  .pair > div {
-    padding: clamp(20px, 2.4vw, 28px) 0;
-    border-top: 1px solid rgba(28, 43, 58, 0.12);
-  }
-  .pair > div:last-child { padding-bottom: 0; }
-  .pair b {
-    display: block; margin-bottom: 7px;
-    font-size: var(--t-md); font-weight: 700; letter-spacing: -0.028em;
-    line-height: 1.3; color: var(--ink-dark);
-  }
-  .pair p { margin: 0 auto; }
+  .cl-tall .s1 { top: 0;    left: 6%;  width: 56%; aspect-ratio: 4 / 5; transform: rotate(-7deg); }
+  .cl-tall .s2 { top: 74px; left: 32%; width: 58%; aspect-ratio: 4 / 5; transform: rotate(6deg);
+                 box-shadow: 0 20px 36px rgba(28, 43, 58, 0.2); }
+  .cl-wide .s1 { top: 12px;  left: 0;   width: 63%; aspect-ratio: 3 / 2; transform: rotate(-5deg); }
+  .cl-wide .s2 { top: 130px; left: 22%; width: 63%; aspect-ratio: 3 / 2; transform: rotate(4deg);
+                 box-shadow: 0 20px 36px rgba(28, 43, 58, 0.2); }
+  .cl-trio .s1 { top: 30px; left: 0;    width: 54%; aspect-ratio: 16 / 10; transform: rotate(-6deg); }
+  .cl-trio .s2 { top: 66px; left: 23%;  width: 54%; aspect-ratio: 16 / 10; transform: rotate(2deg); }
+  .cl-trio .s3 { top: 14px; left: 46%;  width: 54%; aspect-ratio: 16 / 10; transform: rotate(8deg);
+                 box-shadow: 0 22px 40px rgba(28, 43, 58, 0.2); }
 
-  /* The sentence that settles the two rows above it. It was 30px and centred,
-     landing between two 40px left-aligned headings — three alignments and three
-     weights inside 650px, and a body sentence borrowing display scale it had no
-     claim to. Down to lede size, on the spine; the rule above it and the short
-     measure are what mark it as a beat. */
-  .resolve {
-    /* The rule spans the BLOCK; the sentence does not. Capped at the measure
-       it would draw a 520px hairline directly under the pair's full-width ones
-       — three dividers at two lengths in one passage. A divider marks the
-       structure it divides, and that is the section, not the line length of the
-       sentence beneath it. So the box stays full width and SYMMETRIC INLINE
-       PADDING holds the measure and the centring at once. The percentage
-       resolves against the panel, so it is 180px a side at 880 and collapses to
-       0 the moment the panel is narrower than the measure — nothing to chase
-       on a phone. */
-    max-width: none; padding-inline: max(0px, calc((100% - 520px) / 2));
-    margin: clamp(30px, 3.6vw, 44px) 0 0; padding-top: clamp(24px, 2.8vw, 32px);
-    border-top: 1px solid rgba(28, 43, 58, 0.12);
-    font-size: var(--t-lead); font-weight: 500; letter-spacing: -0.012em;
-    line-height: 1.6; color: var(--ink-dark); text-wrap: balance;
+  /* ── the closing statement, still in the sky ───────────────────────────
+     Every word of the writing finishes above the ground. The meadow below is
+     a footer — the same footer index.html lands on — so it carries no
+     argument of its own, and this is the page's last thought rather than its
+     first sight of grass. Sky ink, therefore, not meadow ink. */
+  /* gap: 0 — `.panel`'s grid gap would stack on top of the coda's own
+     margin and rule, and the two lines are one thought, not two blocks. */
+  .closing { justify-items: center; text-align: center; gap: 0; }
+  .closing .statement {
+    font-size: var(--t-lg); font-weight: 400; letter-spacing: -0.012em;
+    line-height: 1.62; color: var(--ink-soft);
+    margin: 0 auto; max-width: 660px; text-wrap: pretty;
+  }
+  .closing .statement b { font-weight: 600; color: var(--ink-dark); }
+  /* The one serif on the page, and its last line. Italic at 48px against a
+     page set entirely in Jakarta — the change of voice is the point, so
+     nothing else is allowed to borrow it. */
+  .closing .coda {
+    font-family: var(--font-serif); font-style: italic; font-weight: 400;
+    font-size: var(--t-xxl); letter-spacing: -0.01em; line-height: 1.16;
+    color: var(--ink-dark); max-width: 740px;
+    margin: clamp(30px, 4.4vw, 42px) auto 0;
+    padding-top: clamp(28px, 3.6vw, 38px);
+    border-top: 1px solid rgba(28, 43, 58, 0.2);
   }
 
-  /* ── the closer ────────────────────────────────────────────────────────────
-     The page's thesis: six labels that only mean anything together. They sit in
-     ink at 700 while the sentence around them stays soft, so the list separates
-     from the prose without leaving it — the pieces and the person arrive in the
-     same line. One step below the pull quote on the scale: the quote is the
-     peak of the page, this is where it comes down. */
-  /* The sentence says the reader should NOT see him as just a designer, a
-     photographer, a traveller. Set at 40px/700 in full ink with the disclaimer
-     around them in grey, the typography asserted precisely what the words deny —
-     it read as a keyword cloud with connective tissue between it. One step of
-     weight now (600 against 500) and one of colour, so the six labels sit inside
-     the sentence instead of replacing it. And down a full step on the scale, so
-     the pull quote is the only display moment left above the h1. */
-  .closer p {
-    max-width: 820px; margin-inline: auto;
-    font-size: var(--t-lg); font-weight: 500; letter-spacing: -0.024em;
-    line-height: 1.34; color: var(--ink-soft); margin-block: 0; text-wrap: balance;
-  }
-  .closer b { font-weight: 600; color: var(--ink-dark); }
-  /* the last line before the ask, back at reading size so the page exhales
-     instead of ending on a second display sentence */
-  .closer .coda {
-    margin: clamp(20px, 2.6vw, 30px) auto 0; max-width: 560px; text-wrap: pretty;
-    font-size: var(--t-lead); font-weight: 400; letter-spacing: 0;
-    line-height: 1.66; color: var(--ink-soft);
-  }
+  /* ── the arrival ─────────────────────────────────────────────────────────
+     Two class names here are wiring, not styling, and renaming either one
+     detaches the camera from the page: `.sky-ground` on the spacer is where
+     the meadow starts to resolve, `.sky-land` is where the fall is over. Both
+     are read by measure() in about-sky.js.
 
-  /* ── the photo wall, edge to edge ──────────────────────────────────────────
-     The one place the page leaves its measure. Everything above holds 720px, so
-     a full-bleed wall reads as a change of register rather than as a wider box
-     — and it is the only section whose material is photographs, which are the
-     one thing on this page that earns the whole screen.
-     The 50% resolves against .panel's 720px box, not the viewport, which is why
-     this has to live inside the section: 50% of 720 minus half the viewport is
-     exactly the distance from the panel's left edge back to the screen's.
-     body has overflow-x: hidden, which absorbs the scrollbar gutter. */
-  .bleed { width: 100vw; margin-left: calc(50% - 50vw); }
+     The spacer is the whole reason the arrival can be slow. It is not padding
+     — it is the only stretch of the page where the ground is free to come up,
+     and the camera's last leg is scrubbed across exactly this height. At one
+     viewport the meadow snapped in; at ~1.7 it surfaces out of the haze at a
+     pace you can watch. Two hard requirements: it must stay TALLER than about
+     1.3 viewports (below that, about-sky.js's clamps invert and the landing
+     is dragged back over the closing lines), and it must stay empty. */
+  .descent-gap { width: 100%; height: clamp(760px, 172vh, 1900px); }
 
-  /* ── photo wall — each .photo div becomes an img.photo once the shots land ──
-     Twelve frames over four masonry columns was 1,399px — a quarter of the page
-     — of empty placeholder gradient, sitting directly between the first section
-     and the pull quote, i.e. the biggest dead zone immediately before the
-     biggest peak. That, not the prose, is where "too much" came from: the page
-     runs 409 words.
+  /* ── the meadow: index.html's contact scene, unchanged ───────────────────
+     Copied rather than re-designed, down to the 100vh centring, because it is
+     meant to BE that place — the same grass reached by a different route.
+     Every value below is index.html's; anything invented here would read as a
+     seam between the two pages. */
+  .meadow {
+    min-height: 100vh; display: grid; place-items: center;
+    padding: 18vh 5vw 8vh; text-align: center; color: var(--meadow-ink);
+  }
+  .meadow .label {
+    font-size: 13px; font-weight: 700; letter-spacing: 0.22em; text-transform: uppercase;
+    margin: 0 0 30px; opacity: 0.75; color: var(--meadow-soft);
+  }
+  .meadow h2 {
+    font-size: clamp(32px, 4.6vw, 60px); font-weight: 700; letter-spacing: -0.035em;
+    line-height: 1.08; margin: 0 auto 30px; max-width: 18ch;
+  }
+  /* two compact CTAs: solid email, frosted LinkedIn */
+  .contact-row {
+    display: flex; align-items: center; justify-content: center;
+    gap: 12px; flex-wrap: wrap; margin-top: 34px;
+  }
+  .cta-btn {
+    display: inline-flex; align-items: center; gap: 9px;
+    font-size: 14px; font-weight: 600; letter-spacing: -0.01em;
+    padding: 12px 22px; border-radius: 999px; text-decoration: none;
+    transition: transform .35s cubic-bezier(.2,.9,.25,1), box-shadow .35s ease;
+  }
+  .cta-btn:hover { transform: translateY(-2px); }
+  .cta-btn svg { width: 16px; height: 16px; }
+  .cta-solid { background: #1c2b3a; color: #fff; box-shadow: 0 12px 32px rgba(20, 40, 30, 0.25); }
+  .cta-solid:hover { box-shadow: 0 18px 40px rgba(20, 40, 30, 0.32); }
+  .cta-ghost {
+    color: var(--meadow-ink); background: rgba(255, 255, 255, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  }
+  .cta-in {
+    width: 17px; height: 17px; border-radius: 4px;
+    display: grid; place-items: center;
+    background: var(--meadow-ink); color: #fff;
+    font-size: 11px; font-weight: 800; letter-spacing: -0.02em;
+  }
+  /* There is no back link down here, and that is deliberate on two counts.
+     One: the brief is that this footer is index.html's meadow, which carries a
+     label, a headline and two buttons and nothing else — an extra link is an
+     extra element. Two: measured, a bare text link on this grass came out at
+     2.2:1, the worst thing on the page, because unlike the two buttons it has
+     no background of its own to sit on. The way back is the cross, fixed in
+     the corner, which is on screen at every scroll position including this
+     one. */
 
-     Six frames now, and a real grid rather than CSS columns. Columns balance by
-     height, so varied crops left ragged trailing edges that had to be tuned by
-     frame count; a 3x2 grid of one ratio tiles exactly and reads as a contact
-     sheet — a photographer's edit — instead of a masonry accident. Capped at
-     1120px so it still leaves the 720 measure and changes register, without
-     handing six placeholders the entire viewport. */
-  .photo-grid {
-    display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: clamp(12px, 1.6vw, 18px); margin-top: clamp(26px, 3.2vw, 36px);
-  }
-  .bleed .photo-grid {
-    max-width: 1120px; margin-inline: auto;
-    padding: 0 clamp(14px, 3vw, 40px); margin-top: clamp(24px, 3vw, 34px);
-  }
-  /* This rule used to be `.photo-grid` inside the 860 query, which lost on
-     specificity to `.bleed .photo-grid` and never once fired — the phone layout
-     was three 112px tiles, below the size at which a photograph reads as one. */
-  @media (max-width: 700px) { .photo-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-  .photo {
-    position: relative; width: 100%; aspect-ratio: 4 / 5; object-fit: cover;
-    border-radius: 16px; border: 1px solid rgba(255, 255, 255, 0.6);
-    overflow: hidden;
-  }
-  /* The hover lift is gone with the labels: it promised a lightbox that does not
-     exist, and the `PHOTO 01` captions were 11px of white on mid-gradient at
-     1.76:1 — the only measured contrast failure on the page. The gradients read
-     as placeholders perfectly well without being told they are placeholders. */
-  .ph-a { background: linear-gradient(140deg, #cfe0e6, #7d9fb4 58%, #3f5c78); }
-  .ph-b { background: linear-gradient(140deg, #eddcbc, #cfae8a 60%, #96705c); }
-  .ph-c { background: linear-gradient(140deg, #f6d9a8, #e5a05f 58%, #b5652f); }
-  .ph-d { background: linear-gradient(140deg, #cfe3c4, #93b986 58%, #5c7f57); }
-  .ph-e { background: linear-gradient(140deg, #8fc4e8, #3f7fc0 58%, #1e4a80); }
-  .ph-f { background: linear-gradient(140deg, #dfe4ea, #9aa4b0 58%, #4e5762); }
+  /* ── reveals ─────────────────────────────────────────────────────────────
+     One-way, driven by about-sky.js's rect pass (not IntersectionObserver:
+     rects are reliable under headless capture, iframes and instant scrolls
+     alike). The boot hold is the only gate — the opening copy waits for the
+     sky to come up rather than arriving over a bare canvas. */
+  .reveal { opacity: 0; transform: translateY(28px); transition: opacity .9s cubic-bezier(.2,.7,.2,1), transform .9s cubic-bezier(.2,.7,.2,1); }
+  .reveal.in { opacity: 1; transform: none; }
+  .d1 { transition-delay: .12s; }
+  .d2 { transition-delay: .24s; }
+  .sky-instant .reveal { transition: none !important; }
 
-  /* ── foot ──────────────────────────────────────────────────────────────── */
-  /* On the spine like everything else, and one step down. The sign-off used to
-     be set at --t-xxl, the SAME size as the pull quote, so the page's designated
-     peak was tied with its goodbye. */
-  .foot { padding: 4vh 0 2vh; }
-  /* The one heading that is NOT hedged — it asks for something — so it keeps
-     more weight than the three that think out loud. */
-  .foot h2 { font-size: var(--t-xl); font-weight: 700; letter-spacing: -0.03em; line-height: 1.16; margin: 0 auto 12px; max-width: 620px; text-wrap: balance; }
-  .foot p { margin: 0 auto 28px; max-width: 520px; }
-  .mail {
-    display: inline-flex; align-items: center; gap: 12px;
-    font-size: var(--t-md); font-weight: 700; letter-spacing: -0.03em;
-    text-decoration: none; color: #fff;
-    padding: clamp(14px, 1.6vw, 20px) clamp(24px, 2.8vw, 34px); border-radius: 999px;
-    background: var(--ink-dark);
-    box-shadow: 0 20px 44px -22px rgba(15, 30, 50, 0.7);
-    transition: transform .4s cubic-bezier(.2,.9,.25,1), box-shadow .4s ease;
+  @media (max-width: 980px) {
+    .panel.split, .panel.split.flip { grid-template-columns: minmax(0, 1fr); }
+    .panel.split .copy, .panel.split.flip .copy { order: 0; }
+    .panel p { max-width: none; }
+    .cluster { max-width: 520px; margin-inline: auto; }
   }
-  .mail:hover { transform: translateY(-3px); box-shadow: 0 28px 56px -24px rgba(15, 30, 50, 0.8); }
-  .mail svg { width: 20px; height: 20px; flex: none; transition: transform .35s cubic-bezier(.2,.9,.25,1); }
-  .mail:hover svg { transform: translateX(4px); }
-  /* The button used to BE the address — the most utilitarian string on the page
-     set as its climax, at 23px/700. The pill carries the invitation now and the
-     address sits under it as the pill's own caption, still visible and still
-     copyable. `user-select: all` makes one click take the whole address rather
-     than a word of it, which is the only thing anyone ever wants to do with it. */
-  .foot .addr {
-    /* `0` here reset the inherited `margin-inline: auto` and left the address
-       pinned to the left of the centred footer — the page's last off-axis
-       element, measured at mid=540 against the 720 centreline. */
-    margin: 14px auto 0; font-size: var(--t-meta); font-weight: 500;
-    letter-spacing: 0.01em; color: var(--ink-soft);
-    -webkit-user-select: all; user-select: all;
-  }
-  /* `inline-block` next to the `inline-flex` pill put both in ONE line box, so
-     `text-align: center` centred the PAIR and the button itself sat 86px left of
-     centre with this link welded to its shoulder — the last thing every reader
-     saw, on a designer's portfolio. `display: block` gives it its own line; on
-     the left spine it needs no auto margins.
-     It also takes --accent-text, which was declared with a contrast
-     justification and then used nowhere but the focus ring. This is the page's
-     only route to the work, so it is the one place that earns the hue. */
-  .back {
-    display: block; width: fit-content; margin: 26px auto 0;
-    padding: 12px 16px; font-size: var(--t-meta); font-weight: 600;
-    color: var(--accent-text); text-decoration: none;
-  }
-  .back:hover { color: var(--ink-dark); }
-
-  /* reveals */
-  .rv { opacity: 0; transform: translateY(28px); transition: opacity .8s cubic-bezier(.2,.7,.2,1), transform .8s cubic-bezier(.2,.7,.2,1); }
-  .rv.in { opacity: 1; transform: none; }
-
   @media (max-width: 860px) {
-    .page { padding: 10vh 4vw 12vh; }
+    .page { padding: 10vh 6vw 0; }
     /* 44px, not 42: this is the only way off the page, and it is the one
        control a thumb reaches for on a phone */
     .x-close { top: 14px; right: 14px; width: 44px; height: 44px; }
+    .cl-tall { height: 300px; }
+    .cl-wide { height: 290px; }
+    .cl-trio { height: 240px; }
+    .cl-trio .s1, .cl-trio .s2, .cl-trio .s3 { width: 62%; }
   }
   @media (prefers-reduced-motion: reduce) {
     html { scroll-behavior: auto; }
-    .rv, .quote.rv { opacity: 1; transform: none; filter: none; transition: none; }
-    .photo, .mail { transition: none; }
+    .reveal { opacity: 1; transform: none; transition: none; }
+    .cta-btn { transition: none; }
     .deck.live .card { transition-duration: 1ms !important; }
   }
 </style>
 </head>
 <body>
+
+<canvas id="sky-canvas" aria-hidden="true"></canvas>
 
 <a class="x-close" href="index.html" aria-label="Back to the journey">
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
@@ -494,98 +477,99 @@
 
 <main class="page">
 
-  <header class="head rv">
+  <!-- The page opens at 420 units up, in nothing but sky. No cloud, no
+       terrain, no props — the palette's row 0 is empty on purpose, so the
+       first thing on screen is a sentence and a colour. -->
+  <header class="head reveal">
     <h1>Hey, I&rsquo;m Ajeet.</h1>
-    <p class="lede">I&rsquo;m a product designer who likes making sense of messy problems and turning ideas into things people can actually use. But work is only one part of who I am.</p>
-    <!-- `.sub` lived here: "Outside of it, I'm constantly finding new things to get
-         excited about… Here's a little bit of that side of me." Thirty-two words
-         captioning content that begins one scroll below, in a third consecutive
-         grey centred paragraph. The page shows that side of him; it does not need
-         to announce that it is about to. -->
+    <p class="lede">I&rsquo;m a product designer based in <b>Bangalore, India</b>, who enjoys solving problems and building things. Outside of work, I spend my time exploring different interests, learning new things, and trying not to take any of them too seriously.</p>
     <p class="creds"><b>Product designer</b>, Bangalore &middot; four-plus years, B2B and B2C &middot; currently at <b>Porter</b>, before that <b>Juspay</b> and <b>Convin.ai</b></p>
   </header>
 
   <div class="deck" id="deck" role="img" tabindex="0"
        aria-label="A few frames from my camera roll. Drag sideways to shuffle, or use the left and right arrow keys."></div>
 
-  <!-- Movement 1 · the instinct. The four things the paragraph names — places,
-       streets, a camera, an anime — are left as prose rather than broken into a
-       card each: a grid of six one-line interests is a word cloud, and this copy
-       is deliberately written as one thought that keeps going. The photo wall
-       below it is the one claim in the passage that can be shown instead of
-       said, so it is the only thing that gets pulled out. -->
-  <section class="panel rv">
-    <h2>It probably starts with curiosity.</h2>
-    <p>I&rsquo;ve always been curious about the world and the things that make it interesting. I like discovering new places, getting lost in unfamiliar streets, picking up a camera and noticing the little things most people walk past, or getting completely absorbed in a good anime and its world of characters and stories.</p>
-    <p>I like travelling without having every moment planned, leaving enough room for a wrong turn, an unexpected conversation, or a place I wasn&rsquo;t looking for.</p>
-
-    <!-- the wall leaves the measure every other section holds — see .bleed.
-         It stays inside the section because it belongs to this passage, and
-         because the full-bleed offset resolves against .panel's 720px box. -->
-    <div class="bleed">
-      <div class="photo-grid">
-        <div class="photo ph-a"></div>
-        <div class="photo ph-b"></div>
-        <div class="photo ph-c"></div>
-        <div class="photo ph-d"></div>
-        <div class="photo ph-e"></div>
-        <div class="photo ph-f"></div>
-      </div>
+  <!-- 01 — the instinct -->
+  <section class="panel split reveal">
+    <div class="copy">
+      <span class="eyebrow">01 &mdash; Curious</span>
+      <h2>I&rsquo;ve always been curious.</h2>
+      <p>I enjoy discovering new places, taking photographs, watching anime, and going down random rabbit holes whenever something catches my attention. When I travel, I prefer leaving some things unplanned so I can explore and see where I end up. Photography has also taught me to slow down and notice the small details around me.</p>
+    </div>
+    <div class="cluster cl-tall">
+      <div class="shot s1 w-cool"><span>street</span></div>
+      <div class="shot s2 w-warm"><span>detail</span></div>
     </div>
   </section>
 
-  <!-- The passage's own last sentence, lifted out of it. It is the thesis of
-       the whole page — every movement below is a different answer to it — so it
-       gets the page's one display moment, staged straight onto the sky. Not a
-       quotation and not attributed: it is still Ajeet talking, just louder. -->
-  <div class="quote rv">
-    <p>I think I enjoy the feeling of discovering something more than I enjoy knowing exactly what I&rsquo;m going to find.</p>
-  </div>
+  <!-- 02 — the contrast: one thing that slows him down, one that pushes -->
+  <section class="panel split flip reveal">
+    <div class="cluster cl-wide">
+      <div class="shot s1 w-blue"><span>pool</span></div>
+      <div class="shot s2 w-warm"><span>gym</span></div>
+    </div>
+    <div class="copy">
+      <span class="eyebrow">02 &mdash; Active</span>
+      <h2>I also enjoy keeping myself active.</h2>
+      <p>Swimming is one of the best ways for me to switch off and clear my head. Fitness keeps me challenged and reminds me that getting better is mostly about being consistent. Both have become a regular part of my life for very different reasons.</p>
+    </div>
+  </section>
 
-  <!-- Movement 2 · the contrast. Swimming and fitness are given as opposites
-       that meet in the middle, so they are set as opposites that meet in the
-       middle. The reconciling sentence is the only thing under both columns. -->
-  <section class="panel rv">
-    <h2>Maybe that&rsquo;s also why I like doing things that pull me into the moment.</h2>
-    <div class="pair">
-      <div>
-        <b>Swimming</b>
-        <p>gives me a rare kind of quiet, where there&rsquo;s nothing to focus on except breathing, rhythm, and movement.</p>
-      </div>
-      <div>
-        <b>Fitness</b>
-        <p>gives me something completely different&mdash;it reminds me that progress usually comes from showing up consistently, even when you don&rsquo;t feel like it.</p>
+  <!-- 03 — where it lands. The only section about work, which is the argument
+       the header opened with. -->
+  <section class="panel centre reveal">
+    <span class="eyebrow">03 &mdash; The work</span>
+    <h2>And that curiosity shows up in my work too.</h2>
+    <p>I enjoy understanding how things work, figuring out why they could be better, and turning ideas into something real. Design gave me a way to do that, and AI has made it even easier to experiment and build things myself. These days, I spend a lot of time learning, trying new ideas, making things, and occasionally breaking them along the way.</p>
+    <div class="cluster cl-trio">
+      <div class="shot s1 w-cool"><span>sketch</span></div>
+      <div class="shot s2 w-warm"><span>prototype</span></div>
+      <div class="shot s3 w-blue"><span>shipped</span></div>
+    </div>
+  </section>
+
+  <!-- The page's thesis, and the last thing said in the sky. Every word of
+       the writing finishes up here: the meadow below is a footer, not a
+       chapter, so it carries no argument of its own. -->
+  <section class="panel closing reveal">
+    <p class="statement">I don&rsquo;t really want to be defined by one thing. I&rsquo;m a <b>designer</b>, but I&rsquo;m also someone who enjoys <b>photography</b>, <b>travel</b>, <b>anime</b>, <b>swimming</b>, <b>fitness</b>, and <b>building things</b>. They&rsquo;re all just different parts of who I am.</p>
+    <p class="coda">I&rsquo;m still figuring things out, and I&rsquo;m happy to keep it that way.</p>
+  </section>
+
+  <!-- ── the arrival ──────────────────────────────────────────────────────
+       Deliberately empty, and load-bearing for both files. `sky-ground` is the
+       mark about-sky.js takes S = 4 from: the moment this spacer's top reaches
+       the fold, the writing has fully left and the meadow is free to begin
+       resolving without doing it underneath a paragraph. Everything below is
+       the arrival, and it is given more than a viewport and a half so the
+       ground can surface slowly rather than snap in. -->
+  <div class="descent-gap sky-ground" aria-hidden="true"></div>
+
+  <!-- ── the meadow: index.html's contact scene, as this page's footer ─────
+       Same copy, same two buttons, same ink, same vertical centring — it is
+       meant to be the identical place, reached by a different route, so
+       anything invented here would show up as a seam between the two pages.
+       `sky-land` is what tells about-sky.js where the fall ends; by the time
+       this block's top reaches the fold the camera is standing in the grass.
+       See measure() there. -->
+  <section class="meadow sky-land">
+    <div class="ovl">
+      <p class="label reveal">05 &mdash; Clear skies ahead</p>
+      <h2 class="reveal d1">Let&rsquo;s build something together.</h2>
+      <div class="contact-row reveal d2">
+        <a class="cta-btn cta-solid" href="mailto:ajeet.kr646@gmail.com">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3.5" y="5.5" width="17" height="13" rx="2.5"/><path d="m4.5 7 7.5 6 7.5-6"/>
+          </svg>
+          Email me
+        </a>
+        <a class="cta-btn cta-ghost" href="https://www.linkedin.com/" target="_blank" rel="noopener">
+          <span class="cta-in">in</span>
+          LinkedIn
+        </a>
       </div>
     </div>
-    <p class="resolve">Somewhere between the two, I&rsquo;ve learned to appreciate both slowing down and pushing forward. I think that balance has become an important part of who I am.</p>
   </section>
-
-  <!-- Movement 3 · where it lands. The shortest section on the page, and the
-       only one about work — which is the argument the header opened with. -->
-  <section class="panel rv">
-    <h2>And that curiosity eventually found its way into what I do.</h2>
-    <p>I like understanding how things work, questioning why they work that way, and turning ideas into something tangible.</p>
-    <p>Design became one of the ways I could explore that instinct, and now <strong>AI</strong> has made the space between having an idea and actually building it smaller than ever. I&rsquo;m constantly experimenting, learning, making things, breaking them, and trying again.</p>
-  </section>
-
-  <!-- The six labels are the page's structure said out loud: each movement above
-       was one or two of them. Nothing introduces the line, and nothing follows it
-       except the ask. -->
-  <div class="closer rv">
-    <p>I don&rsquo;t really see myself as just a <b>designer</b>, <b>photographer</b>, <b>traveller</b>, <b>fitness enthusiast</b>, <b>anime nerd</b>, or <b>builder</b>&mdash;they&rsquo;re all different pieces of the same person.</p>
-    <p class="coda">And I don&rsquo;t think I want to have everything figured out either. I&rsquo;d rather keep exploring, keep learning, and see where all these interests take me next.</p>
-  </div>
-
-  <footer class="foot rv">
-    <h2>That&rsquo;s me. Now let&rsquo;s talk about you.</h2>
-    <p>Drop a &lsquo;hi&rsquo; and let&rsquo;s start cooking something together.</p>
-    <a class="mail" href="mailto:ajeet.kr646@gmail.com">
-      Say hi
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M12 5l7 7-7 7"/></svg>
-    </a>
-    <p class="addr">ajeet.kr646@gmail.com</p>
-    <a class="back" href="index.html">See the work &rarr;</a>
-  </footer>
 
 </main>
 
@@ -599,30 +583,46 @@
     });
   });
 
-  var rv = [].slice.call(document.querySelectorAll('.rv'));
-  var timer;
-  function tick() {
-    var vh = innerHeight;
-    for (var i = 0; i < rv.length; i++) {
-      /* The `&& b.bottom > 0` term that used to be here meant "not scrolled past
-         yet". Any block already ABOVE the viewport when a tick fired failed it —
-         and since an element is only spliced out on SUCCESS, it was re-tested
-         forever against a condition it could never satisfy again, and stayed at
-         opacity 0 for the life of the page. Reload below the fold with the
-         browser's default scroll restoration, hit End, or come back through
-         history, and the top half of the page was blank sky with no recovery.
-         A block above the viewport has simply been reached: reveal it. */
-      if (rv[i].getBoundingClientRect().top < vh * 0.88) { rv[i].classList.add('in'); rv.splice(i, 1); i--; }
+  /* ── reveal fail-safe ──────────────────────────────────────────────────
+     Every block on this page starts at opacity 0 and is brought in by
+     about-sky.js, which is the right place for it: the copy should wait for
+     the sky to come up rather than arrive over a bare canvas.
+
+     But it means the words are hostage to a WebGL module. Lose the context —
+     no GPU, a blocklisted driver, a browser with WebGL off, a CDN font stall
+     that trips the module, a parse error on an old engine — and about-sky.js
+     returns early, nothing ever adds `.in`, and a visitor gets a page with
+     nothing on it. A portfolio's About page failing CLOSED, to blank, is the
+     worst available outcome; the sky is the enhancement and the writing is
+     the page.
+
+     So: wait past the module's own boot hold, and if it has revealed nothing
+     by then, run the same rect pass here instead. Rect-based rather than an
+     IntersectionObserver for the same reason about-sky.js is — it behaves
+     under headless capture, in iframes and after an instant scroll — and
+     progressive rather than a blanket unhide, so a merely SLOW module still
+     hands over a page that reveals section by section. */
+  setTimeout(function () {
+    if (document.querySelector('.reveal.in')) return;   // the module has it
+    var els = [].slice.call(document.querySelectorAll('.reveal'));
+    var timer;
+    function tick() {
+      for (var i = els.length - 1; i >= 0; i--) {
+        /* deliberately no `bottom > 0` test: a block already scrolled past —
+           a reload below the fold, a back-navigation — has been reached, and
+           testing for it would leave it invisible with no way to recover */
+        if (els[i].getBoundingClientRect().top < innerHeight * 0.88) {
+          els[i].classList.add('in'); els.splice(i, 1);
+        }
+      }
+      if (!els.length) { clearInterval(timer); removeEventListener('scroll', tick); }
     }
-    if (!rv.length) { clearInterval(timer); removeEventListener('scroll', tick); removeEventListener('resize', tick); }
-  }
-  addEventListener('scroll', tick, { passive: true });
-  addEventListener('resize', tick);
-  tick();
-  timer = setInterval(tick, 600);
+    addEventListener('scroll', tick, { passive: true });
+    timer = setInterval(tick, 400);
+    tick();
+  }, 3200);
 })();
 </script>
-
 <script>
 /* ═══════════════════════════════════════════════════════════════════════
    DECK — a stack of cards that fans open, then takes hover and drag.
@@ -840,6 +840,10 @@
   paint();
 })();
 </script>
+
+<!-- The descent. Bump ?v= after any change here or the browser will keep
+     flying the old camera path. -->
+<script type="module" src="js/about-sky.js?v=14"></script>
 
 </body>
 </html>
