@@ -91,6 +91,35 @@
   }
   .shot.tall { aspect-ratio: 4 / 3; }
   .shot.bleed { border-radius: 24px; }
+  /* Opt-in via `wide: true` on a FIGURES entry, for artwork whose subject is a
+     row of phone screens: inside a problem block a figure renders in the grid's
+     right column (~806px of a 1080px wrap), where three phones land ~169px each
+     and their UI is unreadable. The frame's height is fixed by the artwork's own
+     aspect, so WIDTH is the only lever that scales them.
+
+     Grows RIGHTWARD only. The left is occupied by .prob-rail, which is sticky —
+     it sits beside the figure the whole time it is on screen — so expanding that
+     way would slide the artwork underneath it.
+
+     Sized by width rather than centred with a margin/transform: any 50% there
+     resolves against the problem COLUMN, not the wrap, which pushes the figure
+     right and off the viewport. The column's right edge coincides with the
+     wrap's right edge, so the room available is half the difference between
+     viewport and wrap, less a gutter. max() floors it at 0 so narrow viewports
+     opt out instead of overflowing. */
+  .shot--wide {
+    /* Two guards, both deliberate:
+       · the 48px gutter (was 20px) absorbs a classic scrollbar — `vw` counts
+         the scrollbar, the layout width does not, so vw-based breakout math
+         overshoots by half the scrollbar on any browser that reserves space
+         for one. Headless hides scrollbars, so that error is invisible in
+         capture and only shows up on a real machine.
+       · the 160px cap stops the breakout growing without limit on a wide
+         display, where 50vw - 540px runs to 700px+ and the figure would tower
+         over the column of text it belongs to. */
+    width: calc(100% + min(160px, max(0px, 50vw - min(46vw, 540px) - 48px)));
+    max-width: none;
+  }
   .g1 { background: linear-gradient(135deg, #ffd8a6, #ff9d6c 55%, #f76b8a); }
   .g2 { background: linear-gradient(135deg, #a6d8ff, #6c9dff 55%, #7b6bf7); }
   .g3 { background: linear-gradient(135deg, #c3f0c8, #6cc9a4 55%, #3f9d8a); }
@@ -753,9 +782,14 @@ var COVERS = { porter: 'images/porter-cover.jpg' };
 /* real body images keyed by case id → placeholder label */
 var FIGURES = { porter: {
   'Porter-branded trucks and two-wheelers on the road': 'images/porter-context.jpg',
+  /* 54/31 (1.742), not the 16:9 this used to be: the light redesign of the
+     diagram came out at 6480x3720. Every .shot is object-fit: cover, so without
+     the ratio the frame would silently crop ~2% off the top and bottom — which
+     is exactly where the "Existing Process" title and the red failure labels sit. */
   'The manual ops behind the program': {
-    src: 'images/porter-manual-ops.png?v=3',
-    srcset: 'images/porter-manual-ops-1080.png?v=3 1080w, images/porter-manual-ops.png?v=3 2160w'
+    src: 'images/porter-manual-ops.png?v=4',
+    srcset: 'images/porter-manual-ops-1080.png?v=4 1080w, images/porter-manual-ops.png?v=4 2160w',
+    ratio: '54 / 31'
   },
   'Partner motivations & research insights': {
     src: 'images/porter-personas.png?v=2',
@@ -784,8 +818,33 @@ var FIGURES = { porter: {
     srcset: 'images/porter-program-impact-1080.jpg 1080w, images/porter-program-impact.jpg 2160w',
     ratio: '5 / 2'
   },
-  'Final onboarding flow': 'images/porter-onboarding-flow.jpg',
-  'Entry point exploration': 'images/porter-entry-points.jpg'
+  /* Three phone screens are the whole point of this figure, and in a problem
+     block it renders in a ~806px column where they land ~169px each. Two levers,
+     both applied: `wide` grows the frame rightward, and the export is cropped to
+     its own content (the supplied art carried ~20% dead plate horizontally).
+     The ratio is the CROPPED aspect — without it the 2/1 frame .shot-row.n1
+     imposes would cover-crop into the phones.
+     BUMP `?v=` WHENEVER THE FILE IS RECROPPED, even if the name is unchanged:
+     `ratio` and the file have to agree, and a cached image at a stale version
+     against a new ratio is cover-fitted, which clips top and bottom. That
+     happened once here — v2 was reused for two different crops. */
+  'Final onboarding flow': {
+    src: 'images/porter-onboarding-flow.jpg?v=3',
+    srcset: 'images/porter-onboarding-flow-1440.jpg?v=3 1440w, images/porter-onboarding-flow.jpg?v=3 2880w',
+    ratio: '5579 / 3369',
+    wide: true
+  },
+  /* Same treatment as the onboarding flow, and for the same reason: four phone
+     screens in a problem block's ~806px column are unreadable, so this breaks
+     the column too. This export was already tight horizontally (~5% dead plate
+     each side), so the crop is mostly vertical breathing room; `wide` is doing
+     the work here, not the crop. Bump ?v= on any recrop — see above. */
+  'Entry point exploration': {
+    src: 'images/porter-entry-points.jpg?v=2',
+    srcset: 'images/porter-entry-points-1440.jpg?v=2 1440w, images/porter-entry-points.jpg?v=2 2880w',
+    ratio: '6076 / 3123',
+    wide: true
+  }
 } };
 
 /* Rows whose last frame holds two screens. That frame is width-constrained
@@ -912,11 +971,18 @@ function shot(s, grad, extra) {
   var f = (FIGURES[id] || {})[s[0]];
   if (f) {
     var src = typeof f === 'string' ? f : f.src;
+    /* wide — breaks this one figure out of the 1080px text column (see
+       .shot--wide). The `sizes` hint has to follow it: left at 1080px the
+       browser picks a candidate for the column and the wider frame then
+       renders an upscale of it, which is the opposite of the point. */
+    var wide = (typeof f === 'object' && f.wide);
     var srcset = (typeof f === 'object' && f.srcset)
-      ? ' srcset="' + f.srcset + '" sizes="(max-width: 1173px) 92vw, 1080px"' : '';
+      ? ' srcset="' + f.srcset + '" sizes="' +
+        (wide ? '(max-width: 1500px) 94vw, 1400px' : '(max-width: 1173px) 92vw, 1080px') + '"' : '';
     var ratio = (typeof f === 'object' && f.ratio)
       ? ' style="aspect-ratio:' + f.ratio + '"' : '';
-    return '<img class="shot ' + (s[1] || '') + ' ' + (extra || '') + '" src="' + src + '"' +
+    return '<img class="shot ' + (s[1] || '') + ' ' + (extra || '') +
+      (wide ? ' shot--wide' : '') + '" src="' + src + '"' +
       srcset + ratio + ' alt="' + s[0] + '">';
   }
   return '<div class="shot ' + grad + ' ' + (s[1] || '') + ' ' + (extra || '') + '" data-n="' + s[0] + '"></div>';
