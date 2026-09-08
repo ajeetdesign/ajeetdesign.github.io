@@ -31,6 +31,11 @@
    third of the card empty. NOT 1:1: the shot's width is fixed by the grid, so a
    square frame cannot make the UI bigger, it only trades backdrop for nothing.
 
+   `year` and `company` render as a small uppercase tag above the modal title
+   (`YEAR · COMPANY`). Both are optional and either may be empty — the line
+   hides itself rather than showing a stray separator — so a bite with no
+   attribution simply has none.
+
    Bites composed from separate background + transparent-UI sources are built by
    `compose-bites.py` at the repo root, which writes both variants from one pair
    of files. Bites still on a single flat export keep their old 16:9 `detail`.
@@ -38,8 +43,15 @@
    is fetched when its card is opened, so the second set costs a visitor
    nothing unless they click.
 
-   Order alternates desktop and mobile so no two neighbours read as the same
-   shape, and spreads the backdrops rather than running the cool ones together.
+   ORDER IS CHRONOLOGICAL, newest first — 2026 down to 2021. That is the spine;
+   do not resort on any other basis.
+
+   Where two bites share a year the tie is broken to alternate desktop and
+   mobile, so no two neighbours read as the same shape. 2023 and 2022 are both
+   pairs, and using them that way takes the same-shape adjacencies from four
+   down to two (the 2026/2025-26 pair at the head and the lone 2021 at the
+   tail, neither of which has a partner to swap with). The carousel loops, so
+   the last card neighbours the first.
 
    The carousel wraps over N * STEP world units, and roughly fifteen units are
    on screen at once. Three shots made the loop 17.6 units, so a card slid back
@@ -48,30 +60,30 @@
    between one shot and its next instance — so the padding is gone. */
 
 const WORK = [
-  { src: 'images/bite-prompt-ops.jpg?v=5',
-    detail: 'images/bite-prompt-ops-detail.jpg?v=3', ratio: '4 / 3', title: 'Prompt Ops',
-    label: 'A prompt-ops console for an airline support agent — a run log filtered down to success, failure and pending states, beside a trace timeline opened to one span’s input, output and metadata' },
+  { src: 'images/bite-coin-rewards.jpg?v=5',
+    detail: 'images/bite-coin-rewards-detail.jpg?v=3', ratio: '4 / 3', year: '2026', company: 'Porter', title: 'Porter Coin redemption program using Vouchers',
+    label: 'Designed a gift card redemption experience for the Booker persona, enabling users to redeem Porter Coins across 20+ brands. The feature saw meaningful uptake among Bookers, creating a new way for customers to turn their accumulated Coins into rewards.' },
   { src: 'images/bite-booking-flow.jpg?v=5',
-    detail: 'images/bite-booking-flow-detail.jpg?v=3', ratio: '4 / 3', title: 'Booking Flow',
-    label: 'Three screens from a logistics booking flow — vehicle categories and rewards on the home screen, a picker comparing capacity, price and pickup time, and a review step carrying loading help and proof-of-delivery add-ons' },
-  { src: 'images/bite-call-audits.jpg?v=5',
-    detail: 'images/bite-call-audits-detail.jpg?v=3', ratio: '4 / 3', title: 'Call Audits',
-    label: 'A call-audit template builder — the violations a template watches for, scoring rules for non-critical and not-applicable answers, the escalation each violation triggers, and the teams it applies to' },
+    detail: 'images/bite-booking-flow-detail.jpg?v=3', ratio: '4 / 3', year: '2025-26', company: 'Porter', title: 'Reimagined the Porter Customer App',
+    label: 'Reimagined the customer app using our new design system, while working within the constraint of not creating any new APIs. The redesign improved booking flow conversion, reduced the time taken to search for locations, improved signup conversion, and increased the addition of value-added services.' },
+  { src: 'images/bite-prompt-ops.jpg?v=5',
+    detail: 'images/bite-prompt-ops-detail.jpg?v=3', ratio: '4 / 3', year: '2025', company: 'Design task', title: 'Filters for logs and span',
+    label: 'A prompt-ops console for an airline support agent — a run log filtered down to success, failure and pending states, beside a trace timeline opened to one span’s input, output and metadata' },
+  { src: 'images/bite-checkout-sdk.jpg?v=5',
+    detail: 'images/bite-checkout-sdk-detail.jpg?v=3', ratio: '4 / 3', year: '2023', company: 'Juspay', title: 'Multi platform SDK for Payments',
+    label: 'Designed a scalable Checkout SDK for merchants across Android, iOS, and web. Built as an experience optimised kit, it allows merchants to enable their preferred payment methods and deliver a consistent checkout experience across platforms.' },
+  { src: 'images/bite-connector-setup.jpg?v=5',
+    detail: 'images/bite-connector-setup-detail.jpg?v=3', ratio: '4 / 3', year: '2023', company: 'Juspay', title: 'Improved payment connectors setup',
+    label: 'A four-step wizard for connecting a payment processor — credentials, webhooks, payment methods and a summary — with each field explained at the point it is asked for' },
   { src: 'images/bite-loan-offers.jpg?v=5',
-    detail: 'images/bite-loan-offers-detail.jpg?v=3', ratio: '4 / 3', title: 'Loan Offers',
+    detail: 'images/bite-loan-offers-detail.jpg?v=3', ratio: '4 / 3', year: '2022', company: 'Juspay', title: 'Increased conversion of credit SDK',
     label: 'Three screens from an in-app lending journey — the offer splash naming its participating lenders, a bank-statement step offering account-aggregator consent instead of a manual upload, and three EMI offers compared side by side' },
   { src: 'images/bite-lender-config.jpg?v=5',
-    detail: 'images/bite-lender-config-detail.jpg?v=3', ratio: '4 / 3', title: 'Lender Config',
+    detail: 'images/bite-lender-config-detail.jpg?v=3', ratio: '4 / 3', year: '2022', company: 'Juspay', title: 'Merchant Lenders configuration on FinOps',
     label: 'A lending console for lead distribution — active lenders ranked by drag with their share of leads, the inactive ones waiting to be switched on, and a primer on what a soft integration changes before it is turned on' },
-  { src: 'images/bite-coin-rewards.jpg?v=5',
-    detail: 'images/bite-coin-rewards-detail.jpg?v=3', ratio: '4 / 3', title: 'Coin Rewards',
-    label: 'Three screens turning earned coins into gift cards — a catalogue browsable by category, a purchase sheet with preset and custom amounts against a coin balance, and the redeemed card with its code and PIN' },
-  { src: 'images/bite-connector-setup.jpg?v=5',
-    detail: 'images/bite-connector-setup-detail.jpg?v=3', ratio: '4 / 3', title: 'Connector Setup',
-    label: 'A four-step wizard for connecting a payment processor — credentials, webhooks, payment methods and a summary — with each field explained at the point it is asked for' },
-  { src: 'images/bite-checkout-sdk.jpg?v=5',
-    detail: 'images/bite-checkout-sdk-detail.jpg?v=3', ratio: '4 / 3', title: 'Checkout SDK',
-    label: 'A drop-in checkout in two themes — a light sheet grouping card entry, wallets, pay-later and crypto by type, and a dark variant leading with express wallets above the shopper’s saved cards' }
+  { src: 'images/bite-call-audits.jpg?v=5',
+    detail: 'images/bite-call-audits-detail.jpg?v=3', ratio: '4 / 3', year: '2021', company: 'Convin.ai', title: 'Improved AI call audit process for Convin',
+    label: 'A call-audit template builder — the violations a template watches for, scoring rules for non-critical and not-applicable answers, the escalation each violation triggers, and the teams it applies to' }
 ];
 
 const PROJECTS = WORK;

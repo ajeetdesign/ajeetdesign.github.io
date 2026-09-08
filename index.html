@@ -530,6 +530,26 @@
     box-shadow: 0 60px 140px -40px rgba(0, 0, 0, 0.6);
   }
   .bitm-copy { display: flex; flex-direction: column; justify-content: center; gap: 16px; min-height: 0; min-width: 0; max-width: 38ch; }
+  /* Year and company, above the title. 0.66 alpha, not the 0.5 a meta line
+     wants to be: at 12px on the panel's near-white that measured 3.03:1, and
+     the page's own accent blue is only 4.03:1 — small type on white simply has
+     no room for a lighter ink. It is separated from the body copy by size,
+     weight, tracking and case instead of by colour, which is the right way to
+     rank two lines this small anyway.
+
+     The negative margin tightens it to the title against .bitm-copy's 16px
+     flex gap: the pair is one unit, and 16px let it drift into the space that
+     is meant to separate the title from the paragraph. */
+  /* `.bitm-copy .bitm-meta`, not `.bitm-meta`: this is a <p> inside .bitm-copy,
+     and `.bitm-copy p` below is (0,1,1) — it beat a bare class selector on
+     specificity no matter where it sat in the file, so the tag silently
+     rendered at 16px in body ink. Two classes puts it back in front. */
+  .bitm-copy .bitm-meta {
+    font-size: 12px; font-weight: 700; letter-spacing: 0.14em;
+    text-transform: uppercase; line-height: 1.3;
+    color: rgba(28, 43, 58, 0.66); margin: 0 0 -5px;
+  }
+  .bitm-copy .bitm-meta[hidden] { display: none; }
   .bitm-copy h3 {
     font-size: clamp(22px, 2.6vw, 36px); font-weight: 800; letter-spacing: -0.03em;
     line-height: 1.15; margin: 0; color: var(--ink-dark);
@@ -593,7 +613,6 @@
   .bitm-nav.bitm-next { right: calc(50% - min(720px, 46vw) - 24px); }
   .bitm-nav.bitm-prev:hover { transform: translateY(-50%) translateX(-3px); }
   .bitm-nav.bitm-next:hover { transform: translateY(-50%) translateX(3px); }
-  .bitm-nav:disabled { opacity: 0.28; cursor: default; pointer-events: none; }
   @media (max-width: 760px) {
     .bitm-panel { width: 92vw; height: 84vh; }
     .bitm-close { top: calc(50% - 42vh - 21px); right: calc(50% - 46vw - 21px); }
@@ -1270,16 +1289,22 @@
       <!-- The stage is a WebGL canvas, so its cards carry no text for a screen
            reader. The removed bites player described each of these shots; the
            work did not become decorative when it moved onto the carousel, so
-           the descriptions come with it. -->
+           the descriptions come with it.
+
+           Each entry leads with the card's TITLE because that title is now a
+           claim ("Increased conversion of credit SDK") rather than a two-word
+           label, and it is baked into the card texture where no screen reader
+           can reach it. Titles and descriptions both live in
+           js/gallery-assets.js; this list mirrors them and must stay in sync. -->
       <ul class="sr-only">
-        <li>A prompt-ops console for an airline support agent &mdash; a run log filtered down to success, failure and pending states, beside a trace timeline opened to one span&rsquo;s input, output and metadata.</li>
-        <li>Three screens from a logistics booking flow &mdash; vehicle categories and rewards on the home screen, a picker comparing capacity, price and pickup time, and a review step carrying loading help and proof-of-delivery add-ons.</li>
-        <li>A call-audit template builder &mdash; the violations a template watches for, scoring rules for non-critical and not-applicable answers, the escalation each violation triggers, and the teams it applies to.</li>
-        <li>Three screens from an in-app lending journey &mdash; the offer splash naming its participating lenders, a bank-statement step offering account-aggregator consent instead of a manual upload, and three EMI offers compared side by side.</li>
-        <li>A lending console for lead distribution &mdash; active lenders ranked by drag with their share of leads, the inactive ones waiting to be switched on, and a primer on what a soft integration changes before it is turned on.</li>
-        <li>Three screens turning earned coins into gift cards &mdash; a catalogue browsable by category, a purchase sheet with preset and custom amounts against a coin balance, and the redeemed card with its code and PIN.</li>
-        <li>A four-step wizard for connecting a payment processor &mdash; credentials, webhooks, payment methods and a summary &mdash; with each field explained at the point it is asked for.</li>
-        <li>A drop-in checkout in two themes &mdash; a light sheet grouping card entry, wallets, pay-later and crypto by type, and a dark variant leading with express wallets above the shopper&rsquo;s saved cards.</li>
+        <li>Porter Coin redemption program using Vouchers. Designed a gift card redemption experience for the Booker persona, enabling users to redeem Porter Coins across 20+ brands. The feature saw meaningful uptake among Bookers, creating a new way for customers to turn their accumulated Coins into rewards.</li>
+        <li>Reimagined the Porter Customer App. Reimagined the customer app using our new design system, while working within the constraint of not creating any new APIs. The redesign improved booking flow conversion, reduced the time taken to search for locations, improved signup conversion, and increased the addition of value-added services.</li>
+        <li>Filters for logs and span. A prompt-ops console for an airline support agent &mdash; a run log filtered down to success, failure and pending states, beside a trace timeline opened to one span&rsquo;s input, output and metadata.</li>
+        <li>Multi platform SDK for Payments. Designed a scalable Checkout SDK for merchants across Android, iOS, and web. Built as an experience optimised kit, it allows merchants to enable their preferred payment methods and deliver a consistent checkout experience across platforms.</li>
+        <li>Improved payment connectors setup. A four-step wizard for connecting a payment processor &mdash; credentials, webhooks, payment methods and a summary &mdash; with each field explained at the point it is asked for.</li>
+        <li>Increased conversion of credit SDK. Three screens from an in-app lending journey &mdash; the offer splash naming its participating lenders, a bank-statement step offering account-aggregator consent instead of a manual upload, and three EMI offers compared side by side.</li>
+        <li>Merchant Lenders configuration on FinOps. A lending console for lead distribution &mdash; active lenders ranked by drag with their share of leads, the inactive ones waiting to be switched on, and a primer on what a soft integration changes before it is turned on.</li>
+        <li>Improved AI call audit process for Convin. A call-audit template builder &mdash; the violations a template watches for, scoring rules for non-critical and not-applicable answers, the escalation each violation triggers, and the teams it applies to.</li>
       </ul>
     </div>
   </section>
@@ -1486,6 +1511,7 @@
     </button>
     <div class="bitm-panel">
       <div class="bitm-copy">
+        <p class="bitm-meta" id="bitm-meta"></p>
         <h3 id="bitm-title"></h3>
         <p id="bitm-body"></p>
       </div>
@@ -1494,7 +1520,7 @@
   </div>
 </div>
 <script type="module">
-  import { WORK } from './js/gallery-assets.js?v=6';
+  import { WORK } from './js/gallery-assets.js?v=14';
   (function () {
     var layer = document.getElementById('bite-modal');
     var panel = layer && layer.querySelector('.bitm-panel');
@@ -1503,6 +1529,7 @@
     var img = document.getElementById('bitm-img');
     var title = document.getElementById('bitm-title');
     var body = document.getElementById('bitm-body');
+    var meta = document.getElementById('bitm-meta');
     var copyEl = layer.querySelector('.bitm-copy');
     var shotEl = layer.querySelector('.bitm-shot');
     var closeBtn = layer.querySelector('.bitm-close');
@@ -1510,17 +1537,37 @@
     var nextBtn = layer.querySelector('.bitm-nav.bitm-next');
     var prevPeek = layer.querySelector('.bitm-peek-prev');
     var nextPeek = layer.querySelector('.bitm-peek-next');
-    var lastY = 0, current = 0, animating = false, sessionId = 0;
+    var lastY = 0, current = 0, animating = false, sessionId = 0, pending = 0;
 
-    // a blank hint that a neighbour exists — hidden outright past the ends
-    function setPeek(el, i) {
-      el.hidden = !(i >= 0 && i < WORK.length);
+    /* The deck is a RING: index arithmetic wraps, so every card has a card on
+       both sides and the peeks are always true. They are shown once, here,
+       rather than recomputed per card. */
+    prevPeek.hidden = nextPeek.hidden = false;
+
+    function wrap(i) { var n = WORK.length; return (i % n + n) % n; }
+
+    /* Warm the neighbours. A `detail` is ~250kB and only fetched when its card
+       is opened, which on a ring means the next thing the reader can reach is
+       always exactly one click away in either direction. Fetching both while
+       they read makes the swap below land on a decoded image instead of an
+       empty box. Idempotent — the browser cache absorbs the repeats. */
+    function prefetchNeighbours(i) {
+      [wrap(i - 1), wrap(i + 1)].forEach(function (n) {
+        var c = WORK[n], u = c && (c.detail || c.src);
+        if (u) { var im = new Image(); im.decoding = 'async'; im.src = u; }
+      });
     }
+
     function render(i) {
       current = i;
       var card = WORK[i];
       title.textContent = card.title || '';
       body.textContent = card.label || '';
+      /* Year and company. Either may be missing — a card with neither hides the
+         line rather than rendering an empty separator or a stray dot. */
+      var tag = [card.year, card.company].filter(Boolean).join(' \u00b7 ');
+      meta.textContent = tag;
+      meta.hidden = !tag;
       /* the crop, not the composition the carousel card shows — see the header
          of gallery-assets.js. Falls back so a card without one still renders. */
       img.src = card.detail || card.src;
@@ -1529,10 +1576,7 @@
          class so the value lives in one place — the card — and an unset `ratio`
          inherits the :root default instead of needing a matching class. */
       shotEl.style.setProperty('--quick-bite-ratio', card.ratio || '16 / 9');
-      prevBtn.disabled = i <= 0;
-      nextBtn.disabled = i >= WORK.length - 1;
-      setPeek(prevPeek, i - 1);
-      setPeek(nextPeek, i + 1);
+      prefetchNeighbours(i);
     }
 
     /* The copy fades and rises into place on its own beat, independent of
@@ -1551,80 +1595,87 @@
       });
     }
 
-    /* FLIP-style swap: the outgoing card shrinks into the peek slot it's
-       heading toward, then — at full size zero, mid-flight — jumps straight
-       to the OTHER peek's slot, swaps its content there while invisible, and
-       grows back out to full size. The shot image rides its own, slower
-       counter-slide the whole time (a parallax layer inside the FLIP) so the
-       screenshot visibly drifts against the card's own motion instead of
-       moving rigidly with it. */
+    /* A plain cross-fade. The card holds still; its contents fade out, swap,
+       and fade back in, with a small drift in the direction of travel so the
+       switch still says which way you went.
+
+       Three more elaborate versions came before this one and all of them were
+       worse. A FLIP shrank the panel into a peek slot and grew it back — a
+       hard cut dressed as a move. Sliding the whole panel out and back in read
+       well but was sequential, so the card fell to nothing for about a tenth
+       of a second. Cloning the outgoing content and pushing it out under the
+       incoming one removed that gap but bought a lot of machinery — two live
+       copies of the card, pinned geometry, id stripping, leak cleanup — for a
+       motion that still did not look right.
+
+       So: no ghosts, no panel movement, no parallax. The frame never leaves,
+       which is what stops the fade reading as a blank screen, and the whole
+       thing is over in under half a second. */
     function navigate(dir) {
-      var target = current + dir;
-      if (animating || target < 0 || target >= WORK.length) return;
-      var exitPeek = dir < 0 ? nextPeek : prevPeek;   // where the outgoing card recedes to
-      var entryPeek = dir < 0 ? prevPeek : nextPeek;  // where the incoming card grows from
-      // exitPeek reflects the OLD current's neighbour on that side, which is
-      // about to become false (the old card is leaving) — force it visible
-      // for the geometry read; render(target) sets its real final state.
-      exitPeek.hidden = false;
-
-      var base = panel.getBoundingClientRect();
-      var exitR = exitPeek.getBoundingClientRect();
-      var entryR = entryPeek.getBoundingClientRect();
-      function toRect(r) {
-        return 'translate(' + ((r.left + r.width / 2) - (base.left + base.width / 2)) + 'px,'
-          + ((r.top + r.height / 2) - (base.top + base.height / 2)) + 'px) '
-          + 'scale(' + (r.width / base.width) + ',' + (r.height / base.height) + ')';
-      }
-
-      // setTimeout-driven, not transitionend-driven: transitionend can be
-      // missed (tab backgrounded, transition interrupted, a second property
-      // finishing first), and a missed event here means the panel never
-      // recovers because `animating` would stay stuck true forever.
-      // sessionId guards against a close()+reopen() while this timeout is
-      // still pending — a stale callback would otherwise stomp whatever
-      // card the reopened modal is now showing.
-      var DUR = 260, PARALLAX = dir * -34 + 'px';
+      /* One step of memory, not a queue and not a dropped click: a transition
+         locks for ~460ms, and simply returning meant a reader tapping through
+         the ring lost most of their taps. Exactly one step means a double-tap
+         advances two, while nothing piles up a backlog that keeps animating
+         after they stop. */
+      if (animating) { pending = dir; return; }
+      var target = wrap(current + dir);      // the ring: never out of range
       var mySession = sessionId;
       animating = true;
-      panel.style.transition = 'transform ' + DUR + 'ms cubic-bezier(.4,0,.2,1), opacity 200ms ease';
-      panel.style.transform = toRect(exitR);
-      panel.style.opacity = '0';
-      shotEl.style.transition = 'transform ' + DUR + 'ms cubic-bezier(.2,.7,.3,1)';
-      shotEl.style.transform = 'translateX(' + PARALLAX + ')';
+
+      var OUT = 160, IN = 260, DRIFT = dir * 14;
+      var ease = 'cubic-bezier(.4, 0, .2, 1)';
+
+      function set(el, x, o, dur) {
+        el.style.transition = 'opacity ' + dur + 'ms ' + ease + ', transform ' + dur + 'ms ' + ease;
+        el.style.transform = x === 0 ? 'none' : 'translateX(' + x + 'px)';
+        el.style.opacity = o;
+      }
+
+      set(copyEl, -DRIFT, '0', OUT);
+      set(shotEl, -DRIFT * 0.6, '0', OUT);
 
       setTimeout(function () {
         if (mySession !== sessionId) return;
-        panel.style.transition = 'none';
-        panel.style.transform = toRect(entryR);
-        shotEl.style.transition = 'none';
-        shotEl.style.transform = 'translateX(' + (dir * 34) + 'px)';
-        void panel.offsetWidth; // flush, so the transition change below actually transitions
         render(target);
-        revealCopy();
-        requestAnimationFrame(function () {
+
+        copyEl.style.transition = shotEl.style.transition = 'none';
+        copyEl.style.transform = 'translateX(' + DRIFT + 'px)';
+        shotEl.style.transform = 'translateX(' + (DRIFT * 0.6) + 'px)';
+        void panel.offsetWidth;   // flush, or the change below would not transition
+
+        /* Wait for the new shot to be decodable before fading it up, so a card
+           opened cold does not fade in on an empty frame. Raced against a cap:
+           decode() can reject or hang, and a stalled image must not leave the
+           modal mid-transition with `animating` stuck true. */
+        var ready = img.decode ? img.decode().catch(function () {}) : Promise.resolve();
+        var capped = new Promise(function (r) { setTimeout(r, 240); });
+
+        Promise.race([ready, capped]).then(function () {
           if (mySession !== sessionId) return;
-          panel.style.transition = 'transform ' + DUR + 'ms cubic-bezier(.4,0,.2,1), opacity 200ms ease';
-          panel.style.transform = 'none';
-          panel.style.opacity = '1';
-          shotEl.style.transition = 'transform ' + DUR + 'ms cubic-bezier(.2,.7,.3,1)';
-          shotEl.style.transform = 'none';
+          requestAnimationFrame(function () {
+            if (mySession !== sessionId) return;
+            set(copyEl, 0, '1', IN);
+            set(shotEl, 0, '1', IN);
+          });
+          setTimeout(function () {
+            if (mySession !== sessionId) return;
+            [copyEl, shotEl].forEach(function (el) {
+              el.style.transition = el.style.transform = el.style.opacity = '';
+            });
+            animating = false;
+            if (pending) { var d = pending; pending = 0; navigate(d); }
+          }, IN + 60);
         });
-        setTimeout(function () {
-          if (mySession !== sessionId) return;
-          panel.style.transition = '';
-          shotEl.style.transition = '';
-          animating = false;
-        }, DUR + 40);
-      }, DUR);
+      }, OUT);
     }
 
     function resetPanel() {
       sessionId++;   // invalidates any in-flight navigate() callbacks
       animating = false;
+      pending = 0;   // a step held from the last session must not fire into this one
       panel.style.transition = panel.style.transform = '';
       panel.style.opacity = '';
-      shotEl.style.transition = shotEl.style.transform = '';
+      shotEl.style.transition = shotEl.style.transform = shotEl.style.opacity = '';
       copyEl.style.transition = copyEl.style.opacity = copyEl.style.transform = '';
     }
     function open(i) {
@@ -1809,7 +1860,7 @@
       .add({ duration: 1500, complete: finish });
   })();
 </script>
-<script type="module" src="js/sky.js?v=124"></script>
+<script type="module" src="js/sky.js?v=132"></script>
 <script>
   /* nav active state — rect-based like the reveals (IO never fires in captures) */
   (function () {
