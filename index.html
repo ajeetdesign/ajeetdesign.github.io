@@ -23,8 +23,17 @@
     --storm-accent: #8fb7ff;
     --meadow-ink: #17301f;
     --meadow-soft: rgba(23, 48, 31, 0.74);
-    /* Shared by the WebGL carousel and its detail view. Keep new Quick Bites
-       exports at 16:9 so product UI is shown without a crop. */
+    /* The CAROUSEL is always 16:9 — that is fixed by the card geometry in
+       curved-gallery.js, and a `src` at any other ratio is silently
+       cover-cropped by paint(). This token is the DETAIL view's default only:
+       a card may override it (see `ratio` in gallery-assets.js) because the
+       modal panel is far taller than a 16:9 box in that column, so a bite whose
+       detail is composed at 4:3 fills the card instead of floating in it.
+
+       All eight bites carry `ratio: '4 / 3'` as of Sept 2026, so this default
+       is currently unused — it is kept because it is what let the deck migrate
+       one bite at a time, and it is the fallback if a card is ever added from
+       a single flat 16:9 export. */
     --quick-bite-ratio: 16 / 9;
     /* one size for the three pillar glyphs, in the hero and on the card alike.
        The flight interpolates between those two ends, so they must not drift. */
@@ -489,22 +498,33 @@
   /* both the current card and the two peeks share this footprint — the peeks
      are the same box, just scaled down and slid sideways, so they read as
      the same deck rather than a different-shaped preview */
-  /* Height trimmed from 860 once the shot grew: a 16:9 asset in a two-thirds
-     column stands ~482px, and the taller box left nearly 300px of empty panel
-     under it. The close/nav offsets below are half of these two numbers — they
-     have to move together or the chrome drifts off the panel's corners. */
+  /* 760 / 90vh, up from 740 / 84vh. The px cap barely binds on a laptop — 84vh
+     of a 732px window was 615, so the VH TERM is what most people actually get
+     and it is the one worth raising.
+
+     Raising the height alone would do nothing but add white: the shot is a
+     fixed ratio at a fixed share of the WIDTH, so its height is already
+     determined. The grid below widens with this. The close/nav offsets are half
+     of these two numbers and the peek is ~72% of the height — all of them have
+     to move together or the chrome drifts off the panel's corners. */
   .bitm-panel, .bitm-peek {
-    width: min(1440px, 92vw); height: min(740px, 84vh); border-radius: 24px;
+    width: min(1440px, 92vw); height: min(760px, 90vh); border-radius: 24px;
   }
-  /* The shot carries roughly two thirds of the width. At the old 1fr 1.15fr
-     the asset column came out ~676px, and a 16:9 box in it stands only ~380px
-     tall inside a ~740px content area — over a third of the panel was empty
-     while the artwork it exists to show sat small. The copy is a short title
-     and two lines; it does not need parity with the thing being described. */
+  /* 2.85fr, up from 1.9fr. WIDTH IS THE ONLY WAY TO BUY HEIGHT here: the shot
+     is a fixed aspect ratio spanning a share of the column, so the way to make
+     the artwork taller is to make its column wider. 1.9fr left the 4:3 shot at
+     791x593 in a 659px content area; 2.85fr puts it at ~893x670, which fills
+     the taller panel above.
+
+     The copy floor is 280px rather than a bare 1fr so the column can never be
+     squeezed to where a two-word title breaks across three lines — below about
+     1150px wide the grid stops honouring the ratio and holds that minimum
+     instead. The copy is a short title and a sentence; it does not need parity
+     with the thing it describes. */
   .bitm-panel {
     position: relative; z-index: 2;
     background: #fbfdff;
-    display: grid; grid-template-columns: 1fr 1.9fr; align-items: center;
+    display: grid; grid-template-columns: minmax(280px, 1fr) 2.85fr; align-items: center;
     gap: clamp(20px, 2.6vw, 44px); padding: clamp(22px, 2.8vw, 44px);
     overflow: hidden;
     box-shadow: 0 60px 140px -40px rgba(0, 0, 0, 0.6);
@@ -529,7 +549,7 @@
      panel. No preview content, just a hint that another card is there. */
   .bitm-peek {
     position: absolute; top: 50%; z-index: 1;
-    width: 220px; height: min(530px, 63vh);   /* same ~72% of the panel's height as before it was trimmed */
+    width: 220px; height: min(547px, 65vh);   /* ~72% of the panel's height — see .bitm-panel */
     border: 0; padding: 0; cursor: pointer; border-radius: 24px;
     background: #48484c;
     transition: background .25s ease, opacity .3s ease;
@@ -553,7 +573,7 @@
   .bitm-close:hover, .bitm-nav:hover { background: rgba(10, 16, 26, 0.96); }
   .bitm-close {
     position: absolute; z-index: 3;
-    top: calc(50% - min(370px, 42vh) - 21px);
+    top: calc(50% - min(380px, 45vh) - 21px);   /* half the panel height — see .bitm-panel */
     right: calc(50% - min(720px, 46vw) - 21px);
     width: 42px; height: 42px; border: 0; border-radius: 999px; cursor: pointer;
     display: grid; place-items: center;
@@ -921,7 +941,10 @@
   .tile.sm .t-copy { margin-top: auto; }
 
   /* ── 4 · contact (sunny meadow) ─────────────────────────────────────── */
-  #s-contact { text-align: center; color: var(--meadow-ink); padding-bottom: 8vh; }
+  /* `relative` is what .footmark's bottom edge hangs off. Kept while the mark
+     is parked — it has no visual effect on its own, and without it the absolute
+     mark would resolve against the viewport instead when uncommented. */
+  #s-contact { position: relative; text-align: center; color: var(--meadow-ink); padding-bottom: 8vh; }
   #s-contact .label { color: var(--meadow-soft); }
   #s-contact .label { margin-bottom: 30px; }
   #s-contact h2 {
@@ -948,6 +971,37 @@
     border: 1px solid rgba(255, 255, 255, 0.7);
     backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
   }
+  /* PARKED — nothing carries .footmark right now; the markup in #s-contact is
+     commented out. Kept because the two constraints below were measured, not
+     guessed, and would have to be rediscovered otherwise.
+     the sign-off that closes the journey — pinned to the bottom edge of the
+     meadow rather than trailing the CTAs, so it reads as the page's last line
+     rather than a caption on the contact block. Positioned (not just margined)
+     because the section's height follows its content, and a margin would leave
+     the mark floating at whatever height that happened to be. */
+  .footmark {
+    position: absolute; left: 0; right: 0; bottom: clamp(14px, 2.4vh, 28px);
+    margin: 0;
+    font-size: 13px; font-weight: 600; letter-spacing: -0.005em;
+    /* LIGHT here, not --meadow-ink like the rest of this scene. The grass at
+       the very bottom edge is a dark olive (~rgb(84,89,18)) — far darker than
+       where the headline sits — so the dark ink measured 1.90:1 against it and
+       failed AA outright.
+       Sand rather than --ink-light: that token is a COOL blue-white built for
+       the work sky and the storm, and it read clinical against a golden-hour
+       meadow. #eddcbc is the same sand already used as the WebGL boot
+       background (and documented as color.sand in the token panel), so it
+       belongs to the warm end of the palette the scene is lit by. 5.26:1 on the
+       lightest grass, 8.92:1 on the darkest — the mark stays quiet through SIZE
+       and WEIGHT rather than through low contrast. */
+    color: #eddcbc;
+    /* the sunflowers shift toward centre on narrow viewports, so a soft dark
+       shadow guarantees separation if the mark ever lands on a lit petal */
+    text-shadow: 0 1px 2px rgba(12, 24, 10, 0.45);
+  }
+  /* emoji sit high against a Latin baseline, so the heart floats above the
+     words unless it is nudged down and taken off the text's own line-height */
+  .footmark .hh { display: inline-block; font-size: 12px; transform: translateY(1px); }
   .cta-in {
     width: 17px; height: 17px; border-radius: 4px;
     display: grid; place-items: center;
@@ -1324,6 +1378,18 @@
         </a>
       </div>
     </div>
+    <!-- PARKED (Sept 2026) — the sign-off is shelved until it is designed
+         properly, not deleted. To bring it back: uncomment the <p>, and raise
+         #s-contact's padding-bottom to 11vh so it has a floor to sit on.
+         Two constraints already paid for, in the .footmark rule below:
+           · it must NOT carry .reveal — checkReveals() only fires an element
+             once its top clears innerHeight * 0.88, and something pinned to the
+             bottom edge never gets there, so the reveal can never fire
+           · it must NOT use --meadow-ink — the grass at the bottom edge is a
+             dark olive and that measured 1.90:1, failing AA outright
+    <p class="footmark">Built With <span class="hh" role="img" aria-label="love">&#10084;&#65039;</span>, Diet Coke &amp; AI Buddies</p>
+    -->
+
   </section>
 
 </main>
@@ -1428,7 +1494,7 @@
   </div>
 </div>
 <script type="module">
-  import { WORK } from './js/gallery-assets.js?v=4';
+  import { WORK } from './js/gallery-assets.js?v=6';
   (function () {
     var layer = document.getElementById('bite-modal');
     var panel = layer && layer.querySelector('.bitm-panel');
@@ -1459,6 +1525,10 @@
          of gallery-assets.js. Falls back so a card without one still renders. */
       img.src = card.detail || card.src;
       img.alt = card.title || '';
+      /* Per-card detail ratio. Set on the element rather than swapped via a
+         class so the value lives in one place — the card — and an unset `ratio`
+         inherits the :root default instead of needing a matching class. */
+      shotEl.style.setProperty('--quick-bite-ratio', card.ratio || '16 / 9');
       prevBtn.disabled = i <= 0;
       nextBtn.disabled = i >= WORK.length - 1;
       setPeek(prevPeek, i - 1);
@@ -1739,7 +1809,7 @@
       .add({ duration: 1500, complete: finish });
   })();
 </script>
-<script type="module" src="js/sky.js?v=122"></script>
+<script type="module" src="js/sky.js?v=124"></script>
 <script>
   /* nav active state — rect-based like the reveals (IO never fires in captures) */
   (function () {

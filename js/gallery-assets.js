@@ -20,8 +20,20 @@
               just dead space pushing the product smaller. Cropping buys
               1.06–1.38x depending on how much air the export carried.
 
-   Both are 16:9 and must stay that way: the card geometry is 16:9, so anything
-   else is silently cover-cropped, and .bitm-shot boxes the modal at 16:9 too.
+   `src` is 16:9 and must stay that way — the card geometry is 16:9, so anything
+   else is silently cover-cropped by paint().
+
+   `detail` no longer has to be. A card may carry `ratio` (e.g. '4 / 3'), which
+   index.html sets on .bitm-shot when the card opens; without it the modal falls
+   back to 16:9 and the card renders exactly as it always did. That is what lets
+   the deck migrate one bite at a time. 4:3 exists because the modal panel is
+   much taller than a 16:9 box in that column — a 16:9 detail leaves the bottom
+   third of the card empty. NOT 1:1: the shot's width is fixed by the grid, so a
+   square frame cannot make the UI bigger, it only trades backdrop for nothing.
+
+   Bites composed from separate background + transparent-UI sources are built by
+   `compose-bites.py` at the repo root, which writes both variants from one pair
+   of files. Bites still on a single flat export keep their old 16:9 `detail`.
    Only `src` is loaded up front (lazily, when the leg approaches); a `detail`
    is fetched when its card is opened, so the second set costs a visitor
    nothing unless they click.
@@ -36,29 +48,29 @@
    between one shot and its next instance — so the padding is gone. */
 
 const WORK = [
-  { src: 'images/bite-prompt-ops.jpg?v=3',
-    detail: 'images/bite-prompt-ops-detail.jpg?v=1', title: 'Prompt Ops',
+  { src: 'images/bite-prompt-ops.jpg?v=5',
+    detail: 'images/bite-prompt-ops-detail.jpg?v=3', ratio: '4 / 3', title: 'Prompt Ops',
     label: 'A prompt-ops console for an airline support agent — a run log filtered down to success, failure and pending states, beside a trace timeline opened to one span’s input, output and metadata' },
-  { src: 'images/bite-booking-flow.jpg?v=3',
-    detail: 'images/bite-booking-flow-detail.jpg?v=1', title: 'Booking Flow',
+  { src: 'images/bite-booking-flow.jpg?v=5',
+    detail: 'images/bite-booking-flow-detail.jpg?v=3', ratio: '4 / 3', title: 'Booking Flow',
     label: 'Three screens from a logistics booking flow — vehicle categories and rewards on the home screen, a picker comparing capacity, price and pickup time, and a review step carrying loading help and proof-of-delivery add-ons' },
-  { src: 'images/bite-call-audits.jpg?v=3',
-    detail: 'images/bite-call-audits-detail.jpg?v=1', title: 'Call Audits',
+  { src: 'images/bite-call-audits.jpg?v=5',
+    detail: 'images/bite-call-audits-detail.jpg?v=3', ratio: '4 / 3', title: 'Call Audits',
     label: 'A call-audit template builder — the violations a template watches for, scoring rules for non-critical and not-applicable answers, the escalation each violation triggers, and the teams it applies to' },
-  { src: 'images/bite-loan-offers.jpg?v=3',
-    detail: 'images/bite-loan-offers-detail.jpg?v=1', title: 'Loan Offers',
+  { src: 'images/bite-loan-offers.jpg?v=5',
+    detail: 'images/bite-loan-offers-detail.jpg?v=3', ratio: '4 / 3', title: 'Loan Offers',
     label: 'Three screens from an in-app lending journey — the offer splash naming its participating lenders, a bank-statement step offering account-aggregator consent instead of a manual upload, and three EMI offers compared side by side' },
-  { src: 'images/bite-lender-config.jpg?v=3',
-    detail: 'images/bite-lender-config-detail.jpg?v=1', title: 'Lender Config',
+  { src: 'images/bite-lender-config.jpg?v=5',
+    detail: 'images/bite-lender-config-detail.jpg?v=3', ratio: '4 / 3', title: 'Lender Config',
     label: 'A lending console for lead distribution — active lenders ranked by drag with their share of leads, the inactive ones waiting to be switched on, and a primer on what a soft integration changes before it is turned on' },
-  { src: 'images/bite-coin-rewards.jpg?v=3',
-    detail: 'images/bite-coin-rewards-detail.jpg?v=1', title: 'Coin Rewards',
+  { src: 'images/bite-coin-rewards.jpg?v=5',
+    detail: 'images/bite-coin-rewards-detail.jpg?v=3', ratio: '4 / 3', title: 'Coin Rewards',
     label: 'Three screens turning earned coins into gift cards — a catalogue browsable by category, a purchase sheet with preset and custom amounts against a coin balance, and the redeemed card with its code and PIN' },
-  { src: 'images/bite-connector-setup.jpg?v=3',
-    detail: 'images/bite-connector-setup-detail.jpg?v=1', title: 'Connector Setup',
+  { src: 'images/bite-connector-setup.jpg?v=5',
+    detail: 'images/bite-connector-setup-detail.jpg?v=3', ratio: '4 / 3', title: 'Connector Setup',
     label: 'A four-step wizard for connecting a payment processor — credentials, webhooks, payment methods and a summary — with each field explained at the point it is asked for' },
-  { src: 'images/bite-checkout-sdk.jpg?v=3',
-    detail: 'images/bite-checkout-sdk-detail.jpg?v=1', title: 'Checkout SDK',
+  { src: 'images/bite-checkout-sdk.jpg?v=5',
+    detail: 'images/bite-checkout-sdk-detail.jpg?v=3', ratio: '4 / 3', title: 'Checkout SDK',
     label: 'A drop-in checkout in two themes — a light sheet grouping card entry, wallets, pay-later and crypto by type, and a dark variant leading with express wallets above the shopper’s saved cards' }
 ];
 
