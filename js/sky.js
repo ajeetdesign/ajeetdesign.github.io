@@ -12,7 +12,7 @@ import * as THREE from './three.module.min.js';
    must match index.html's own import of gallery-assets, or the two resolve to
    different URLs and the module is instantiated twice. */
 import { createGallery } from './curved-gallery.js?v=3';
-import { PROJECTS, WORK } from './gallery-assets.js?v=14';
+import { PROJECTS, WORK } from './gallery-assets.js?v=15';
 import { createFlock } from './flock.js?v=1';
 
 (function () {

@@ -1299,12 +1299,12 @@
       <ul class="sr-only">
         <li>Porter Coin redemption program using Vouchers. Designed a gift card redemption experience for the Booker persona, enabling users to redeem Porter Coins across 20+ brands. The feature saw meaningful uptake among Bookers, creating a new way for customers to turn their accumulated Coins into rewards.</li>
         <li>Reimagined the Porter Customer App. Reimagined the customer app using our new design system, while working within the constraint of not creating any new APIs. The redesign improved booking flow conversion, reduced the time taken to search for locations, improved signup conversion, and increased the addition of value-added services.</li>
-        <li>Filters for logs and span. A prompt-ops console for an airline support agent &mdash; a run log filtered down to success, failure and pending states, beside a trace timeline opened to one span&rsquo;s input, output and metadata.</li>
+        <li>Filters for logs and span. This was a design task to create a clear distinction between spans and traces within logs, while also making logs easier to filter and explore. I identified the most useful attributes for filtering, then validated each category through research to understand whether it addressed a real user need. The solution was completed within two days.</li>
         <li>Multi platform SDK for Payments. Designed a scalable Checkout SDK for merchants across Android, iOS, and web. Built as an experience optimised kit, it allows merchants to enable their preferred payment methods and deliver a consistent checkout experience across platforms.</li>
-        <li>Improved payment connectors setup. A four-step wizard for connecting a payment processor &mdash; credentials, webhooks, payment methods and a summary &mdash; with each field explained at the point it is asked for.</li>
-        <li>Increased conversion of credit SDK. Three screens from an in-app lending journey &mdash; the offer splash naming its participating lenders, a bank-statement step offering account-aggregator consent instead of a manual upload, and three EMI offers compared side by side.</li>
-        <li>Merchant Lenders configuration on FinOps. A lending console for lead distribution &mdash; active lenders ranked by drag with their share of leads, the inactive ones waiting to be switched on, and a primer on what a soft integration changes before it is turned on.</li>
-        <li>Improved AI call audit process for Convin. A call-audit template builder &mdash; the violations a template watches for, scoring rules for non-critical and not-applicable answers, the escalation each violation triggers, and the teams it applies to.</li>
+        <li>Improved payment connectors setup. The first version showed significant drop-offs and setup failures among new users setting up their first payment connector. We improved the flow by introducing a dummy connector as a guided walkthrough before the actual setup, along with checkpoints and contextual tips to help users complete each step with more confidence.</li>
+        <li>Increased conversion of credit SDK. Designed a scalable Credit SDK that merchants could plug into their checkout, enabling customers to pay using credit. Built a flexible component system that could adapt to different merchant design languages, making the SDK reusable across platforms and merchant setups. It was rolled out across merchants including Vedantu, toothsi, Unacademy, and more.</li>
+        <li>Merchant Lenders configuration on FinOps. Designed a dashboard experience that lets merchants onboard and configure lenders themselves, eliminating the need to depend on business and engineering teams. Merchants can now enable, rank, and assign application shares across lenders, significantly reducing the time needed to onboard and manage lenders.</li>
+        <li>Improved AI call audit process for Convin. To reduce the manual effort involved in call audits, we introduced AI led auditing. I designed a merchant facing flow that lets them create and configure audit templates, which the AI agent then uses to evaluate calls consistently.</li>
       </ul>
     </div>
   </section>
@@ -1520,7 +1520,7 @@
   </div>
 </div>
 <script type="module">
-  import { WORK } from './js/gallery-assets.js?v=14';
+  import { WORK } from './js/gallery-assets.js?v=15';
   (function () {
     var layer = document.getElementById('bite-modal');
     var panel = layer && layer.querySelector('.bitm-panel');
@@ -1860,7 +1860,7 @@
       .add({ duration: 1500, complete: finish });
   })();
 </script>
-<script type="module" src="js/sky.js?v=133"></script>
+<script type="module" src="js/sky.js?v=134"></script>
 <script>
   /* nav active state — rect-based like the reveals (IO never fires in captures) */
   (function () {

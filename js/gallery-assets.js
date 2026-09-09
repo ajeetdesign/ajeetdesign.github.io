@@ -68,22 +68,22 @@ const WORK = [
     label: 'Reimagined the customer app using our new design system, while working within the constraint of not creating any new APIs. The redesign improved booking flow conversion, reduced the time taken to search for locations, improved signup conversion, and increased the addition of value-added services.' },
   { src: 'images/bite-prompt-ops.jpg?v=5',
     detail: 'images/bite-prompt-ops-detail.jpg?v=3', ratio: '4 / 3', year: '2025', company: 'Design task', title: 'Filters for logs and span',
-    label: 'A prompt-ops console for an airline support agent — a run log filtered down to success, failure and pending states, beside a trace timeline opened to one span’s input, output and metadata' },
+    label: 'This was a design task to create a clear distinction between spans and traces within logs, while also making logs easier to filter and explore. I identified the most useful attributes for filtering, then validated each category through research to understand whether it addressed a real user need. The solution was completed within two days.' },
   { src: 'images/bite-checkout-sdk.jpg?v=5',
     detail: 'images/bite-checkout-sdk-detail.jpg?v=3', ratio: '4 / 3', year: '2023', company: 'Juspay', title: 'Multi platform SDK for Payments',
     label: 'Designed a scalable Checkout SDK for merchants across Android, iOS, and web. Built as an experience optimised kit, it allows merchants to enable their preferred payment methods and deliver a consistent checkout experience across platforms.' },
   { src: 'images/bite-connector-setup.jpg?v=5',
     detail: 'images/bite-connector-setup-detail.jpg?v=3', ratio: '4 / 3', year: '2023', company: 'Juspay', title: 'Improved payment connectors setup',
-    label: 'A four-step wizard for connecting a payment processor — credentials, webhooks, payment methods and a summary — with each field explained at the point it is asked for' },
+    label: 'The first version showed significant drop-offs and setup failures among new users setting up their first payment connector. We improved the flow by introducing a dummy connector as a guided walkthrough before the actual setup, along with checkpoints and contextual tips to help users complete each step with more confidence.' },
   { src: 'images/bite-loan-offers.jpg?v=5',
     detail: 'images/bite-loan-offers-detail.jpg?v=3', ratio: '4 / 3', year: '2022', company: 'Juspay', title: 'Increased conversion of credit SDK',
-    label: 'Three screens from an in-app lending journey — the offer splash naming its participating lenders, a bank-statement step offering account-aggregator consent instead of a manual upload, and three EMI offers compared side by side' },
+    label: 'Designed a scalable Credit SDK that merchants could plug into their checkout, enabling customers to pay using credit. Built a flexible component system that could adapt to different merchant design languages, making the SDK reusable across platforms and merchant setups. It was rolled out across merchants including Vedantu, toothsi, Unacademy, and more.' },
   { src: 'images/bite-lender-config.jpg?v=5',
     detail: 'images/bite-lender-config-detail.jpg?v=3', ratio: '4 / 3', year: '2022', company: 'Juspay', title: 'Merchant Lenders configuration on FinOps',
-    label: 'A lending console for lead distribution — active lenders ranked by drag with their share of leads, the inactive ones waiting to be switched on, and a primer on what a soft integration changes before it is turned on' },
+    label: 'Designed a dashboard experience that lets merchants onboard and configure lenders themselves, eliminating the need to depend on business and engineering teams. Merchants can now enable, rank, and assign application shares across lenders, significantly reducing the time needed to onboard and manage lenders.' },
   { src: 'images/bite-call-audits.jpg?v=5',
     detail: 'images/bite-call-audits-detail.jpg?v=3', ratio: '4 / 3', year: '2021', company: 'Convin.ai', title: 'Improved AI call audit process for Convin',
-    label: 'A call-audit template builder — the violations a template watches for, scoring rules for non-critical and not-applicable answers, the escalation each violation triggers, and the teams it applies to' }
+    label: 'To reduce the manual effort involved in call audits, we introduced AI led auditing. I designed a merchant facing flow that lets them create and configure audit templates, which the AI agent then uses to evaluate calls consistently.' }
 ];
 
 const PROJECTS = WORK;
