@@ -17,6 +17,8 @@ __skydebug.html
 __skyprobe.html
 __caseprobe.html
 __flockdbg.html
+__aboutprobe.html
+__hoverprobe.html
 
 # Hand-made snapshots taken before risky passes over the scene, plus the
 # stylesheet from the quality pass that was reverted. Kept locally until the

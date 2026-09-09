@@ -65,7 +65,8 @@
     --t-lg:      clamp(21px, 2.4vw, 30px);   /* the closing statement        */
     --t-lead:    clamp(16px, 1.6vw, 20px);   /* ledes                        */
     --t-body:    clamp(15px, 1.4vw, 17px);   /* paragraphs                   */
-    --t-meta:    clamp(13px, 1.1vw, 13.5px); /* credentials, back link       */
+    /* --t-meta went with the credentials line: it was the scale's smallest
+       rung and its only other consumer, the back link, is an icon now. */
 
     /* Two widths. Display type and running prose do not want the same measure:
        a heading may take the full column, a paragraph may not. That difference
@@ -160,16 +161,6 @@
     color: var(--ink-soft); margin: 0 auto; max-width: 620px; text-wrap: pretty;
   }
   .head .lede b { font-weight: 600; color: var(--ink-dark); }
-  /* Credentials: metadata, not prose, so it sits BELOW the sentence rather
-     than above it as an eyebrow — but the four proper nouns come up to full
-     ink so the line can be taken in one pass. This is the only place the page
-     carries role, city and employers. */
-  .head .creds {
-    margin: 26px auto 0; max-width: 480px; text-wrap: balance;
-    font-size: var(--t-meta); font-weight: 500; line-height: 1.7;
-    letter-spacing: 0.01em; color: var(--ink-soft);
-  }
-  .head .creds b { font-weight: 700; color: var(--ink-dark); }
 
   /* ── deck: lands as a stack, holds, then fans open ─────────────────────
      The one element carried over unchanged from the previous build, and the
@@ -245,7 +236,9 @@
   }
   .deck.live .card { transition: transform var(--deck-dur) var(--deck-ease), opacity .32s linear; }
   .deck.grabbing .card { transition: opacity .32s linear; }
-  .card img { width: 100%; height: 100%; object-fit: cover; display: block; pointer-events: none; }
+  /* video sits in the same box as a still — a card holding a clip must be
+     indistinguishable in layout from one holding a photograph */
+  .card img, .card video { width: 100%; height: 100%; object-fit: cover; display: block; pointer-events: none; }
   /* Label for an unfilled card. Overlaid, not a grid item — as a sibling of
      the artwork it would take a row of its own and shorten it. */
   .card[data-n]::after {
@@ -289,7 +282,7 @@
      Struck through with a diagonal weave rather than filled with a rich
      gradient, because a gradient reads as a designed surface and these are
      holes: the moment Ajeet's own frames land, the stripes and the label go
-     and an <img> takes the same box. The label is what each hole is FOR, set
+     and the artwork takes the same box. The label is what each hole is FOR, set
      in ink at 62% on the light end of the weave (7.1:1) — the previous build
      had these captions at 1.76:1 in white, the only measured contrast failure
      on the page. */
@@ -298,6 +291,10 @@
     display: grid; place-items: start start;
     border: 1px solid rgba(255, 255, 255, 0.72);
     box-shadow: 0 18px 34px rgba(28, 43, 58, 0.16);
+    /* built from the slot's --rot so the hover rule can extend it rather than
+       replace it; see the cluster slots below */
+    transform: rotate(var(--rot, 0deg));
+    transition: transform .42s cubic-bezier(.2, .9, .25, 1), box-shadow .42s ease;
   }
   /* Top-left, not centred. These frames overlap by design, and a centred label
      lands under the frame stacked on top of it — the first cut rendered
@@ -316,26 +313,54 @@
   .w-cool { background: repeating-linear-gradient(135deg, #dee6ee 0 8px, #e9eef4 8px 16px); }
   .w-warm { background: repeating-linear-gradient(135deg, #e5ded0 0 8px, #eee9de 8px 16px); }
   .w-blue { background: repeating-linear-gradient(135deg, #d6e1ee 0 8px, #e3eaf3 8px 16px); }
+  .work-camera { background: center / cover no-repeat url('images/about-work-camera.jpg'); }
+  .beach-sunset { background: center / cover no-repeat url('images/about-beach.webp'); }
 
   /* Clusters are absolutely positioned inside a sized box, which is the only
      way overlapping tilted frames can be composed to the pixel. Each cluster
      therefore carries its own height, and each collapses to a flow layout
      below 860 where there is no width left to overlap into. */
   .cluster { position: relative; width: 100%; }
-  .cl-tall { height: 340px; }
+  .cl-tall { height: 336px; }   /* landscape frames: s2 bottom + its rotation */
   .cl-wide { height: 330px; }
   .cl-trio { height: 300px; width: min(100%, 560px); margin-top: clamp(30px, 4vw, 46px); }
 
-  .cl-tall .s1 { top: 0;    left: 6%;  width: 56%; aspect-ratio: 4 / 5; transform: rotate(-7deg); }
-  .cl-tall .s2 { top: 74px; left: 32%; width: 58%; aspect-ratio: 4 / 5; transform: rotate(6deg);
+  /* LANDSCAPE, because the two frames in it are: the beach is 16/9 and the
+     camera 8/5. They were 4/5 portrait, and a landscape photo forced into that
+     box loses a third of its width to the cover crop — on the beach frame that
+     is most of the sky the picture is actually about. Wider and shorter also
+     means they had to grow (56/58% -> 78/80%) and sit closer together, or two
+     short cards in a 380px column read as stamps floating in space. */
+  /* Each slot declares only its ANGLE, never its transform. The hover below
+     has to compose a lift on top of that rotation, and a `transform` in the
+     hover rule replaces the whole property — so the angle lives in a custom
+     property and one shared rule builds the transform from it. Otherwise the
+     lift would have to be written out seven times, once per slot, with the
+     slot's own rotation copied into it. */
+  .cl-tall .s1 { --rot: -7deg; top: 4px;   left: 0;   width: 78%; aspect-ratio: 16 / 9; }
+  .cl-tall .s2 { --rot:  6deg; top: 118px; left: 14%; width: 80%; aspect-ratio: 8 / 5;
                  box-shadow: 0 20px 36px rgba(28, 43, 58, 0.2); }
-  .cl-wide .s1 { top: 12px;  left: 0;   width: 63%; aspect-ratio: 3 / 2; transform: rotate(-5deg); }
-  .cl-wide .s2 { top: 130px; left: 22%; width: 63%; aspect-ratio: 3 / 2; transform: rotate(4deg);
+  .cl-wide .s1 { --rot: -5deg; top: 12px;  left: 0;   width: 63%; aspect-ratio: 3 / 2; }
+  .cl-wide .s2 { --rot:  4deg; top: 130px; left: 22%; width: 63%; aspect-ratio: 3 / 2;
                  box-shadow: 0 20px 36px rgba(28, 43, 58, 0.2); }
-  .cl-trio .s1 { top: 30px; left: 0;    width: 54%; aspect-ratio: 16 / 10; transform: rotate(-6deg); }
-  .cl-trio .s2 { top: 66px; left: 23%;  width: 54%; aspect-ratio: 16 / 10; transform: rotate(2deg); }
-  .cl-trio .s3 { top: 14px; left: 46%;  width: 54%; aspect-ratio: 16 / 10; transform: rotate(8deg);
+  .cl-trio .s1 { --rot: -6deg; top: 30px; left: 0;    width: 54%; aspect-ratio: 16 / 10; }
+  .cl-trio .s2 { --rot:  2deg; top: 66px; left: 23%;  width: 54%; aspect-ratio: 16 / 10; }
+  .cl-trio .s3 { --rot:  8deg; top: 14px; left: 46%;  width: 54%; aspect-ratio: 16 / 10;
                  box-shadow: 0 22px 40px rgba(28, 43, 58, 0.2); }
+
+  /* Hover: the frame under the cursor comes to the front and lifts, the way a
+     card does in the deck above. `z-index` is what actually does the work —
+     these overlap, and without it the frame merely grows UNDERNEATH its
+     neighbour, which reads as a glitch rather than as a pick-up.
+     Guarded on `hover: hover` so a touch device, where :hover latches on tap
+     and stays, never gets stuck with one frame raised. */
+  @media (hover: hover) {
+    .cluster .shot:hover {
+      z-index: 5;
+      transform: rotate(var(--rot, 0deg)) scale(1.055) translateY(-10px);
+      box-shadow: 0 30px 54px rgba(28, 43, 58, 0.30);
+    }
+  }
 
   /* ── the closing statement, still in the sky ───────────────────────────
      Every word of the writing finishes above the ground. The meadow below is
@@ -462,6 +487,12 @@
     .reveal { opacity: 1; transform: none; transition: none; }
     .cta-btn { transition: none; }
     .deck.live .card { transition-duration: 1ms !important; }
+    /* The cluster frames keep the useful half of their hover — coming to the
+       front, and the deeper shadow that says so — and lose the half that is
+       pure motion. This rule sits after the `hover: hover` block on purpose,
+       so it overrides the lift at equal specificity. */
+    .shot { transition: none; }
+    .cluster .shot:hover { transform: rotate(var(--rot, 0deg)); }
   }
 </style>
 </head>
@@ -483,7 +514,6 @@
   <header class="head reveal">
     <h1>Hey, I&rsquo;m Ajeet.</h1>
     <p class="lede">I&rsquo;m a product designer based in <b>Bangalore, India</b>, who enjoys solving problems and building things. Outside of work, I spend my time exploring different interests, learning new things, and trying not to take any of them too seriously.</p>
-    <p class="creds"><b>Product designer</b>, Bangalore &middot; four-plus years, B2B and B2C &middot; currently at <b>Porter</b>, before that <b>Juspay</b> and <b>Convin.ai</b></p>
   </header>
 
   <div class="deck" id="deck" role="img" tabindex="0"
@@ -497,8 +527,10 @@
       <p>I enjoy discovering new places, taking photographs, watching anime, and going down random rabbit holes whenever something catches my attention. When I travel, I prefer leaving some things unplanned so I can explore and see where I end up. Photography has also taught me to slow down and notice the small details around me.</p>
     </div>
     <div class="cluster cl-tall">
-      <div class="shot s1 w-cool"><span>street</span></div>
-      <div class="shot s2 w-warm"><span>detail</span></div>
+      <div class="shot s1 beach-sunset" role="img"
+           aria-label="People on a beach at sunset, the sky burning orange over the surf"></div>
+      <div class="shot s2 work-camera" role="img"
+           aria-label="Sony camera framing a turquoise doorway"></div>
     </div>
   </section>
 
@@ -522,7 +554,7 @@
     <h2>And that curiosity shows up in my work too.</h2>
     <p>I enjoy understanding how things work, figuring out why they could be better, and turning ideas into something real. Design gave me a way to do that, and AI has made it even easier to experiment and build things myself. These days, I spend a lot of time learning, trying new ideas, making things, and occasionally breaking them along the way.</p>
     <div class="cluster cl-trio">
-      <div class="shot s1 w-cool"><span>sketch</span></div>
+      <div class="shot s1 work-camera" role="img" aria-label="Sony camera framing a turquoise doorway"></div>
       <div class="shot s2 w-warm"><span>prototype</span></div>
       <div class="shot s3 w-blue"><span>shipped</span></div>
     </div>
@@ -642,20 +674,33 @@
   var deck = document.getElementById('deck');
   if (!deck) return;
 
-  /* STAND-IN ARTWORK — borrowed from the reference build, hotlinked from its
-     CDN. Third-party images of a real person: fine while designing, must be
-     swapped for Ajeet's own frames before this ships. Drop the `cdn` prefix
-     and point `src` at images/… ; an entry with no `src` falls back to the
-     gradient placeholder and its `label`. */
-  var cdn = 'https://cdn.prod.website-files.com/67b5a02dc5d338960b17a7e9/';
+  /* Ajeet's own frames. The hotlinked stand-ins that were here — third-party
+     photographs of a real person, served from a live personal site — are gone.
+     A card with neither `src` nor `video` falls back to its gradient and label,
+     so the deck can fill one frame at a time. All seven are filled now.
+
+     SEAT ORDER IS NOT ARRAY ORDER. seat() below folds the index into
+     [-HALF, HALF), so the fan reads 05 06 07 | 01 | 02 03 04 left to right:
+     CARDS[0] is the centre card and CARDS[6] is the one immediately left of it.
+
+     ASPECT: the card is 0.546 : 1 (portrait, ~1 : 1.83) — see --cw / --ch.
+     `object-fit: cover` centre-crops anything else SILENTLY, so a 2:3 (0.667)
+     or 3:4 (0.75) portrait loses its top and bottom. Crop to 0.546 first.
+     The card maxes at 268px CSS, so ~1092 x 2000 covers it at 2x. */
   var CARDS = [
-    { cls: 'ph-a', label: 'Photo 01', src: cdn + '68d3ba846e593e52541fb7a8_Lando-6-on-track.webp',  alt: 'Trackside, cameras up' },
-    { cls: 'ph-c', label: 'Photo 02', src: cdn + '6830302d42237886d0c4b24c_ln-social-img-2.webp',   alt: 'Mirror-ball helmet' },
-    { cls: 'ph-e', label: 'Photo 03', src: cdn + '68d3ba8463e72a95c2d8a0ba_Lando-4-off-track.webp', alt: 'Off-track portrait' },
-    { cls: 'ph-b', label: 'Photo 04', src: cdn + '68d3ba848fb98d1ca68eb6c8_Lando-5-off-track.webp', alt: 'Off-track, garage light' },
-    { cls: 'ph-h', label: 'Photo 05', src: cdn + '68d3ba8449f0506fbaad037b_Lano-5-on-track.webp',   alt: 'On the grid' },
-    { cls: 'ph-d', label: 'Photo 06', src: cdn + '6830302dadd0727e6ac034dd_ln-social-img-6.webp',   alt: 'Sprint weekend backdrop' },
-    { cls: 'ph-i', label: 'Photo 07', src: cdn + '68d3ba83f162f4d2f4e78442_Lando-6-off-track.webp', alt: 'Off duty' }
+    { cls: 'ph-a', label: 'Photo 01', src: 'images/about-01-night-portrait.jpg', alt: 'Portrait on a warmly lit street at night' },
+    { cls: 'ph-c', label: 'Photo 02', src: 'images/about-02-kayak.jpg', alt: 'Kayaking in mangroves on a bright day' },
+    /* the one card that moves. `video` takes the place of `src`; see the
+       renderer below for what it does under reduced motion. */
+    { cls: 'ph-e', label: 'Photo 03', video: 'images/about-gym.mp4',
+      poster: 'images/about-gym-poster.jpg',
+      alt: 'Lifting dumbbells in the gym' },
+    { cls: 'ph-b', label: 'Photo 04', src: 'images/about-04-pool.jpg', alt: 'A swimmer at the edge of a pool, framed by tropical greenery' },
+    { cls: 'ph-h', label: 'Photo 05', src: 'images/about-street.webp',
+      alt: 'A street of tall balconied buildings in late afternoon light' },
+    { cls: 'ph-d', label: 'Photo 06', src: 'images/about-manga.webp',
+      alt: 'Holding two volumes of the manga Vagabond' },
+    { cls: 'ph-i', label: 'Photo 07', src: 'images/about-03-camera-room.jpg', alt: 'Camera poised in a warmly lit room' }
   ];
 
   var CFG = {
@@ -696,8 +741,22 @@
 
   var els = CARDS.map(function (c, i) {
     var el = document.createElement('div');
-    el.className = 'card ' + (c.src ? '' : c.cls);
-    if (c.src) {
+    el.className = 'card ' + (c.src || c.video ? '' : c.cls);
+    if (c.video) {
+      /* A card can hold a clip instead of a still. muted + playsinline is what
+         makes autoplay legal in every browser; loop is the point of it here.
+         Under reduced motion it does not autoplay and does not loop — the
+         poster stands in, which is the same still the card would have had. */
+      var vid = document.createElement('video');
+      vid.src = c.video;
+      if (c.poster) vid.poster = c.poster;
+      vid.muted = true; vid.playsInline = true;
+      vid.setAttribute('muted', ''); vid.setAttribute('playsinline', '');
+      vid.preload = 'metadata';
+      vid.setAttribute('aria-label', c.alt || c.label);
+      if (!reduced) { vid.loop = true; vid.autoplay = true; }
+      el.appendChild(vid);
+    } else if (c.src) {
       var img = document.createElement('img');
       img.src = c.src; img.alt = c.alt || '';
       img.draggable = false; img.decoding = 'async';
