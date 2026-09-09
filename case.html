@@ -260,6 +260,12 @@
     margin: 0 0 8px;
   }
   .prob-result-p { font-size: 13px; line-height: 1.6; color: var(--ink-soft); margin: 0; }
+  /* two or more figures stacked in the rail. The rail is only 160–210px wide,
+     so the single-stat size would let two of these dominate the problem they
+     belong to — they step down, and the gap does the separating rather than a
+     rule, matching the rest of this page. */
+  .prob-result-multi > * + * { margin-top: 18px; }
+  .prob-result-multi .prob-stat { font-size: clamp(26px, 2.7vw, 34px); margin: 0 0 4px; }
   .prob-result-list { list-style: none; margin: 0; padding: 0; }
   .prob-result-list li {
     font-size: 14px; font-weight: 700; color: var(--ink-dark); margin: 0 0 6px;
@@ -451,6 +457,20 @@
     border-radius: clamp(10px, 1.1vw, 15px);
     box-shadow: 0 0 0 5px #1b1f26, 0 0 0 6px #454b55,
                 0 16px 30px -20px rgba(15, 30, 50, 0.45);
+  }
+  /* Artwork that arrives already wearing its device frame. Two things have to
+     come off, or the exports are not what ships:
+       · the drawn ring above would be a second frame around the supplied one
+       · `aspect-ratio` would FILL (this img sets no object-fit), stretching each
+         export by however far it sits from the declared ratio. Dropping it lets
+         every screen keep its own proportions exactly as exported — equal HEIGHT
+         is what makes them read as one set, which is how .pairs works too.
+     The lift becomes a drop-shadow because that follows the alpha: these are
+     cut-out phones with rounded corners, and a box-shadow would trace the
+     rectangular box instead of the device. */
+  .vgrid--framed img {
+    aspect-ratio: auto; border-radius: 0; box-shadow: none;
+    filter: drop-shadow(0 14px 16px rgba(15, 30, 50, 0.22));
   }
   /* unscoped (not ".vgrid .lbl") so a numbered {label,text} note can reuse
      the exact same look outside the grid, as "asset 01" ahead of the steps.
@@ -876,7 +896,10 @@ var MERGE_SHOTS = { porter: {
    Each step's shots resolve through FIGURES like any other — until artwork
    lands they render as the usual gradient placeholders. */
 var DEMOS = { porter: {
+  /* framed, and no `ratio`: these four ship exactly as exported — device frame
+     included, nothing cropped and nothing stretched. See .vgrid--framed. */
   'Redesigned verification flow': {
+    framed: true,
     video: {
       src: 'images/porter-verification-nudge.mp4',
       poster: 'images/porter-verification-nudge-poster.jpg',
@@ -888,29 +911,30 @@ var DEMOS = { porter: {
       { label: 'Visibility of timer',
         text: 'We added a timer to give a better sense of how much time is left to complete the task, along with a preview and the option to retake.',
         shots: [
-          { src: 'images/porter-verify-01-capture.jpg',
-            alt: 'The capture screen, counting down and showing what has to be in frame' },
-          { src: 'images/porter-verify-02-review.jpg',
-            alt: 'The captured selfie with retake and submit, before anything is sent' }
+          { src: 'images/porter-verify-01-capture.webp',
+            alt: 'The capture screen — a partner framing their selfie with 90 seconds left on the clock' },
+          { src: 'images/porter-verify-02-review.webp',
+            alt: 'The captured selfie with retake and submit, 30 seconds left, before anything is sent' }
         ] },
       { label: 'Reason for failure',
         text: 'With the results, we focused on highlighting the reason it failed.',
         shots: [
-          { src: 'images/porter-verify-03-pass.jpg',
-            alt: 'Audit passed, confirmed at the point of capture' },
-          { src: 'images/porter-verify-04-fail.jpg',
-            alt: 'Audit failed, naming the reason — the Porter logo was not visible' }
+          { src: 'images/porter-verify-03-pass.webp',
+            alt: 'Audit passed, confirmed at the point of capture, with a note about staying consistent to keep earning \u20b91500 monthly' },
+          { src: 'images/porter-verify-04-fail.webp',
+            alt: 'Audit failed, naming the reason — the Porter logo was not visible on the partner\u2019s t-shirt' }
         ] }
     ]
   },
-  /* The dashboard, in the four states a partner actually meets it in. These
-     screens export at 720x1440 rather than the verification set's 391x860, so
-     the grid is told its aspect instead of stretching them into the other's.
+  /* The dashboard, in the four states a partner actually meets it in. Framed
+     like the verification set — the exports carry their own device frame, so
+     the grid must not draw a second one, and dropping `aspect-ratio` is what
+     keeps each screen at exactly the proportions it was exported at.
      The note here is a plain lead-in, not a numbered {label,text} pair like the
      verification demo's: it introduces BOTH categories below rather than
      describing the clip above it, so the two steps take 01 and 02. */
   'Final dashboard': {
-    ratio: '1 / 2',
+    framed: true,
     video: {
       src: 'images/porter-dashboard.mp4',
       poster: 'images/porter-dashboard-poster.jpg',
@@ -921,17 +945,17 @@ var DEMOS = { porter: {
       { label: 'Gap and next steps',
         text: 'Whether a partner was short on days online or on pass percentage, we named the exact gap and the one action that would close it.',
         shots: [
-          { src: 'images/porter-dashboard-01-days-short.png',
+          { src: 'images/porter-dashboard-01-days-short.webp',
             alt: 'The dashboard at risk on days online — 15 of 24, telling the partner to go online for four more days and pass verification' },
-          { src: 'images/porter-dashboard-02-pass-short.png',
+          { src: 'images/porter-dashboard-02-pass-short.webp',
             alt: 'The dashboard at risk on pass rate — 50% against a 60% bar, telling the partner they need six more days of successful verification, with a link to learn how to click the selfie' }
         ] },
       { label: 'Results upfront',
         text: 'We surfaced the previous month\'s payout on the same card — ₹1500 paid, or ₹0 with the reason it fell through.',
         shots: [
-          { src: 'images/porter-dashboard-03-payout-paid.png',
+          { src: 'images/porter-dashboard-03-payout-paid.webp',
             alt: 'The dashboard on track, with June\'s payout of ₹1500 added to the partner\'s wallet' },
-          { src: 'images/porter-dashboard-04-payout-zero.png',
+          { src: 'images/porter-dashboard-04-payout-zero.webp',
             alt: 'The dashboard on track, with June\'s payout at ₹0 because the partner failed to pass their audits' }
         ] }
     ]
@@ -1031,7 +1055,10 @@ function demo(d) {
       st.label + '</p>' + (st.text ? '<p class="d">' + st.text + '</p>' : '') + '</div>';
   });
   var ratio = d.ratio ? ' style="--screen:' + d.ratio + '"' : '';
-  return h + '<div class="vgrid rv"' + ratio + '>' + shots + labels + '</div>';
+  /* framed: the artwork already carries its own device frame, so the grid must
+     not draw a second one around it — see .vgrid--framed. */
+  var cls = 'vgrid rv' + (d.framed ? ' vgrid--framed' : '');
+  return h + '<div class="' + cls + '"' + ratio + '>' + shots + labels + '</div>';
 }
 
 /* sections number themselves — cases can skip any of them */
@@ -1213,7 +1240,15 @@ if (c.approachOutro) {
    heading, not at the bottom of the column that scrolled past it */
 function resultRailHtml(result) {
   var inner;
-  if (Array.isArray(result)) {
+  /* An array of {stat, p} is several measured outcomes rather than one: each
+     keeps the big serif figure, stacked down the rail. Distinct from an array
+     of STRINGS, which is the unquantified list Performance Tracking uses. */
+  if (Array.isArray(result) && result.length && typeof result[0] === 'object') {
+    inner = '<div class="prob-result-multi">' + result.map(function (r) {
+      return '<div><p class="prob-stat">' + r.stat + '</p>' +
+        '<p class="prob-result-p">' + r.p + '</p></div>';
+    }).join('') + '</div>';
+  } else if (Array.isArray(result)) {
     inner = '<ul class="prob-result-list">' + result.map(function (r) { return '<li>' + r + '</li>'; }).join('') + '</ul>';
   } else if (typeof result === 'object') {
     inner = '<p class="prob-stat">' + result.stat + '</p><p class="prob-result-p">' + result.p + '</p>';
