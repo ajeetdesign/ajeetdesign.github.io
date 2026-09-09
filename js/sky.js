@@ -13,6 +13,7 @@ import * as THREE from './three.module.min.js';
    different URLs and the module is instantiated twice. */
 import { createGallery } from './curved-gallery.js?v=3';
 import { PROJECTS, WORK } from './gallery-assets.js?v=14';
+import { createFlock } from './flock.js?v=1';
 
 (function () {
   if (window.__adSkyInit) return; window.__adSkyInit = true;
@@ -1260,26 +1261,49 @@ import { PROJECTS, WORK } from './gallery-assets.js?v=14';
   var balloonFar = airship(4.6);
   balloonFar.position.set(20, 42, -727);
 
-  // a flock of 3D birds — flat silhouette wings that actually flap
-  var birdMat = new THREE.MeshBasicMaterial({
-    color: 0x33261f, side: THREE.DoubleSide, transparent: true, opacity: 0 });
-  var wingGeo = new THREE.PlaneGeometry(1.3, 0.42);
-  wingGeo.translate(0.65, 0, 0);           // hinge at the wing root
-  wingGeo.rotateX(-Math.PI / 2);           // wings spread flat, tips flap up/down
-  var bodyGeo = new THREE.SphereGeometry(0.16, 8, 6);
-  var flock = new THREE.Group();
-  for (var fb = 0; fb < 8; fb++) {
-    var bd = new THREE.Group();
-    var wl = new THREE.Mesh(wingGeo, birdMat);
-    var wr = new THREE.Mesh(wingGeo, birdMat); wr.scale.x = -1;
-    var body = new THREE.Mesh(bodyGeo, birdMat);
-    body.scale.set(2.2, 0.7, 0.7);
-    bd.add(wl); bd.add(wr); bd.add(body);
-    bd.position.set((Math.random() - 0.5) * 26, (Math.random() - 0.5) * 6, (Math.random() - 0.5) * 18);
-    bd.scale.setScalar(0.8 + Math.random() * 0.7);
-    bd.userData = { wl: wl, wr: wr, ph: Math.random() * Math.PI * 2, fl: 5 + Math.random() * 3 };
-    flock.add(bd);
-  }
+  /* The flock: procedurally-built gulls whose wings fold, twist and slot their
+     primaries in the vertex shader, flying a boids corridor. Lives in
+     js/flock.js — see the header there for what changed to run it inside this
+     scene rather than on its own canvas.
+
+     The corridor and spread are cut from the reference's 130 x 40 x 20, which
+     was sized for a full-viewport hero where the flock IS the subject. Here it
+     is one prop in a landscape ~120 units from the camera, and at the original
+     depth the nearest birds arrived close enough to read as a different species
+     from the ones at the far end. */
+  /* scratch colour for the per-scene haze — allocated once, never per frame */
+  var hazeC = new THREE.Color();
+  var flockRig = createFlock(THREE, {
+    count: 24,
+    corridor: 140,   /* long enough that the far end is genuinely distant —
+                          birds thin out because they ARE far, not because a
+                          ramp switched them off at readable size */
+    spread: [34, 15],
+    scale: 1.35,          // a gull's half-span is 1 unit; this is its size in world units
+    color: '#33261f',     // the silhouette the old flock used, kept
+    haze: '#edd2a9',      // overwritten per scene from P.fogC below
+
+    /* Aimed at the hero summit rather than at open sky. heroPeak sits at
+       (28, 4, -225) with amplitude 82, so its crown is around (28, 82, -225) —
+       right of the flock and further away. The yaw turns the corridor toward
+       it; the climb is only barely negative because the summit is BEHIND the
+       headline on screen, and a corridor that descends into it walks the birds
+       straight through "I'm Ajeet". They cross above the crown instead, which
+       still reads as heading for the mountain and keeps the type clear. */
+    yaw: -0.80,
+    climb: -0.02,
+
+    /* The birds were dissolving mid-flight. Three things caused it together:
+       farAlpha 0.16 left distant birds nearly transparent, the far ramp then
+       took them to zero over a quarter of the corridor, and the corridor was
+       short enough that the ramp began almost immediately. Distant birds now
+       hold at 40% of the near silhouette, and the corridor fade bottoms out at
+       0.35 rather than 0 — past that the haze does the receding. */
+    farAlpha: 0.40,
+    fadeOut: 20,
+    fadeFar: 0.30
+  });
+  var flock = flockRig.group;
   flock.position.set(-55, 72, -145);
   scene.add(flock);
 
@@ -1769,20 +1793,32 @@ import { PROJECTS, WORK } from './gallery-assets.js?v=14';
     }
     // one flock serves the hero and work scenes: it re-bases further down the
     // flight path while it's fully faded out mid-journey (birdOp ≈ 0 near S 1)
-    if (S < 1.1) { flock.position.y = 72; flock.position.z = -145; }
-    else { flock.position.y = 102; flock.position.z = -375; }
-    birdMat.opacity = numAt(P.birdOp, i, f);
-    flock.visible = birdMat.opacity > 0.01;
-    if (!REDUCED && flock.visible) {
-      flock.position.x += dt * 2.4;
-      if (flock.position.x > 70) flock.position.x = -160;
-      for (c = 0; c < flock.children.length; c++) {
-        sp = flock.children[c];
-        var fw = Math.sin(T * sp.userData.fl + sp.userData.ph) * 0.55;
-        sp.userData.wl.rotation.z = fw;
-        sp.userData.wr.rotation.z = -fw;
-      }
-    }
+    /* Placed clear of the headline, not merely near it. The old flock drifted
+       across and wrapped, so it only ever crossed the type in passing; this one
+       holds its corridor and would sit behind "I'm Ajeet" permanently. x is set
+       here too — without the drift it would otherwise keep whatever it started
+       with. Same caution as the hero airship: anything nearer or righter than
+       this lands on the headline. */
+    /* Aim as well as position, because the two legs frame the sky completely
+       differently. The hero is open sky and the corridor is turned toward the
+       summit; the work leg is almost entirely covered by the sticky card, and
+       the only sky left is a narrow strip down the left, so there the corridor
+       has to recede LEFT to stay inside it. Pointing it at the hero's summit
+       here swung the whole flock off-frame and out of the scene. */
+    if (S < 1.1) { flock.position.set(-86, 100, -158); flock.rotation.y = -0.80; }
+    /* Solved against K[2], not guessed: that camera sits at (20,124,-300)
+       pitched ~12° UP, so anything at the hero's altitude falls far below frame.
+       The sticky card then covers everything below y≈137, leaving only a band
+       across the top — so this corridor is turned almost broadside (yaw -1.35)
+       to run ALONG that band rather than receding into it, which is the only
+       way more than a couple of birds stay visible here. */
+    else { flock.position.set(-32, 241, -458); flock.rotation.y = -1.35; }
+    flockRig.setOpacity(numAt(P.birdOp, i, f));
+    /* The group no longer drifts across the sky and wraps: the flock recycles
+       birds down its own corridor and weaves as it goes, so an outer drift on
+       top of that fought the receding read and doubled the motion. */
+    flockRig.setHaze(colAt(P.fogC, i, f, hazeC));
+    flockRig.update(REDUCED ? 0 : dt, T, camera);   // 0 = settled, still hazed
     var jOp = numAt(P.jetOp, i, f);
     jetMat.opacity = jOp; trailMat.opacity = jOp * 0.7;
     jetGrp.visible = jOp > 0.01; trail.visible = jetGrp.visible;
