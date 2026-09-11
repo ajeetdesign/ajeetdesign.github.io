@@ -156,11 +156,103 @@
      genuinely thin face, and it was being asked to hold up over a live sky
      rather than the flat cream page the reference sets it on — thin strokes
      are the first thing a moving background eats. */
+  /* position: relative so the bubble below — its containing block, once
+     the tip span stops being one — has somewhere unambiguous to anchor to.
+     See the note on .tip for why it moved here. */
   .head .lede {
+    position: relative;
     font-size: var(--t-lead); font-weight: 400; line-height: 1.66;
     color: var(--ink-soft); margin: 0 auto; max-width: 620px; text-wrap: pretty;
   }
   .head .lede b { font-weight: 600; color: var(--ink-dark); }
+
+  /* A badge, not another line of prose — this is the one piece of the header
+     that isn't part of the bio sentence, so it gets its own small affordance
+     rather than blending into the lede's flow the way the German note does.
+     `inline-flex` (not block/inline): the pill has to hug its own text,
+     which only an inline-level box does, and `.head`'s `text-align: center`
+     is what centres it as a unit once it is one. `--accent-text` and its own
+     10% tint are the same colour `.eyebrow` already uses for the numbered
+     section labels — a second badge in a second colour would read as two
+     different systems for the same kind of thing. */
+  .head .fan-tag {
+    /* inline-block, not inline-flex: this holds mixed text and <b> runs,
+       and flex treats each run as a separate flex item with no inter-item
+       gap by default — the spaces between words were collapsing to nothing.
+       inline-block keeps it plain inline text internally (spaces intact)
+       while still being one atomic box, centred by `.head`'s text-align, not
+       by margin: auto — auto margins don't centre an inline-level box, so
+       the margin below is only a top gap. */
+    display: inline-block; margin: 20px 0 0;
+    padding: 10px 20px;
+    font-size: 14.5px; font-weight: 600; letter-spacing: 0.01em;
+    color: var(--accent-text);
+    background: rgba(13, 44, 82, 0.08);
+    border: 1px solid rgba(13, 44, 82, 0.16);
+    border-radius: 999px;
+  }
+  .head .fan-tag b { font-weight: 700; }
+
+  /* The German aside: a dotted underline and a help cursor, the same signal
+     a browser's own `<abbr title>` uses — no separate icon or colour is
+     needed to teach "there's more here" because that convention already
+     exists.
+
+     Plain inline — no `display: inline-block`. The lede caps at 620px,
+     narrow enough that this phrase wraps on most ordinary desktop widths,
+     and inline-block was tried first to keep the bubble's anchor simple: it
+     forces the WHOLE phrase to jump to a new line as one atomic unit rather
+     than filling the line the way the rest of the sentence does, which reads
+     as a pasted-in chip rather than a continuation of what Ajeet is saying.
+     Plain inline lets it wrap exactly like its neighbours — mid-phrase, same
+     as any other line break in the paragraph — so it stays part of the
+     sentence. The cost is that the anchor is no longer simple: see the
+     script at the bottom of the page for how the bubble's position is
+     actually computed. */
+  .tip { text-decoration: underline dotted; text-decoration-thickness: 1.4px; text-underline-offset: 3px; cursor: help; }
+  /* Dark-ink-on-white, not a new colour: it's the same pairing `.cta-solid`
+     already uses in the meadow, so the one moment a dark surface appears
+     over light on this page doesn't invent a second palette for it.
+     `pointer-events: none` — the bubble is decorative; the span is what's
+     interactive, so the bubble never needs to catch its own hover-out.
+
+     `left: 0; top: 0`, not left unset, even though the script at the bottom
+     of the page overwrites both the moment the bubble can actually be seen.
+     `position: absolute` with NEITHER set resolves to the element's own
+     static position — and for a wrapped inline element that can be far out
+     along whatever line it happens to fall on, wide enough to push the
+     WHOLE PAGE into horizontal scroll on a narrow phone even while the
+     bubble sits at opacity: 0. Anchoring it at `.lede`'s own top-left corner
+     first keeps it inside a box that's already width-constrained, so there
+     is no gap where an invisible element can widen the page. The script
+     then measures the actual rendered rect of the (possibly wrapped) phrase
+     against `.lede` — which, being block, has no anchor ambiguity — and
+     replaces these with exact pixels. */
+  .tip .tip-bubble {
+    position: absolute; left: 0; top: 0; transform: translate(-50%, -100%);
+    width: max-content; max-width: 220px;
+    background: var(--ink-dark); color: #fff;
+    font-size: 13px; font-weight: 500; line-height: 1.45; text-align: center;
+    text-decoration: none;
+    padding: 9px 13px; border-radius: 10px;
+    box-shadow: 0 14px 30px rgba(28, 43, 58, 0.28);
+    opacity: 0; pointer-events: none;
+    transition: opacity .2s ease;
+  }
+  .tip .tip-bubble::after {
+    content: ''; position: absolute; top: 100%; left: 50%; transform: translateX(-50%);
+    border: 6px solid transparent; border-top-color: var(--ink-dark);
+  }
+  /* `:focus-visible`, not `:focus` — this is the one non-link, non-button
+     focusable thing on the page (tabindex="0" below), and the global
+     [tabindex]:focus-visible rule already draws its outline; this only adds
+     what that rule doesn't: revealing the bubble itself. Screen readers get
+     the same text via aria-describedby regardless of this hover state, since
+     `opacity: 0` (not `display: none`/`visibility: hidden`) keeps the bubble
+     in the accessibility tree even while it's invisible. */
+  .tip:hover .tip-bubble, .tip:focus-visible .tip-bubble {
+    opacity: 1;
+  }
 
   /* ── deck: lands as a stack, holds, then fans open ─────────────────────
      The one element carried over unchanged from the previous build, and the
@@ -315,6 +407,28 @@
   .w-blue { background: repeating-linear-gradient(135deg, #d6e1ee 0 8px, #e3eaf3 8px 16px); }
   .work-camera { background: center / cover no-repeat url('images/about-work-camera.jpg'); }
   .beach-sunset { background: center / cover no-repeat url('images/about-beach.webp'); }
+  /* The two frames in 03 that are the work itself rather than a picture of it.
+     Both are dark navy artwork on a page of golden-hour sky, which is the
+     point — a shipped screen should read as a screen, not as another photo.
+     Neither asset is 16/10 like the slot: the downloads card is 16/9 and the
+     phone shot is near-square, so `cover` would crop the type off one or slice
+     the phone. `contain` instead, on a background-color pulled from each
+     asset's own edge pixels — the letterbox bar reads as more of the same
+     navy artwork, not as a gap around it. */
+  .app-downloads { background: #121c34 center / contain no-repeat url('images/about-downloads.webp'); }
+  .app-shipped   { background: #161c2c center / contain no-repeat url('images/about-shipped.webp'); }
+
+  /* A frame can hold a clip instead of a still, on exactly the same terms as
+     one filled with a photograph: same box, same slot rotation, same cover
+     crop. `place-items: stretch` overrides .shot's start/start, which is only
+     there to park the placeholder label in the corner — a video has to fill
+     the frame. `overflow: hidden` is what keeps it inside the 18px radius,
+     since a replaced child does not inherit the parent's corners. */
+  .shot.clip { overflow: hidden; place-items: stretch; }
+  .shot.clip video {
+    width: 100%; height: 100%; object-fit: cover;
+    display: block; pointer-events: none;   /* the hover belongs to the frame */
+  }
 
   /* Clusters are absolutely positioned inside a sized box, which is the only
      way overlapping tilted frames can be composed to the pixel. Each cluster
@@ -322,8 +436,13 @@
      below 860 where there is no width left to overlap into. */
   .cluster { position: relative; width: 100%; }
   .cl-tall { height: 336px; }   /* landscape frames: s2 bottom + its rotation */
-  .cl-wide { height: 330px; }
-  .cl-trio { height: 300px; width: min(100%, 560px); margin-top: clamp(30px, 4vw, 46px); }
+  .cl-wide { height: 352px; }   /* s1 is landscape, s2 is a tall portrait clip */
+  /* 256, not the 300 this carried before: at the cluster's 560px ceiling s2
+     (the deepest-reaching card) bottoms out at ~246px, so 300 was sitting on
+     54px of dead air that then stacked underneath the closing panel's own
+     ~190-210px margin-top — the two together read as one oversized gap. 256
+     leaves a small landing buffer without reopening it. */
+  .cl-trio { height: 256px; width: min(100%, 560px); margin-top: clamp(30px, 4vw, 46px); }
 
   /* LANDSCAPE, because the two frames in it are: the beach is 16/9 and the
      camera 8/5. They were 4/5 portrait, and a landscape photo forced into that
@@ -340,8 +459,15 @@
   .cl-tall .s1 { --rot: -7deg; top: 4px;   left: 0;   width: 78%; aspect-ratio: 16 / 9; }
   .cl-tall .s2 { --rot:  6deg; top: 118px; left: 14%; width: 80%; aspect-ratio: 8 / 5;
                  box-shadow: 0 20px 36px rgba(28, 43, 58, 0.2); }
-  .cl-wide .s1 { --rot: -5deg; top: 12px;  left: 0;   width: 63%; aspect-ratio: 3 / 2; }
-  .cl-wide .s2 { --rot:  4deg; top: 130px; left: 22%; width: 63%; aspect-ratio: 3 / 2;
+  .cl-wide .s1 { --rot: -5deg; top: 12px; left: 0;   width: 62%; aspect-ratio: 3 / 2; }
+  /* s2 is the squat clip, and it is PORTRAIT — 3:4, not the 3:2 s1 carries —
+     so the whole rep reads: bar on the shoulders down to the feet, the knees
+     bending through the middle. A landscape crop here loses the legs, which
+     are the half of a squat worth showing. `max-width` caps it in px so the
+     frame does not balloon when the cluster hits its 520px ceiling below
+     980; the cluster height is sized to hold the taller box. */
+  .cl-wide .s2 { --rot:  4deg; top: 74px; left: 34%; width: 50%; max-width: 208px;
+                 aspect-ratio: 3 / 4;
                  box-shadow: 0 20px 36px rgba(28, 43, 58, 0.2); }
   .cl-trio .s1 { --rot: -6deg; top: 30px; left: 0;    width: 54%; aspect-ratio: 16 / 10; }
   .cl-trio .s2 { --rot:  2deg; top: 66px; left: 23%;  width: 54%; aspect-ratio: 16 / 10; }
@@ -478,7 +604,8 @@
        control a thumb reaches for on a phone */
     .x-close { top: 14px; right: 14px; width: 44px; height: 44px; }
     .cl-tall { height: 300px; }
-    .cl-wide { height: 290px; }
+    .cl-wide { height: 316px; }
+    .cl-wide .s2 { top: 56px; max-width: 178px; }   /* keep the tall clip in bounds on a phone */
     .cl-trio { height: 240px; }
     .cl-trio .s1, .cl-trio .s2, .cl-trio .s3 { width: 62%; }
   }
@@ -493,6 +620,7 @@
        so it overrides the lift at equal specificity. */
     .shot { transition: none; }
     .cluster .shot:hover { transform: rotate(var(--rot, 0deg)); }
+    .tip .tip-bubble { transition: none; }
   }
 </style>
 </head>
@@ -513,7 +641,8 @@
        first thing on screen is a sentence and a colour. -->
   <header class="head reveal">
     <h1>Hey, I&rsquo;m Ajeet.</h1>
-    <p class="lede">I&rsquo;m a product designer based in <b>Bangalore, India</b>, who enjoys solving problems and building things. Outside of work, I spend my time exploring different interests, learning new things, and trying not to take any of them too seriously.</p>
+    <p class="lede">I&rsquo;m a product designer based in <b>Bangalore, India</b>, who enjoys solving problems and building things. Outside of work, I spend my time exploring different interests, learning new things, and trying not to take any of them too seriously. <span class="tip" tabindex="0" aria-describedby="de-a1-tip">Currently, I&rsquo;m learning German A1<span class="tip-bubble" id="de-a1-tip" role="tooltip">Ich lerne, Deutsch zu schreiben und zu sprechen</span></span>.</p>
+    <p class="fan-tag">Firmly in the <b>Lando</b> &times; <b>McLaren</b> &times; <b>MI</b> &times; <b>ICT</b> camp.</p>
   </header>
 
   <div class="deck" id="deck" role="img" tabindex="0"
@@ -537,8 +666,22 @@
   <!-- 02 — the contrast: one thing that slows him down, one that pushes -->
   <section class="panel split flip reveal">
     <div class="cluster cl-wide">
-      <div class="shot s1 w-blue"><span>pool</span></div>
-      <div class="shot s2 w-warm"><span>gym</span></div>
+      <!-- Both holes here are filled with the thing a still could not carry:
+           the motion itself. Each source is a tall phone clip cropped to the
+           slot's 3:2 on the way in — `object-fit: cover` would otherwise
+           centre-crop a 9:16 frame and lose the subject — and each holds at
+           its poster until the frame is near, which is most of a scroll away.
+           See the clip script below for the lazy load and reduced motion. -->
+      <div class="shot s1 clip">
+        <video src="images/about-pool.mp4" poster="images/about-pool-poster.jpg"
+               muted playsinline loop preload="none"
+               aria-label="Swimming lengths in an outdoor pool, framed by tropical greenery"></video>
+      </div>
+      <div class="shot s2 clip">
+        <video src="images/about-lift.mp4" poster="images/about-lift-poster.jpg"
+               muted playsinline loop preload="none"
+               aria-label="A front-squat rep under a loaded barbell, shot from the front"></video>
+      </div>
     </div>
     <div class="copy">
       <span class="eyebrow">02 &mdash; Active</span>
@@ -555,8 +698,10 @@
     <p>I enjoy understanding how things work, figuring out why they could be better, and turning ideas into something real. Design gave me a way to do that, and AI has made it even easier to experiment and build things myself. These days, I spend a lot of time learning, trying new ideas, making things, and occasionally breaking them along the way.</p>
     <div class="cluster cl-trio">
       <div class="shot s1 work-camera" role="img" aria-label="Sony camera framing a turquoise doorway"></div>
-      <div class="shot s2 w-warm"><span>prototype</span></div>
-      <div class="shot s3 w-blue"><span>shipped</span></div>
+      <div class="shot s2 app-downloads" role="img"
+           aria-label="A card reading 100+ downloads on PlayStore"></div>
+      <div class="shot s3 app-shipped" role="img"
+           aria-label="A shipped mood check-in screen asking How was your day, with a row of feeling emoji and a Save button"></div>
     </div>
   </section>
 
@@ -897,6 +1042,104 @@
   });
 
   paint();
+})();
+</script>
+
+<script>
+/* ══════════════════════════════════════════════════════════════════════
+   CLIP FRAMES — the cluster shots that hold video rather than a still.
+
+   Two things the markup cannot say on its own:
+
+   LAZY. Both clips sit in panel 02, most of a descent below the fold, and
+   together they are by far the heaviest thing on this page. `preload="none"`
+   in the markup means nothing is fetched until this decides to; the poster
+   holds each frame in the meantime, so the cluster is never a hole waiting on
+   a download. They also pause on the way out — the descent keeps a WebGL
+   scene running the whole time, and a decoder chewing on an off-screen clip
+   is frames taken from that.
+
+   REDUCED MOTION. No load, no play: the poster is the frame, which is the
+   same still the slot would have had if it held a photograph. Matches what
+   the deck above does with its own clip.
+
+   Rect-based, not an IntersectionObserver, for the same reason the reveal
+   pass above is: it has to behave under headless capture, in an iframe, and
+   after an instant scroll — an observer registered against a page that was
+   jumped rather than scrolled can sit there never reporting the frame it is
+   watching, and this one owns whether the clip loads at all.
+   ══════════════════════════════════════════════════════════════════════ */
+(function () {
+  var vids = [].slice.call(document.querySelectorAll('.shot.clip video'));
+  if (!vids.length) return;
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+  /* Over half a viewport of lead-in: enough that the first frames are decoded
+     by the time the panel is actually on screen, not so much that the fetch
+     starts while the page is still up in the open sky. */
+  var LEAD = 0.6;
+
+  function tick() {
+    var vh = innerHeight;
+    for (var i = 0; i < vids.length; i++) {
+      var v = vids[i], r = v.getBoundingClientRect();
+      var near = r.top < vh * (1 + LEAD) && r.bottom > -vh * LEAD;
+      if (near) {
+        if (v.preload === 'none') { v.preload = 'auto'; v.load(); }
+        if (v.paused) {
+          var p = v.play();
+          if (p && p.catch) p.catch(function () {});  /* refused: the poster stands */
+        }
+      } else if (!v.paused) {
+        v.pause();
+      }
+    }
+  }
+
+  addEventListener('scroll', tick, { passive: true });
+  addEventListener('resize', tick);
+  setInterval(tick, 500);   /* scroll events don't always dispatch; see above */
+  tick();
+})();
+</script>
+
+<script>
+/* ═══════════════════════════════════════════════════════════════════════
+   GERMAN TOOLTIP — positions the bubble from the phrase's ACTUAL rendered
+   rect, because CSS alone no longer has one to work from.
+
+   The phrase (`.tip`) is plain inline text, on purpose (see the CSS): it
+   wraps like the rest of the sentence rather than jumping to a new line as
+   one unit, which is what makes it read as part of the paragraph and not a
+   pasted-in chip. The cost is that a wrapped inline element doesn't have a
+   single box for `position: absolute; left: 50%` to be 50% OF — so instead,
+   on the two moments the bubble can appear, this measures the span's own
+   `getBoundingClientRect()` (a union box even when it's split across two
+   lines, which is exactly what's needed here) against `.lede`'s — the
+   nearest positioned block ancestor, i.e. the bubble's real containing
+   block — and writes the difference in as exact pixels. Arithmetic, not a
+   layout trick, so it's correct whether the phrase sits on one line or two. */
+(function () {
+  var tip = document.querySelector('.tip');
+  if (!tip) return;
+  var bubble = tip.querySelector('.tip-bubble');
+  var host = tip.closest('.lede');
+  if (!bubble || !host) return;
+
+  function place() {
+    var h = host.getBoundingClientRect(), t = tip.getBoundingClientRect();
+    bubble.style.left = (t.left - h.left + t.width / 2) + 'px';
+    bubble.style.top = (t.top - h.top - 11) + 'px';   /* 11 = the resting gap above the phrase */
+  }
+
+  tip.addEventListener('pointerenter', place);
+  tip.addEventListener('focus', place);
+  /* A resize while the bubble is already open is the one case a plain
+     enter/focus listener misses — re-measure only then, not on every
+     resize regardless of state. */
+  addEventListener('resize', function () {
+    if (tip.matches(':hover') || document.activeElement === tip) place();
+  });
 })();
 </script>
 
