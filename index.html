@@ -3,8 +3,20 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Ajeet's Work</title>
-<meta name="description" content="A cinematic scroll journey through the sky — experimental portfolio of Ajeet, Senior Product Designer.">
+<title>Ajeet K — Senior Product Designer</title>
+<meta name="description" content="Senior Product Designer at Porter, building products used by millions across India and the UAE. Previously Juspay and Convin.ai.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Ajeet K">
+<meta property="og:title" content="Ajeet K — Senior Product Designer">
+<meta property="og:description" content="Building products used by millions across India and the UAE. Previously Juspay and Convin.ai.">
+<meta property="og:url" content="https://ajeetdesign.github.io/">
+<meta property="og:image" content="https://ajeetdesign.github.io/images/og-cover.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Ajeet K — Senior Product Designer">
+<meta name="twitter:description" content="Building products used by millions across India and the UAE. Previously Juspay and Convin.ai.">
+<meta name="twitter:image" content="https://ajeetdesign.github.io/images/og-cover.jpg">
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="icon" type="image/png" sizes="32x32" href="images/favicon-32.png">
 <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
@@ -663,6 +675,7 @@
   .pcard:hover { transform: translateY(calc(-50% - 6px)); box-shadow: 0 40px 90px -34px rgba(10, 30, 60, 0.55); }
   .pcard:hover .art { transform: scale(1.025); }
   .pcard:hover h3 { color: var(--accent); }
+  .pcard { cursor: pointer; }
   .pcard .copy { display: flex; flex-direction: column; align-items: flex-start; }
   .pcard .top { display: flex; align-items: baseline; gap: 12px; margin-bottom: 18px; }
   .pcard .idx { font-size: 15px; font-weight: 800; letter-spacing: 0.1em; color: var(--accent); }
@@ -1091,6 +1104,12 @@
   .sky-instant #case, .sky-instant #ai-modal, .sky-instant #bite-modal,
   .sky-instant .aim-panel { transition: none !important; }
 </style>
+<!-- Analytics — see js/analytics.js for the track() wrapper and why the
+     stub precedes the deferred script. data-domain must match whatever's
+     registered in Plausible; there's no CNAME in this repo, so it's the
+     default GitHub Pages domain. -->
+<script defer data-domain="ajeetdesign.github.io" src="https://plausible.io/js/script.js"></script>
+<script src="js/analytics.js"></script>
 </head>
 <body>
 
@@ -1141,7 +1160,7 @@
         <span class="meta-chip">Bangalore</span>
         <span class="meta-chip">5+ years</span>
       </div>
-      <h1 class="reveal d1">I&rsquo;m <b class="nm">Ajeet</b> &mdash; a <b>Product Designer</b> building <i>products for millions</i> across borders, and <i>shipping ideas</i> with Claude.</h1>
+      <h1 class="reveal d1">I&rsquo;m <b class="nm">Ajeet</b> &mdash; a <b>Product Designer</b> building <i>products for millions</i> across borders, and <i>shipping ideas</i> with AI.</h1>
       <!-- anchors only: the glyphs you see here live in #gflight -->
       <div class="gf-row reveal d2" aria-hidden="true">
         <i class="gf-slot"></i><i class="gf-slot"></i><i class="gf-slot"></i>
@@ -1225,8 +1244,18 @@
       <article class="pcard glass" style="--peek: 0px">
         <div class="copy">
           <div class="top"><span class="idx">01</span><span class="org">Porter</span></div>
-          <h3>Building a Supply-Led Growth Engine That Drove 10% of New Customer Acquisition</h3>
-          <p>Built a rewards experience from scratch that motivated driver-partners and turned their participation into a new growth channel.</p>
+          <h3>Redesigning Porter&rsquo;s Rentals booking flow</h3>
+          <p>Rebuilt how customers choose a vehicle and package, nearly doubling Rentals conversion.</p>
+          <a class="cta" data-case="porter-rentals" href="case.html?id=porter-rentals">Read case study <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M12 5l7 7-7 7"/></svg></a>
+        </div>
+        <img class="art art-a" src="images/card-rentals-flow.jpg" decoding="async"
+             alt="A Porter truck being loaded in a warehouse beside the Select Vehicle screen of the Rentals booking flow">
+      </article>
+      <article class="pcard glass" style="--peek: 14px">
+        <div class="copy">
+          <div class="top"><span class="idx">02</span><span class="org">Porter</span></div>
+          <h3>Building a supply-led growth engine that drove 10% of new customer acquisition</h3>
+          <p>Turned driver-partners and their vehicles into moving billboards, and gave partners a new way to earn.</p>
           <a class="cta" data-case="porter" href="case.html?id=porter">Read case study <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M12 5l7 7-7 7"/></svg></a>
         </div>
         <!-- The art-N gradient class stays on the img: it backs the frame while
@@ -1239,19 +1268,21 @@
              src and nothing else — no filename and no alt text left asserting a
              project it no longer belongs to. -->
         <img class="art art-a" src="images/card-branding-offer.jpg" decoding="async"
-             alt="A partner app screen offering extra earnings for wearing branded kit, above a video explaining the programme">
+             alt="A partner app screen offering extra earnings for wearing branded kit, above a video explaining the program">
       </article>
-      <article class="pcard glass" style="--peek: 14px">
+      <article class="pcard glass" style="--peek: 28px">
         <div class="copy">
-          <div class="top"><span class="idx">02</span><span class="org">Porter</span></div>
-          <h3>Redesigned earning experience of 2 Wheeler partner in UAE</h3>
+          <div class="top"><span class="idx">03</span><span class="org">Porter</span></div>
+          <h3>Redesigning the earnings experience for 2-wheeler partners in the UAE</h3>
           <p>Simplified a complex earnings breakdown into a clear view of where every dirham came from and where it went.</p>
           <a class="cta" data-case="porter-uae-earnings" href="case.html?id=porter-uae-earnings">Read case study <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M12 5l7 7-7 7"/></svg></a>
         </div>
         <img class="art art-b" src="images/card-daily-earnings.jpg" decoding="async" loading="lazy"
              alt="A daily earnings screen with a week of bars, the selected day highlighted, and a stats breakdown below">
       </article>
-      <article class="pcard glass" style="--peek: 28px">
+      <!-- Cash collection (porter-uae-cash) is hidden for now. Restore by moving
+           this card back into the stack and renumbering the idx/--peek values.
+      <article class="pcard glass" style="- -peek: 28px">
         <div class="copy">
           <div class="top"><span class="idx">03</span><span class="org">Porter</span></div>
           <h3>Increasing cash collection from driver partners in UAE</h3>
@@ -1261,10 +1292,11 @@
         <img class="art art-c" src="images/card-cash-ledger.jpg" decoding="async" loading="lazy"
              alt="A cash balance screen with a deposit prompt against a limit, above a ledger of recent settlements, fares and deposits">
       </article>
+      -->
       <article class="pcard glass" style="--peek: 42px">
         <div class="copy">
           <div class="top"><span class="idx">04</span><span class="org">Juspay</span></div>
-          <h3>Reducing devs efforts to configure payment routes</h3>
+          <h3>Reducing developer effort to configure payment routes</h3>
           <p>Created a flexible routing setup that let teams change processor allocation without shipping code.</p>
           <a class="cta" data-case="juspay" href="case.html?id=juspay">Read case study <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M12 5l7 7-7 7"/></svg></a>
         </div>
@@ -1283,7 +1315,7 @@
   <section id="s-cloudline">
     <div class="wrap">
       <header>
-        <p class="sub reveal">and here&rsquo;s a few quick bites&hellip;</p>
+        <p class="sub reveal">and here are a few quick bites&hellip;</p>
       </header>
       <div class="stage" aria-hidden="true"></div>
       <!-- The stage is a WebGL canvas, so its cards carry no text for a screen
@@ -1292,19 +1324,19 @@
            the descriptions come with it.
 
            Each entry leads with the card's TITLE because that title is now a
-           claim ("Increased conversion of credit SDK") rather than a two-word
+           claim ("Credit SDK for merchant checkouts") rather than a two-word
            label, and it is baked into the card texture where no screen reader
            can reach it. Titles and descriptions both live in
            js/gallery-assets.js; this list mirrors them and must stay in sync. -->
       <ul class="sr-only">
-        <li>Porter Coin redemption program using Vouchers. Designed a gift card redemption experience for the Booker persona, enabling users to redeem Porter Coins across 20+ brands. The feature saw meaningful uptake among Bookers, creating a new way for customers to turn their accumulated Coins into rewards.</li>
+        <li>Porter Coin redemption with vouchers. Designed a gift card redemption experience for business customers, enabling users to redeem Porter Coins across 20+ brands. Bookers picked it up quickly, and it created a new way for customers to turn their accumulated Coins into rewards.</li>
         <li>Reimagined the Porter Customer App. Reimagined the customer app using our new design system, while working within the constraint of not creating any new APIs. The redesign improved booking flow conversion, reduced the time taken to search for locations, improved signup conversion, and increased the addition of value-added services.</li>
-        <li>Filters for logs and span. This was a design task to create a clear distinction between spans and traces within logs, while also making logs easier to filter and explore. I identified the most useful attributes for filtering, then validated each category through research to understand whether it addressed a real user need. The solution was completed within two days.</li>
-        <li>Multi platform SDK for Payments. Designed a scalable Checkout SDK for merchants across Android, iOS, and web. Built as an experience optimised kit, it allows merchants to enable their preferred payment methods and deliver a consistent checkout experience across platforms.</li>
-        <li>Improved payment connectors setup. The first version showed significant drop-offs and setup failures among new users setting up their first payment connector. We improved the flow by introducing a dummy connector as a guided walkthrough before the actual setup, along with checkpoints and contextual tips to help users complete each step with more confidence.</li>
-        <li>Increased conversion of credit SDK. Designed a scalable Credit SDK that merchants could plug into their checkout, enabling customers to pay using credit. Built a flexible component system that could adapt to different merchant design languages, making the SDK reusable across platforms and merchant setups. It was rolled out across merchants including Vedantu, toothsi, Unacademy, and more.</li>
-        <li>Merchant Lenders configuration on FinOps. Designed a dashboard experience that lets merchants onboard and configure lenders themselves, eliminating the need to depend on business and engineering teams. Merchants can now enable, rank, and assign application shares across lenders, significantly reducing the time needed to onboard and manage lenders.</li>
-        <li>Improved AI call audit process for Convin. To reduce the manual effort involved in call audits, we introduced AI led auditing. I designed a merchant facing flow that lets them create and configure audit templates, which the AI agent then uses to evaluate calls consistently.</li>
+        <li>Filters for logs and spans. This was a design task to create a clear distinction between spans and traces within logs, while also making logs easier to filter and explore. I identified the most useful attributes for filtering, then validated each category through research to understand whether it addressed a real user need. I shipped it in two days.</li>
+        <li>Multi-platform SDK for payments. Designed a scalable Checkout SDK for merchants across Android, iOS, and web. Built as a ready-made kit, it allows merchants to enable their preferred payment methods and deliver a consistent checkout experience across platforms.</li>
+        <li>Improved payment connector setup. The first version showed significant drop-offs and setup failures among new users setting up their first payment connector. We improved the flow by introducing a dummy connector as a guided walkthrough before the actual setup, along with checkpoints and contextual tips to help users complete each step with more confidence.</li>
+        <li>Credit SDK for merchant checkouts. Designed a scalable Credit SDK that merchants could plug into their checkout, enabling customers to pay using credit. Built a flexible component system that could adapt to different merchant design languages, making the SDK reusable across platforms and merchant setups. It was rolled out across merchants including Vedantu, toothsi, Unacademy, and more.</li>
+        <li>Merchant lender configuration on FinOps. Designed a dashboard experience that lets merchants onboard and configure lenders themselves, eliminating the need to depend on business and engineering teams. Merchants can now enable, rank, and assign application shares across lenders, significantly reducing the time needed to onboard and manage lenders.</li>
+        <li>Improved AI call audit process for Convin. To reduce the manual effort involved in call audits, we introduced AI-led auditing. I designed a merchant-facing flow that lets them create and configure audit templates, which the AI agent then uses to evaluate calls consistently.</li>
       </ul>
     </div>
   </section>
@@ -1313,7 +1345,7 @@
   <section id="s-ai">
     <div class="wrap">
       <header>
-        <p class="label reveal">04 — Current obsession</p>
+        <p class="label reveal">03 — Current obsession</p>
         <h2 class="reveal d1">Building with AI</h2>
         <p class="sub reveal d2">Where design instinct meets machine leverage: experiments, workflows and shipped things.</p>
       </header>
@@ -1339,7 +1371,7 @@
              source order decides which side each lands on. -->
         <button type="button" class="tile glass-dark big reveal d1">
           <div class="t-copy">
-            <h3>Built Porter Atlas</h3>
+            <h3>Porter Atlas</h3>
             <p>A searchable library where teams can find and explore Porter’s product screens across different use cases</p>
           </div>
           <!-- vignettes use div/span only: the modal reads tile.querySelector('p')
@@ -1360,7 +1392,7 @@
             </div>
           </div>
           <div class="t-copy">
-            <h3>Design system token with AI</h3>
+            <h3>Design system tokens with AI</h3>
             <p>Generate, organise, and document design tokens with AI.</p>
           </div>
         </button>
@@ -1388,7 +1420,7 @@
   <!-- 4 · sunny meadow · contact -->
   <section id="s-contact">
     <div class="ovl">
-      <p class="label reveal">05 — Clear skies ahead</p>
+      <p class="label reveal">04 — Clear skies ahead</p>
       <h2 class="reveal d1">Let’s build something together.</h2>
       <div class="contact-row reveal d2">
         <a class="cta-btn cta-solid" href="mailto:ajeet.kr646@gmail.com">
@@ -1403,6 +1435,21 @@
         </a>
       </div>
     </div>
+    <script>
+      /* the two contact CTAs, both pages — the single best "someone wants to
+         reach out" signal on the site, so each gets its own event name
+         rather than living inside a generic outbound-link bucket */
+      (function () {
+        var sec = document.getElementById('s-contact');
+        var email = sec.querySelector('.cta-solid'), li = sec.querySelector('.cta-ghost');
+        if (email) email.addEventListener('click', function () {
+          if (typeof track === 'function') track('email_click', { source_page: 'index' });
+        });
+        if (li) li.addEventListener('click', function () {
+          if (typeof track === 'function') track('linkedin_click', { source_page: 'index' });
+        });
+      })();
+    </script>
     <!-- PARKED (Sept 2026) — the sign-off is shelved until it is designed
          properly, not deleted. To bring it back: uncomment the <p>, and raise
          #s-contact's padding-bottom to 11vh so it has a floor to sit on.
@@ -1520,7 +1567,7 @@
   </div>
 </div>
 <script type="module">
-  import { WORK } from './js/gallery-assets.js?v=15';
+  import { WORK } from './js/gallery-assets.js?v=16';
   (function () {
     var layer = document.getElementById('bite-modal');
     var panel = layer && layer.querySelector('.bitm-panel');
@@ -1729,6 +1776,9 @@
     var layer = document.getElementById('case');
     var frame = document.getElementById('case-frame');
     var lastY = 0;
+    /* set only while the in-page overlay is actually open, so a stray
+       close() (Escape with nothing open, say) can't fire a bogus event */
+    var openedAt = null, openedId = null;
 
     function open(id) {
       lastY = scrollY;
@@ -1737,8 +1787,14 @@
       document.documentElement.classList.add('case-open');
       layer.classList.add('on');
       layer.setAttribute('aria-hidden', 'false');
+      openedAt = Date.now();
+      openedId = id;
     }
     function close() {
+      if (openedAt !== null && typeof track === 'function') {
+        track('case_overlay_close', { case_id: openedId, time_open_ms: Date.now() - openedAt });
+      }
+      openedAt = null; openedId = null;
       layer.classList.remove('on');
       layer.setAttribute('aria-hidden', 'true');
       document.documentElement.classList.remove('case-open');
@@ -1766,9 +1822,18 @@
       var id = a.getAttribute('data-case');
       var away = linkFor(id);
       if (!away) {
-        a.addEventListener('click', function (e) { e.preventDefault(); open(id); });
+        a.addEventListener('click', function (e) {
+          e.preventDefault();
+          if (typeof track === 'function') track('case_card_click', { case_id: id, destination: 'internal' });
+          open(id);
+        });
         return;
       }
+      /* external: fire-and-forget — track() doesn't block, so there's nothing
+         to wait for before the browser follows the link to its new tab */
+      a.addEventListener('click', function () {
+        if (typeof track === 'function') track('case_card_click', { case_id: id, destination: 'external' });
+      });
       /* external: say so in the href, the icon, the tab it opens, and to a
          screen reader, which otherwise gets no warning that the site changes */
       a.href = away;
@@ -1780,6 +1845,14 @@
       var org = a.closest('.pcard').querySelector('.org');
       a.setAttribute('aria-label', 'Read the ' + (org ? org.textContent : 'full') +
         ' case study (opens in a new tab)');
+    });
+    /* the whole card is the target; the .cta stays the real link for keyboard
+       and screen readers, so a click anywhere else just forwards to it */
+    document.querySelectorAll('.pcard').forEach(function (card) {
+      card.addEventListener('click', function (e) {
+        var cta = card.querySelector('.cta[data-case]');
+        if (cta && !e.target.closest('.cta')) cta.click();
+      });
     });
     addEventListener('message', function (e) { if (e.data === 'case:close') close(); });
     addEventListener('keydown', function (e) { if (e.key === 'Escape' && layer.classList.contains('on')) close(); });

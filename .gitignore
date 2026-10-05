@@ -33,3 +33,6 @@ ajeet-portfolio/
 # Plaintext case copy. cases.enc.json is the deployable artefact; this decrypts
 # to the same content and must never ship.
 cases.src.mjs
+
+# Plaintext slide-deck case studies (encrypted twins are deck-*.enc.json)
+decks-src/

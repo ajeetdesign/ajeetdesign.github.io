@@ -5,7 +5,7 @@
            node encrypt-cases.mjs                   (prompts, needs a real terminal)
    Re-run after every copy edit in cases.src.mjs, or to rotate the password. */
 import { webcrypto as crypto } from 'node:crypto';
-import { writeFileSync } from 'node:fs';
+import { writeFileSync, readdirSync, readFileSync, existsSync } from 'node:fs';
 
 const ITERATIONS = 300000;
 
@@ -33,19 +33,35 @@ if (!password) {
 const { default: cases } = await import('./cases.src.mjs');
 
 const enc = new TextEncoder();
-const salt = crypto.getRandomValues(new Uint8Array(16));
-const iv = crypto.getRandomValues(new Uint8Array(12));
-
-const baseKey = await crypto.subtle.importKey('raw', enc.encode(password), 'PBKDF2', false, ['deriveKey']);
-const key = await crypto.subtle.deriveKey(
-  { name: 'PBKDF2', hash: 'SHA-256', salt, iterations: ITERATIONS },
-  baseKey, { name: 'AES-GCM', length: 256 }, false, ['encrypt']
-);
-const data = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, enc.encode(JSON.stringify(cases)));
-
 const b64 = (u8) => Buffer.from(u8).toString('base64');
-writeFileSync(new URL('./cases.enc.json', import.meta.url), JSON.stringify({
-  v: 1, kdf: 'PBKDF2-SHA256', iter: ITERATIONS,
-  salt: b64(salt), iv: b64(iv), data: b64(new Uint8Array(data))
-}));
+
+/* One envelope per file: fresh salt + iv, same password and KDF settings, so
+   the one gate form on case.html opens any of them. */
+async function seal(plaintext, outName) {
+  const salt = crypto.getRandomValues(new Uint8Array(16));
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const baseKey = await crypto.subtle.importKey('raw', enc.encode(password), 'PBKDF2', false, ['deriveKey']);
+  const key = await crypto.subtle.deriveKey(
+    { name: 'PBKDF2', hash: 'SHA-256', salt, iterations: ITERATIONS },
+    baseKey, { name: 'AES-GCM', length: 256 }, false, ['encrypt']
+  );
+  const data = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, enc.encode(plaintext));
+  writeFileSync(new URL('./' + outName, import.meta.url), JSON.stringify({
+    v: 1, kdf: 'PBKDF2-SHA256', iter: ITERATIONS,
+    salt: b64(salt), iv: b64(iv), data: b64(new Uint8Array(data))
+  }));
+}
+
+await seal(JSON.stringify(cases), 'cases.enc.json');
 console.log(`cases.enc.json written — ${Object.keys(cases).length} case studies encrypted.`);
+
+/* Slide-deck case studies: decks-src/<id>.html (gitignored plaintext) →
+   deck-<id>.enc.json. case.html loads that file instead of cases.enc.json when
+   ?id=<id> names a deck, and shows the decrypted page in a full-screen frame. */
+if (existsSync(new URL('./decks-src/', import.meta.url))) {
+  for (const f of readdirSync(new URL('./decks-src/', import.meta.url)).filter((n) => n.endsWith('.html'))) {
+    const id = f.replace(/\.html$/, '');
+    await seal(readFileSync(new URL('./decks-src/' + f, import.meta.url), 'utf8'), `deck-${id}.enc.json`);
+    console.log(`deck-${id}.enc.json written.`);
+  }
+}

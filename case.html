@@ -3,8 +3,20 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Case study — Ajeet</title>
-<meta name="description" content="Case study — product design work by Ajeet.">
+<title>Case study — Ajeet K</title>
+<meta name="description" content="A password-protected product design case study by Ajeet K, Senior Product Designer at Porter.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Ajeet K">
+<meta property="og:title" content="Case study — Ajeet K">
+<meta property="og:description" content="A password-protected product design case study by Ajeet K, Senior Product Designer at Porter.">
+<meta property="og:url" content="https://ajeetdesign.github.io/case.html">
+<meta property="og:image" content="https://ajeetdesign.github.io/images/og-cover.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Case study — Ajeet K">
+<meta name="twitter:description" content="A password-protected product design case study by Ajeet K, Senior Product Designer at Porter.">
+<meta name="twitter:image" content="https://ajeetdesign.github.io/images/og-cover.jpg">
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="icon" type="image/png" sizes="32x32" href="images/favicon-32.png">
 <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
@@ -42,6 +54,7 @@
     transition: transform .35s cubic-bezier(.2,.9,.25,1), background .25s ease;
     text-decoration: none;
   }
+  .cs-deck { position: fixed; inset: 0; width: 100%; height: 100%; border: 0; z-index: 10; background: #0B1220; }
   .cs-close:hover { background: var(--ink-dark); color: #fff; transform: rotate(90deg); }
   .cs-close svg { width: 17px; height: 17px; }
 
@@ -673,6 +686,10 @@
     .hmw-card:hover { transform: none; }
   }
 </style>
+<!-- Analytics — see js/analytics.js for the track() wrapper. Same
+     data-domain as index.html and about.html; keep all three in sync. -->
+<script defer data-domain="ajeetdesign.github.io" src="https://plausible.io/js/script.js"></script>
+<script src="js/analytics.js"></script>
 </head>
 <body>
 
@@ -749,7 +766,11 @@ function b64d(s) { var b = atob(s), u = new Uint8Array(b.length); for (var i = 0
 
 function decryptCases(meta, key) {
   return crypto.subtle.decrypt({ name: 'AES-GCM', iv: b64d(meta.iv) }, key, b64d(meta.data))
-    .then(function (plain) { return JSON.parse(new TextDecoder().decode(plain)); });
+    .then(function (plain) {
+      var text = new TextDecoder().decode(plain);
+      /* a deck payload is the page itself; cases are JSON */
+      return text.charAt(0) === '{' ? JSON.parse(text) : text;
+    });
 }
 function keyFromPassword(meta, pw) {
   return crypto.subtle.importKey('raw', new TextEncoder().encode(pw), 'PBKDF2', false, ['deriveKey'])
@@ -763,7 +784,40 @@ function keyFromPassword(meta, pw) {
 var gate = document.getElementById('gate');
 var gateForm = document.getElementById('gate-form');
 
-fetch('cases.enc.json', { cache: 'no-store' }).then(function (r) { return r.json(); }).then(function (meta) {
+/* analytics — shared with render() below, same script scope.
+   unlockAt is case_exit's clock start: time spent on the gate itself isn't
+   reading time, so the case_exit timer (in render()) measures from here,
+   not from page load. attempts counts submits regardless of outcome — the
+   friction signal case_gate_success carries — and is never the password
+   itself; see the Analytics Event Plan's note on that. */
+var attempts = 0, unlockAt = null;
+
+/* Slide-deck studies ship as their own encrypted file (deck-<id>.enc.json, built
+   by encrypt-cases.mjs from decks-src/) so the 4MB deck is only fetched by the
+   reader who asked for it. Same password, same gate, different payload. */
+var DECKS = ['porter-rentals'];
+var deckId = (new URLSearchParams(location.search).get('id') || '').replace(/[^a-z-]/g, '');
+var isDeck = DECKS.indexOf(deckId) !== -1;
+
+function renderDeck(html) {
+  document.getElementById('cs').hidden = true;
+  var frame = document.createElement('iframe');
+  frame.className = 'cs-deck';
+  frame.title = 'Case study presentation';
+  frame.srcdoc = html;
+  frame.addEventListener('load', function () {
+    frame.focus();
+    /* the deck owns the keyboard, so Escape has to be relayed out of it */
+    try {
+      frame.contentWindow.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && EMBED) parent.postMessage('case:close', '*');
+      });
+    } catch (err) {}
+  });
+  document.body.appendChild(frame);
+}
+
+fetch(isDeck ? 'deck-' + deckId + '.enc.json' : 'cases.enc.json', { cache: 'no-store' }).then(function (r) { return r.json(); }).then(function (meta) {
   /* Always ask for the password — the key is never persisted. So every card
      open and every reload re-locks, and unlocking one project never carries
      over to the others (each opens a fresh, still-locked case.html). */
@@ -773,13 +827,16 @@ fetch('cases.enc.json', { cache: 'no-store' }).then(function (r) { return r.json
   input.focus();
   gateForm.addEventListener('submit', function (e) {
     e.preventDefault();
+    attempts++;
     gateForm.classList.remove('no');
     keyFromPassword(meta, input.value)
       .then(function (key) {
         /* AES-GCM authenticates — a wrong password fails here, nothing to compare */
         return decryptCases(meta, key).then(function (cases) {
           gate.hidden = true;
-          render(cases);
+          unlockAt = Date.now();
+          if (typeof track === 'function') track('case_gate_success', { attempts: attempts });
+          if (isDeck) renderDeck(cases); else render(cases);
         });
       })
       .catch(function () {
@@ -1366,6 +1423,26 @@ if (navSecs.length > 1) {
 var rv = [].slice.call(document.querySelectorAll('.rv'));
 var heroShot = document.querySelector('.hero-banner .shot');
 
+/* case_section_view analytics: fires once per (section, subsection) the
+   first time anything in it reveals. `section` is the human-readable kicker
+   text already on the page (Context, Challenges, The approach, Results),
+   not internal keys — the plan and the dashboard should read the same word.
+   `subsection` only exists inside "The approach", where three whole problem
+   walkthroughs would otherwise flatten into one data point.
+
+   deepestSection is read by case_exit, below: pairing how far someone got
+   with how long they took is worth more than either number alone. */
+var sectionsSeen = {}, deepestSection = null;
+function sectionInfo(el) {
+  var sec = el.closest('section');
+  var kicker = sec && sec.querySelector('.kicker');
+  var section = kicker ? kicker.textContent.replace(/^\d+\s*/, '').trim() : null;
+  if (!section) return null;
+  var prob = el.closest('.prob');
+  var probH = prob && prob.querySelector('.prob-h');
+  return { section: section, subsection: probH ? probH.textContent : null };
+}
+
 /* A clip that loops forever with no way to stop it is exactly what "reduce
    motion" is asking us not to do. There it holds on its poster frame and gets
    its controls back, so the content is still reachable — everywhere else it
@@ -1383,6 +1460,15 @@ function tick() {
     if (b.top < vh * 0.9 && b.bottom > 0) {
       /* stagger elements that reveal together */
       rv[i].style.transitionDelay = Math.min(batch * 70, 420) + 'ms'; batch++;
+      if (typeof track === 'function') {
+        var info = sectionInfo(rv[i]);
+        var key = info && (info.section + '|' + (info.subsection || ''));
+        if (info && !sectionsSeen[key]) {
+          sectionsSeen[key] = true;
+          deepestSection = info.subsection ? info.section + ' — ' + info.subsection : info.section;
+          track('case_section_view', info.subsection ? { section: info.section, subsection: info.subsection } : { section: info.section });
+        }
+      }
       rv[i].classList.add('in');
       rv.splice(i, 1); i--;
     }
@@ -1403,9 +1489,19 @@ addEventListener('scroll', tick, { passive: true });
 tick();
 setInterval(tick, 600);
 
+/* case_exit: the only way out of the page, embedded or not — fires either
+   way, since a direct/new-tab visit to case.html has no overlay to dismiss
+   but still deserves the same read on how far someone got and how long they
+   stayed. Clock starts at unlockAt (gate success, above), not page load. */
+var home = document.querySelector('.cs-foot .home');
+if (home) home.addEventListener('click', function () {
+  if (typeof track === 'function' && unlockAt !== null) {
+    track('case_exit', { time_on_page_ms: Date.now() - unlockAt, deepest_section: deepestSection });
+  }
+});
+
 if (EMBED) {
   /* "back to all work" dismisses the parent layer; next-case stays in it */
-  var home = document.querySelector('.cs-foot .home');
   if (home) home.addEventListener('click', bubbleClose);
   var nx = document.querySelector('.next');
   if (nx) nx.setAttribute('href', nx.getAttribute('href') + '&embed=1');
