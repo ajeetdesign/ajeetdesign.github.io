@@ -16,10 +16,9 @@
    visitor.
 
    data-domain on the script tag in each page's <head> has to match exactly
-   what's registered in Plausible. This deploys to the default GitHub Pages
-   domain (no CNAME in the repo) — ajeetdesign.github.io. Swap it in all
-   three places (index.html, about.html, case.html) together if a custom
-   domain is added later. */
+   what's registered in Plausible. The site is served from the custom
+   domain in CNAME — www.ajeet.work. Change it in all three places
+   (index.html, about.html, case.html) together if the domain changes. */
 window.plausible = window.plausible || function () {
   (window.plausible.q = window.plausible.q || []).push(arguments);
 };
