@@ -1956,6 +1956,19 @@ import * as THREE from './three.module.min.js';
      only gate kept is the boot hold, so the opening copy waits for the sky to
      finish fading up rather than arriving over a black canvas. */
   var revealEls = Array.prototype.slice.call(document.querySelectorAll('.reveal'));
+  // section_view analytics: this page has no scene index like sky.js's, so
+  // the section name comes from the nearest landmark's own class — same five
+  // beats the descent is actually built from.
+  var sectionSeen = {};
+  function sectionName(el) {
+    if (el.closest('.head')) return 'intro';
+    if (el.closest('.panel.closing')) return 'closing';
+    if (el.closest('.meadow')) return 'meadow';
+    var p = el.closest('.panel.split');
+    if (p) return p.classList.contains('flip') ? 'active' : 'curious';
+    if (el.closest('.panel.centre')) return 'the-work';
+    return null;
+  }
   function checkReveals() {
     var h = innerHeight;
     for (var r = revealEls.length - 1; r >= 0; r--) {
@@ -1967,6 +1980,11 @@ import * as THREE from './three.module.min.js';
          the life of the page with no way to recover. */
       if (box.top < h * 0.88) {
         revealEls[r].classList.add('in');
+        var name = sectionName(revealEls[r]);
+        if (name && !sectionSeen[name] && typeof track === 'function') {
+          sectionSeen[name] = true;
+          track('section_view', { section: name });
+        }
         revealEls.splice(r, 1);
       }
     }

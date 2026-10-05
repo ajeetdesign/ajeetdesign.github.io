@@ -1924,6 +1924,11 @@ import { createFlock } from './flock.js?v=1';
   // Rect-based (not IntersectionObserver): reliable under headless capture,
   // iframes and instant scrolls alike.
   var sceneIdx = { 's-hero': 0, 's-intro': 1, 's-work': 2, 's-cloudline': 3, 's-ai': 4, 's-contact': 5 };
+  // reverse of sceneIdx, for the section_view analytics event below — a
+  // visitor's own scroll depth through the sky, one event per section, the
+  // first time any of its content actually reveals.
+  var sceneName = ['hero', 'intro', 'work', 'cloudline', 'ai', 'contact'];
+  var sectionSeen = {};
   var revealEls = Array.prototype.slice.call(document.querySelectorAll('.reveal')).map(function (el) {
     var sec = el.closest('section');
     return { el: el, idx: sec ? sceneIdx[sec.id] : 0 };
@@ -1937,6 +1942,11 @@ import { createFlock } from './flock.js?v=1';
       var box = revealEls[r].el.getBoundingClientRect();
       if (box.top < h * 0.88 && box.bottom > 0) {
         revealEls[r].el.classList.add('in');
+        var idx = revealEls[r].idx;
+        if (!sectionSeen[idx] && typeof track === 'function') {
+          sectionSeen[idx] = true;
+          track('section_view', { section: sceneName[idx] });
+        }
         revealEls.splice(r, 1);
       }
     }
