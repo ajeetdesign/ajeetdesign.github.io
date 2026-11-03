@@ -729,7 +729,7 @@
 <!-- Which studies are still hosted elsewhere; read by the redirect just below.
      Keep v= in step with the copy of this tag in index.html — a stale table
      here would redirect a reader who has already been sent the other way. -->
-<script src="js/case-links.js?v=2"></script>
+<script src="js/case-links.js?v=3"></script>
 <script>
 /* embedded in index.html's full-screen layer? then close = tell the parent */
 var EMBED = new URLSearchParams(location.search).get('embed') === '1';
@@ -762,15 +762,21 @@ var EMBED = new URLSearchParams(location.search).get('embed') === '1';
    password is the decryption key (PBKDF2 → AES-GCM via Web Crypto). Edit copy
    in cases.src.mjs, then rebuild:  node encrypt-cases.mjs <password>
    ───────────────────────────────────────────────────────────────────────────── */
-function b64d(s) { var b = atob(s), u = new Uint8Array(b.length); for (var i = 0; i < b.length; i++) u[i] = b.charCodeAt(i); return u; }
+function b64d(s) { if (typeof s !== 'string') return s; var b = atob(s), u = new Uint8Array(b.length); for (var i = 0; i < b.length; i++) u[i] = b.charCodeAt(i); return u; }
 
 function decryptCases(meta, key) {
   return crypto.subtle.decrypt({ name: 'AES-GCM', iv: b64d(meta.iv) }, key, b64d(meta.data))
     .then(function (plain) {
-      var text = new TextDecoder().decode(plain);
-      /* a deck payload is the page itself; cases are JSON */
-      return text.charAt(0) === '{' ? JSON.parse(text) : text;
+      /* a deck payload is the gzipped page itself; cases are JSON */
+      if (meta.gz) return new Response(new Blob([plain]).stream().pipeThrough(new DecompressionStream('gzip'))).text();
+      return JSON.parse(new TextDecoder().decode(plain));
     });
+}
+
+/* deck-<id>.enc.bin: [4-byte iterations][16 salt][12 iv][ciphertext], see encrypt-cases.mjs */
+function parseDeck(buf) {
+  var u = new Uint8Array(buf);
+  return { iter: new DataView(buf).getUint32(0), salt: u.subarray(4, 20), iv: u.subarray(20, 32), data: u.subarray(32), gz: true };
 }
 function keyFromPassword(meta, pw) {
   return crypto.subtle.importKey('raw', new TextEncoder().encode(pw), 'PBKDF2', false, ['deriveKey'])
@@ -792,10 +798,10 @@ var gateForm = document.getElementById('gate-form');
    itself; see the Analytics Event Plan's note on that. */
 var attempts = 0, unlockAt = null;
 
-/* Slide-deck studies ship as their own encrypted file (deck-<id>.enc.json, built
+/* Slide-deck studies ship as their own encrypted file (deck-<id>.enc.bin, built
    by encrypt-cases.mjs from decks-src/) so the 4MB deck is only fetched by the
    reader who asked for it. Same password, same gate, different payload. */
-var DECKS = ['porter-rentals', 'porter-uae-earnings'];
+var DECKS = ['porter-rentals', 'porter-uae-earnings', 'juspay'];
 var deckId = (new URLSearchParams(location.search).get('id') || '').replace(/[^a-z-]/g, '');
 var isDeck = DECKS.indexOf(deckId) !== -1;
 
@@ -817,7 +823,7 @@ function renderDeck(html) {
   document.body.appendChild(frame);
 }
 
-fetch(isDeck ? 'deck-' + deckId + '.enc.json' : 'cases.enc.json', { cache: 'no-store' }).then(function (r) { return r.json(); }).then(function (meta) {
+fetch(isDeck ? 'deck-' + deckId + '.enc.bin' : 'cases.enc.json', { cache: 'no-store' }).then(function (r) { return isDeck ? r.arrayBuffer().then(parseDeck) : r.json(); }).then(function (meta) {
   /* Always ask for the password — the key is never persisted. So every card
      open and every reload re-locks, and unlocking one project never carries
      over to the others (each opens a fresh, still-locked case.html). */

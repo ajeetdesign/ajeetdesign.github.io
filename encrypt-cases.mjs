@@ -6,6 +6,7 @@
    Re-run after every copy edit in cases.src.mjs, or to rotate the password. */
 import { webcrypto as crypto } from 'node:crypto';
 import { writeFileSync, readdirSync, readFileSync, existsSync } from 'node:fs';
+import { gzipSync } from 'node:zlib';
 
 const ITERATIONS = 300000;
 
@@ -37,7 +38,7 @@ const b64 = (u8) => Buffer.from(u8).toString('base64');
 
 /* One envelope per file: fresh salt + iv, same password and KDF settings, so
    the one gate form on case.html opens any of them. */
-async function seal(plaintext, outName) {
+async function encrypt(bytes) {
   const salt = crypto.getRandomValues(new Uint8Array(16));
   const iv = crypto.getRandomValues(new Uint8Array(12));
   const baseKey = await crypto.subtle.importKey('raw', enc.encode(password), 'PBKDF2', false, ['deriveKey']);
@@ -45,7 +46,12 @@ async function seal(plaintext, outName) {
     { name: 'PBKDF2', hash: 'SHA-256', salt, iterations: ITERATIONS },
     baseKey, { name: 'AES-GCM', length: 256 }, false, ['encrypt']
   );
-  const data = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, enc.encode(plaintext));
+  const data = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, bytes);
+  return { salt, iv, data };
+}
+
+async function seal(plaintext, outName) {
+  const { salt, iv, data } = await encrypt(enc.encode(plaintext));
   writeFileSync(new URL('./' + outName, import.meta.url), JSON.stringify({
     v: 1, kdf: 'PBKDF2-SHA256', iter: ITERATIONS,
     salt: b64(salt), iv: b64(iv), data: b64(new Uint8Array(data))
@@ -55,13 +61,26 @@ async function seal(plaintext, outName) {
 await seal(JSON.stringify(cases), 'cases.enc.json');
 console.log(`cases.enc.json written — ${Object.keys(cases).length} case studies encrypted.`);
 
+/* Decks are mostly base64 images, so they're gzipped before encrypting (which
+   wins back the base64 overhead) and written as raw bytes rather than base64
+   JSON — together roughly a third smaller to download, with identical content.
+   Layout: [4-byte big-endian iterations][16 salt][12 iv][AES-GCM ciphertext].
+   case.html un-gzips after decrypting. */
+async function sealDeck(htmlBytes, outName) {
+  const { salt, iv, data } = await encrypt(gzipSync(htmlBytes, { level: 9 }));
+  const head = new Uint8Array(32);
+  new DataView(head.buffer).setUint32(0, ITERATIONS);
+  head.set(salt, 4); head.set(iv, 20);
+  writeFileSync(new URL('./' + outName, import.meta.url), Buffer.concat([head, new Uint8Array(data)]));
+}
+
 /* Slide-deck case studies: decks-src/<id>.html (gitignored plaintext) →
-   deck-<id>.enc.json. case.html loads that file instead of cases.enc.json when
+   deck-<id>.enc.bin. case.html loads that file instead of cases.enc.json when
    ?id=<id> names a deck, and shows the decrypted page in a full-screen frame. */
 if (existsSync(new URL('./decks-src/', import.meta.url))) {
   for (const f of readdirSync(new URL('./decks-src/', import.meta.url)).filter((n) => n.endsWith('.html'))) {
     const id = f.replace(/\.html$/, '');
-    await seal(readFileSync(new URL('./decks-src/' + f, import.meta.url), 'utf8'), `deck-${id}.enc.json`);
-    console.log(`deck-${id}.enc.json written.`);
+    await sealDeck(readFileSync(new URL('./decks-src/' + f, import.meta.url)), `deck-${id}.enc.bin`);
+    console.log(`deck-${id}.enc.bin written.`);
   }
 }

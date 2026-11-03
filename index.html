@@ -1770,7 +1770,7 @@
      v= is not decoration: this file is what flips a card between the in-page
      overlay and an external write-up, so a stale copy sends readers to the
      wrong place. Bump it here AND in case.html whenever the table changes. -->
-<script src="js/case-links.js?v=2"></script>
+<script src="js/case-links.js?v=3"></script>
 <script>
   (function () {
     var layer = document.getElementById('case');
@@ -1783,7 +1783,7 @@
     function open(id) {
       lastY = scrollY;
       /* v= busts stale iframe caches — bump after case.html template changes */
-      frame.src = 'case.html?id=' + id + '&embed=1&v=46';
+      frame.src = 'case.html?id=' + id + '&embed=1&v=48';
       document.documentElement.classList.add('case-open');
       layer.classList.add('on');
       layer.setAttribute('aria-hidden', 'false');
