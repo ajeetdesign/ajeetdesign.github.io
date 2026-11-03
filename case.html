@@ -729,7 +729,7 @@
 <!-- Which studies are still hosted elsewhere; read by the redirect just below.
      Keep v= in step with the copy of this tag in index.html — a stale table
      here would redirect a reader who has already been sent the other way. -->
-<script src="js/case-links.js?v=1"></script>
+<script src="js/case-links.js?v=2"></script>
 <script>
 /* embedded in index.html's full-screen layer? then close = tell the parent */
 var EMBED = new URLSearchParams(location.search).get('embed') === '1';
@@ -795,7 +795,7 @@ var attempts = 0, unlockAt = null;
 /* Slide-deck studies ship as their own encrypted file (deck-<id>.enc.json, built
    by encrypt-cases.mjs from decks-src/) so the 4MB deck is only fetched by the
    reader who asked for it. Same password, same gate, different payload. */
-var DECKS = ['porter-rentals'];
+var DECKS = ['porter-rentals', 'porter-uae-earnings'];
 var deckId = (new URLSearchParams(location.search).get('id') || '').replace(/[^a-z-]/g, '');
 var isDeck = DECKS.indexOf(deckId) !== -1;
 
