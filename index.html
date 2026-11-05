@@ -791,16 +791,15 @@
   /* 4-card bento: one wide + one tall on row 1, two halves filling row 2.
      big(4) + tall(2) = 6; then sm(2) + sm(2) + tall's second row = 6. */
   .bento { display: grid; grid-template-columns: repeat(6, 1fr); gap: 16px; }
-  /* tiles are <button>s so they are focusable and keyboard-operable for free.
+  /* Tiles are static cards for now — the detail modal only had placeholder
+     copy. To bring it back: turn the four .tile <div>s back into
+     <button type="button">, set AI_DETAILS = true in the #ai-modal script,
+     and restore `cursor: pointer` plus the :hover/:active lift below.
      No `border` here — .glass-dark sets it and .tile wins on source order. */
   .tile {
     padding: 20px; display: flex; flex-direction: column; gap: 16px; overflow: hidden;
-    font: inherit; color: inherit; text-align: left; width: 100%; cursor: pointer;
-    -webkit-appearance: none; appearance: none;
-    transition: transform .35s cubic-bezier(.2,.9,.25,1), box-shadow .35s ease;
+    font: inherit; color: inherit; text-align: left; width: 100%;
   }
-  .tile:hover { transform: translateY(-4px); box-shadow: 0 26px 60px -24px rgba(0, 6, 20, 0.7); }
-  .tile:active { transform: translateY(-1px); }
   .t-copy { display: flex; flex-direction: column; gap: 8px; }
   .tile h3 { font-size: clamp(17px, 1.7vw, 21px); font-weight: 700; letter-spacing: -0.02em; line-height: 1.25; margin: 0; color: #eef4ff; }
   .tile p { font-size: 13.5px; line-height: 1.55; color: rgba(214, 226, 248, 0.66); margin: 0; }
@@ -1356,7 +1355,7 @@
            grid leaves ragged empty columns. The reveal delays follow the same
            order, so the stagger reads down the left column then across. -->
       <div class="bento">
-        <button type="button" class="tile glass-dark tall reveal">
+        <div class="tile glass-dark tall reveal">
           <div class="t-copy">
             <h3>Velia, your days in color</h3>
             <p>A minimal mood journal that turns your days into a visual story. <strong>Built with AI</strong> &middot; <strong>100+ downloads in its first month</strong></p>
@@ -1366,10 +1365,10 @@
             <img class="t-media" src="images/ai-velia.png" alt="" loading="lazy" decoding="async"
                  width="903" height="1470">
           </div>
-        </button>
+        </div>
         <!-- Copy before vignette here because .tile.big lays out as a row, so
              source order decides which side each lands on. -->
-        <button type="button" class="tile glass-dark big reveal d1">
+        <div class="tile glass-dark big reveal d1">
           <div class="t-copy">
             <h3>Porter Atlas</h3>
             <p>A searchable library where teams can find and explore Porter’s product screens across different use cases</p>
@@ -1381,8 +1380,8 @@
               <img class="vg-search-gif" src="images/atlas-search.gif" alt="" width="257" height="62" loading="lazy">
             </div>
           </div>
-        </button>
-        <button type="button" class="tile glass-dark sm reveal d2">
+        </div>
+        <div class="tile glass-dark sm reveal d2">
           <div class="t-shot art-d" aria-hidden="true">
             <div class="vg">
               <div class="vg-panel vg-tok"><i class="vg-sw" style="background:#2f7fd4"></i><span>color.accent</span><b>#2F7FD4</b></div>
@@ -1395,10 +1394,10 @@
             <h3>Design system tokens with AI</h3>
             <p>Generate, organise, and document design tokens with AI.</p>
           </div>
-        </button>
+        </div>
         <!-- vignette before copy: .tile.sm stacks, with the copy pushed to the
              bottom so both half-cards' images line up -->
-        <button type="button" class="tile glass-dark sm reveal d3">
+        <div class="tile glass-dark sm reveal d3">
           <!-- an exported render (Three.js scene, lit and shadowed, not a
                screenshot of a real device) — kept as an asset like ai-velia.png
                rather than a live vignette, since that lighting/shadow can't be
@@ -1412,7 +1411,7 @@
             <h3>Just to see if I could</h3>
             <p>Small web experiments built with AI, mostly driven by curiosity</p>
           </div>
-        </button>
+        </div>
       </div>
     </div>
   </section>
@@ -1487,7 +1486,10 @@
     var layer = document.getElementById('ai-modal');
     var panel = layer && layer.querySelector('.aim-panel');
     var tiles = document.querySelectorAll('#s-ai .tile');
-    if (!layer || !tiles.length) return;
+    /* Off while the details are placeholder copy — the tiles render as plain
+       cards and nothing opens. See the .tile CSS for the full switch-back. */
+    var AI_DETAILS = false;
+    if (!AI_DETAILS || !layer || !tiles.length) return;
 
     var shot = document.getElementById('aim-shot');
     var title = document.getElementById('aim-title');
